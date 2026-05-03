@@ -193,16 +193,19 @@
             font-weight: 600;
             color: var(--color-text-dark);
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            white-space: nowrap;
             overflow: hidden;
             max-width: 0;
             opacity: 0;
             margin-left: 0;
+            line-height: 1.2;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
 
         .user-info-wrapper:hover .user-name-display,
         .cart-wrapper:hover .cart-label-display {
-            max-width: 200px;
+            max-width: 150px;
             opacity: 1;
             margin-left: 10px;
             color: var(--color-primary);
@@ -1084,6 +1087,7 @@
 </head>
 
 <body>
+    @if(!request()->is('admin/dashboard'))
     <nav class="navbar">
         <a href="{{ route('home') }}" class="navbar-brand">
             <div
@@ -1110,7 +1114,7 @@
         </div>
 
         <div class="nav-actions">
-            <div class="cart-wrapper" id="cart-trigger">
+            <a href="{{ route('cart') }}" class="cart-wrapper" style="text-decoration: none;">
                 <div class="profile-btn" title="Shopping Cart">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor">
@@ -1120,7 +1124,7 @@
                     <span class="cart-badge" id="cart-badge">0</span>
                 </div>
                 <span class="cart-label-display">Cart</span>
-            </div>
+            </a>
 
             @auth
                 <div class="user-info-wrapper">
@@ -1136,6 +1140,14 @@
 
                     <!-- Dropdown -->
                     <div class="profile-dropdown">
+                        <a href="{{ route('dashboard') }}" class="dropdown-item" style="text-decoration: none;">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span>My Account</span>
+                        </a>
                         <button type="button" class="dropdown-item" id="logout-trigger">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor">
@@ -1157,11 +1169,13 @@
             @endauth
         </div>
     </nav>
+    @endif
 
     <main>
         @yield('content')
     </main>
 
+    @if(!request()->is('admin/dashboard'))
     <!-- Mobile Bottom Navigation Container -->
     <div class="bottom-nav-container" id="magic-nav-container">
         <!-- Moving Indicator Circle (Moved OUTSIDE the mask) -->
@@ -1187,8 +1201,8 @@
                 <span>Products</span>
             </a>
 
-            <div class="bottom-nav-item {{ request()->is('cart*') ? 'active' : 'nav-item-js' }}"
-                id="cart-trigger-mobile" style="cursor: pointer;">
+            <a href="{{ route('cart') }}" class="bottom-nav-item {{ request()->is('cart*') ? 'active' : 'nav-item-js' }}"
+                id="cart-trigger-mobile">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -1196,7 +1210,7 @@
                 </svg>
                 <span class="cart-badge cart-badge-mobile">0</span>
                 <span>Cart</span>
-            </div>
+            </a>
 
             <a href="{{ route('categories') }}"
                 class="bottom-nav-item {{ request()->routeIs('categories') ? 'active' : 'nav-item-js' }}">
@@ -1219,6 +1233,7 @@
             </a>
         </nav>
     </div>
+    @endif
 
     <!-- Logout Confirmation Modal -->
     <div class="modal-overlay" id="logout-modal">
@@ -1243,50 +1258,7 @@
         </div>
     </div>
 
-    <!-- Cart Drawer -->
-    <div class="cart-overlay" id="cart-overlay"></div>
-    <div class="cart-drawer" id="cart-drawer">
-        <div class="cart-header">
-            <h3 class="cart-title">My Shopping Cart</h3>
-            <button class="cart-close-btn" id="cart-close">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
-        </div>
-        <div class="cart-body">
-            <!-- Example Empty State -->
-            <div class="empty-cart-msg">
-                <div
-                    style="width: 120px; height: 120px; background: var(--color-bg-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; animation: slideUp 0.8s ease;">
-                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)"
-                        stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="9" cy="21" r="1"></circle>
-                        <circle cx="20" cy="21" r="1"></circle>
-                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                    </svg>
-                </div>
-                <h4 style="font-size: 1.2rem; font-weight: 700; color: var(--color-text-dark);">Your cart is empty</h4>
-                <p>Looks like you haven't added anything yet.</p>
-                <a href="{{ route('products') }}" class="btn-checkout"
-                    style="display: inline-block; margin-top: 25px; text-decoration: none; text-align: center;">Start
-                    Shopping</a>
-            </div>
-        </div>
-        <div class="cart-footer">
-            <div class="cart-summary-item">
-                <span>Subtotal</span>
-                <span>$0.00</span>
-            </div>
-            <div class="cart-summary-item cart-total">
-                <span>Total</span>
-                <span>$0.00</span>
-            </div>
-            <button class="btn-checkout">Proceed to Checkout</button>
-        </div>
-    </div>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -1383,8 +1355,25 @@
                 const savedCart = localStorage.getItem(cartKey);
                 if (savedCart) {
                     try {
-                        window.cartItems = JSON.parse(savedCart);
-                        const totalItems = Object.values(window.cartItems).reduce((a, b) => a + b, 0);
+                        const rawCart = JSON.parse(savedCart);
+                        const now = Date.now();
+                        const expiry = 24 * 60 * 60 * 1000; // 24 Hours
+
+                        Object.keys(rawCart).forEach(id => {
+                            const entry = rawCart[id];
+                            // Handle both old format (number) and new format (object)
+                            const qty = typeof entry === 'object' ? entry.qty : entry;
+                            const timestamp = typeof entry === 'object' ? entry.t : now;
+
+                            if (now - timestamp < expiry) {
+                                window.cartItems[id] = { qty: qty, t: timestamp };
+                            }
+                        });
+
+                        // Save cleaned cart
+                        localStorage.setItem(cartKey, JSON.stringify(window.cartItems));
+
+                        const totalItems = Object.values(window.cartItems).reduce((a, b) => a + (b.qty || 0), 0);
                         if (totalItems > 0) {
                             const badges = document.querySelectorAll('.cart-badge');
                             badges.forEach(badge => {
@@ -1404,7 +1393,11 @@
                 if (!cartBtn || !startElement) return;
 
                 if (productId) {
-                    window.cartItems[productId] = (window.cartItems[productId] || 0) + countToAdd;
+                    const current = window.cartItems[productId] || { qty: 0, t: Date.now() };
+                    window.cartItems[productId] = {
+                        qty: current.qty + countToAdd,
+                        t: Date.now() // Reset timer on update? Or keep original? Let's reset to give 24h from last add.
+                    };
                     if (cartKey) localStorage.setItem(cartKey, JSON.stringify(window.cartItems));
                 }
 
@@ -1426,7 +1419,7 @@
 
                 setTimeout(() => {
                     flyer.remove();
-                    const totalItems = Object.values(window.cartItems).reduce((a, b) => a + b, 0);
+                    const totalItems = Object.values(window.cartItems).reduce((a, b) => a + b.qty, 0);
                     badges.forEach(badge => {
                         badge.innerText = totalItems;
                         badge.style.display = 'flex';
@@ -1447,78 +1440,147 @@
                     action.dataset.initialized = "true";
 
                     const card = action.closest('.product-card');
+                    if (!card) return;
+                    
                     const productId = card.dataset.productId;
+                    const stockLimit = parseInt(card.dataset.stock || 0);
                     const btnAdd = action.querySelector('.btn-add');
                     const qtyValue = action.querySelector('.qty-value');
                     const btnPlus = action.querySelector('.plus');
                     const btnMinus = action.querySelector('.minus');
                     const btnConfirm = action.querySelector('.btn-confirm-add');
 
-                    // Check if already at max on load
-                    if ((window.cartItems[productId] || 0) >= 5) {
-                        btnAdd.classList.add('max-reached');
-                        btnAdd.innerHTML = `<span>MAX</span><svg class="prohibited-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>`;
+                    const updateAddButtonState = () => {
+                        if (!btnAdd) return;
+                        const inCart = window.cartItems[productId] ? window.cartItems[productId].qty : 0;
+                        if (inCart >= stockLimit) {
+                            btnAdd.classList.add('max-reached');
+                            btnAdd.innerHTML = `<span>MAX</span><svg class="prohibited-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>`;
+                        } else {
+                            btnAdd.classList.remove('max-reached');
+                            btnAdd.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
+                        }
+                    };
+
+                    updateAddButtonState();
+
+                    if (btnAdd) {
+                        btnAdd.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            if (!isAuthenticated) { window.location.href = "{{ route('sign-in') }}"; return; }
+                            
+                            const inCart = window.cartItems[productId] ? window.cartItems[productId].qty : 0;
+                            if (inCart >= stockLimit) {
+                                alert('Sorry, item not enough in stock!');
+                                return;
+                            }
+                            
+                            card.classList.add('active-qty');
+                            btnAdd.style.display = 'none';
+                            if (qtyValue) qtyValue.innerText = '1';
+                            if (btnConfirm) btnConfirm.innerText = 'ADD TO CART (1)';
+                            if (btnPlus) btnPlus.disabled = (1 + inCart >= stockLimit);
+                        });
                     }
 
-                    btnAdd.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        if (!isAuthenticated) { window.location.href = "{{ route('sign-in') }}"; return; }
-                        const inCart = window.cartItems[productId] || 0;
-                        if (inCart >= 5) return;
-                        card.classList.add('active-qty');
-                        btnAdd.style.display = 'none';
-                        qtyValue.innerText = '1';
-                        btnConfirm.innerText = 'ADD TO CART (1)';
-                        btnPlus.disabled = (1 + inCart >= 5);
-                    });
-
-                    btnPlus.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        let val = parseInt(qtyValue.innerText);
-                        const inCart = window.cartItems[productId] || 0;
-                        if (val + inCart < 5) {
-                            val++;
-                            qtyValue.innerText = val;
-                            btnConfirm.innerText = `ADD TO CART (${val})`;
-                            if (val + inCart === 5) btnPlus.disabled = true;
-                        }
-                    });
-
-                    btnMinus.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        let val = parseInt(qtyValue.innerText);
-                        if (val > 1) {
-                            val--;
-                            qtyValue.innerText = val;
-                            btnPlus.disabled = false;
-                            btnConfirm.innerText = `ADD TO CART (${val})`;
-                        } else {
-                            card.classList.remove('active-qty');
-                            btnAdd.style.display = 'flex';
-                            qtyValue.innerText = '1';
-                            btnPlus.disabled = false;
-                        }
-                    });
-
-                    btnConfirm.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const val = parseInt(qtyValue.innerText);
-                        if (window.flyToCart) window.flyToCart(btnConfirm, val, productId);
-                        btnConfirm.innerText = 'ADDED!';
-                        btnConfirm.style.background = '#28a745';
-                        setTimeout(() => {
-                            card.classList.remove('active-qty');
-                            btnAdd.style.display = 'flex';
-                            qtyValue.innerText = '1';
-                            btnPlus.disabled = false;
-                            if ((window.cartItems[productId] || 0) >= 5) {
-                                btnAdd.classList.add('max-reached');
-                                btnAdd.innerHTML = `<span>MAX</span><svg class="prohibited-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>`;
+                    if (btnPlus) {
+                        btnPlus.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            if (!qtyValue) return;
+                            let val = parseInt(qtyValue.innerText);
+                            const inCart = window.cartItems[productId] || 0;
+                            if (val + inCart < stockLimit) {
+                                val++;
+                                qtyValue.innerText = val;
+                                if (btnConfirm) btnConfirm.innerText = `ADD TO CART (${val})`;
+                                if (val + inCart === stockLimit) btnPlus.disabled = true;
+                            } else {
+                                alert('Sorry, item not enough in stock!');
                             }
-                            btnConfirm.innerText = `ADD TO CART (${val})`;
-                            btnConfirm.style.background = '';
-                        }, 800);
-                    });
+                        });
+                    }
+
+                    if (btnMinus) {
+                        btnMinus.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            if (!qtyValue) return;
+                            let val = parseInt(qtyValue.innerText);
+                            if (val > 1) {
+                                val--;
+                                qtyValue.innerText = val;
+                                if (btnPlus) btnPlus.disabled = false;
+                                if (btnConfirm) btnConfirm.innerText = `ADD TO CART (${val})`;
+                            } else {
+                                card.classList.remove('active-qty');
+                                if (btnAdd) btnAdd.style.display = 'flex';
+                                qtyValue.innerText = '1';
+                                if (btnPlus) btnPlus.disabled = false;
+                            }
+                        });
+                    }
+
+                    if (btnConfirm) {
+                        btnConfirm.addEventListener('click', async (e) => {
+                            e.stopPropagation();
+                            if (!qtyValue) return;
+                            const val = parseInt(qtyValue.innerText);
+                            
+                            btnConfirm.disabled = true;
+                            btnConfirm.innerText = 'Processing...';
+
+                            try {
+                                const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+                                const response = await fetch('{{ route("products.add-to-cart") }}', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': csrfToken,
+                                        'Accept': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        _token: csrfToken,
+                                        product_id: productId,
+                                        quantity: val
+                                    })
+                                });
+
+                                const result = await response.json();
+                                
+                                if (result.success) {
+                                    if (window.flyToCart) window.flyToCart(btnConfirm, val, productId);
+                                    
+                                    // Update local stock dataset
+                                    card.dataset.stock = result.new_stock;
+                                    
+                                    btnConfirm.innerText = 'ADDED!';
+                                    btnConfirm.style.background = '#28a745';
+                                    
+                                    setTimeout(() => {
+                                        card.classList.remove('active-qty');
+                                        if (btnAdd) btnAdd.style.display = 'flex';
+                                        qtyValue.innerText = '1';
+                                        if (btnPlus) btnPlus.disabled = false;
+                                        btnConfirm.disabled = false;
+                                        updateAddButtonState();
+                                        btnConfirm.innerText = `ADD TO CART (${val})`;
+                                        btnConfirm.style.background = '';
+                                        
+                                        if (result.new_stock <= 0) {
+                                            location.reload(); 
+                                        }
+                                    }, 800);
+                                } else {
+                                    alert(result.message || 'Failed to add to cart.');
+                                    btnConfirm.disabled = false;
+                                    btnConfirm.innerText = `ADD TO CART (${val})`;
+                                }
+                            } catch (err) {
+                                console.error(err);
+                                alert('An error occurred.');
+                                btnConfirm.disabled = false;
+                            }
+                        });
+                    }
                 });
             };
 

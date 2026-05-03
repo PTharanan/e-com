@@ -33,6 +33,56 @@
             background-color: var(--color-primary);
             border-radius: 2px;
         }
+
+        /* Badge System */
+        .badge-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .product-badge {
+            position: static !important; /* Override absolute from master */
+            padding: 6px 14px !important;
+            font-size: 0.75rem !important;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .badge-offer {
+            background: #10B981 !important;
+        }
+
+        .badge-new {
+            background: var(--color-primary) !important;
+        }
+
+        .badge-sold-out {
+            background: #64748B !important;
+        }
+
+        /* Price Styling */
+        .price-wrapper {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .old-price {
+            font-size: 0.9rem;
+            color: #9CA3AF;
+            text-decoration: line-through;
+            font-weight: 500;
+            margin-bottom: -2px;
+        }
+
+        .new-price {
+            color: #10B981;
+            font-weight: 800;
+        }
     </style>
 @endsection
 
@@ -43,106 +93,58 @@
         </div>
 
         <div class="product-grid">
-            <!-- Product Card 1 -->
-            <div class="product-card" data-product-id="p1">
-                <div class="product-badge">New</div>
-                <div class="product-image">
-                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=600" alt="Nike Shoes">
-                </div>
-                <div class="product-info">
-                    <span class="product-category">Footwear</span>
-                    <h3 class="product-title">Nike Revolution 5 Running Shoes</h3>
-                    <div class="product-footer">
-                        <div class="product-price">$120.00</div>
-                        <div class="product-actions">
-                            <button class="btn-add">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                            </button>
-                            <div class="qty-selector">
-                                <button class="qty-btn minus">−</button>
-                                <span class="qty-value">1</span>
-                                <button class="qty-btn plus">+</button>
-                                <button class="btn-confirm-add">ADD TO CART (1)</button>
-                            </div>
-                        </div>
+            @forelse($products as $product)
+                <div class="product-card" data-product-id="{{ $product->id }}" data-stock="{{ $product->stock_quantity }}">
+                    <div class="badge-container">
+                        @if($product->discount_percentage)
+                            <div class="product-badge badge-offer">-{{ $product->discount_percentage }}%</div>
+                        @endif
+                        @if($product->is_new)
+                            <div class="product-badge badge-new">NEW</div>
+                        @endif
+                        @if($product->stock_status == 'not' || $product->stock_quantity == 0)
+                            <div class="product-badge badge-sold-out">SOLD OUT</div>
+                        @endif
                     </div>
-                </div>
-            </div>
 
-            <!-- Product Card 2 -->
-            <div class="product-card" data-product-id="p2">
-                <div class="product-image">
-                    <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=600" alt="Apple Watch">
-                </div>
-                <div class="product-info">
-                    <span class="product-category">Accessories</span>
-                    <h3 class="product-title">Apple Watch Series 8 GPS</h3>
-                    <div class="product-footer">
-                        <div class="product-price">$399.00</div>
-                        <div class="product-actions">
-                            <button class="btn-add">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                            </button>
-                            <div class="qty-selector">
-                                <button class="qty-btn minus">−</button>
-                                <span class="qty-value">1</span>
-                                <button class="qty-btn plus">+</button>
-                                <button class="btn-confirm-add">ADD TO CART (1)</button>
+                    <div class="product-image">
+                        <img src="{{ asset($product->main_image_url) }}" alt="{{ $product->name }}">
+                    </div>
+                    <div class="product-info">
+                        <span class="product-category">{{ $product->category->name }}</span>
+                        <h3 class="product-title">{{ $product->name }}</h3>
+                        <div class="product-footer">
+                            <div class="product-price">
+                                @if($product->discount_percentage)
+                                    <div class="price-wrapper">
+                                        <span class="old-price">${{ number_format($product->price, 2) }}</span>
+                                        <span class="new-price">${{ number_format($product->final_price, 2) }}</span>
+                                    </div>
+                                @else
+                                    ${{ number_format($product->price, 2) }}
+                                @endif
+                            </div>
+                            <div class="product-actions">
+                                @if($product->stock_status == 'available' && $product->stock_quantity > 0)
+                                    <button class="btn-add">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                    </button>
+                                    <div class="qty-selector">
+                                        <button class="qty-btn minus">−</button>
+                                        <span class="qty-value">1</span>
+                                        <button class="qty-btn plus">+</button>
+                                        <button class="btn-confirm-add">ADD TO CART (1)</button>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Product Card 3 -->
-            <div class="product-card" data-product-id="p3">
-                <div class="product-image">
-                    <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=600" alt="Sony Headphones">
+            @empty
+                <div style="grid-column: 1/-1; text-align: center; padding: 100px 0; color: var(--color-text-medium);">
+                    <p>No products found in our catalog yet.</p>
                 </div>
-                <div class="product-info">
-                    <span class="product-category">Audio</span>
-                    <h3 class="product-title">Sony WH-1000XM4 Noise Cancelling</h3>
-                    <div class="product-footer">
-                        <div class="product-price">$298.00</div>
-                        <div class="product-actions">
-                            <button class="btn-add">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                            </button>
-                            <div class="qty-selector">
-                                <button class="qty-btn minus">−</button>
-                                <span class="qty-value">1</span>
-                                <button class="qty-btn plus">+</button>
-                                <button class="btn-confirm-add">ADD TO CART (1)</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Product Card 4 -->
-            <div class="product-card" data-product-id="p4">
-                <div class="product-image">
-                    <img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?auto=format&fit=crop&q=80&w=600" alt="Headphones">
-                </div>
-                <div class="product-info">
-                    <span class="product-category">Audio</span>
-                    <h3 class="product-title">Beats Solo Pro Wireless On-Ear</h3>
-                    <div class="product-footer">
-                        <div class="product-price">$249.99</div>
-                        <div class="product-actions">
-                            <button class="btn-add">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                            </button>
-                            <div class="qty-selector">
-                                <button class="qty-btn minus">−</button>
-                                <span class="qty-value">1</span>
-                                <button class="qty-btn plus">+</button>
-                                <button class="btn-confirm-add">ADD TO CART (1)</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            @endforelse
         </div>
     </section>
 @endsection
