@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title') - Admin Panel</title>
+    <title>@yield('title') - Seller Panel</title>
 
     <!-- Favicon -->
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
@@ -533,7 +533,7 @@
 
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <a href="{{ route('admin.dashboard') }}" class="logo-area">
+            <a href="{{ route('seller.dashboard') }}" class="logo-area">
                 E-<span>Shop</span>
             </a>
             <button class="toggle-btn" id="sidebar-toggle">
@@ -547,15 +547,15 @@
         <div class="user-profile">
             <div class="avatar">{{ substr(Auth::user()->name, 0, 1) }}</div>
             <div class="user-info">
-                <p>Admin</p>
+                <p>Seller</p>
                 <h4>{{ Auth::user()->name }}</h4>
             </div>
         </div>
 
         <ul class="nav-menu">
             <li class="nav-item">
-                <a href="{{ route('admin.dashboard') }}"
-                    class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                <a href="{{ route('seller.dashboard') }}"
+                    class="nav-link {{ request()->routeIs('seller.dashboard') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -565,8 +565,8 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('admin.products') }}"
-                    class="nav-link {{ request()->routeIs('admin.products') ? 'active' : '' }}">
+                <a href="{{ route('seller.products') }}"
+                    class="nav-link {{ request()->routeIs('seller.products') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
                         <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
@@ -577,8 +577,8 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('admin.orders') }}"
-                    class="nav-link {{ request()->routeIs('admin.orders') ? 'active' : '' }}">
+                <a href="{{ route('seller.orders') }}"
+                    class="nav-link {{ request()->routeIs('seller.orders') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
                         <path
@@ -588,22 +588,10 @@
                     <span>Orders</span>
                 </a>
             </li>
-            <li class="nav-item">
-                <a href="{{ route('admin.customers') }}"
-                    class="nav-link {{ request()->routeIs('admin.customers') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="9" cy="7" r="4"></circle>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
-                    <span>Customers</span>
-                </a>
-            </li>
 
             <li class="nav-item">
-                <a href="{{ route('admin.delivery') }}"
-                    class="nav-link {{ request()->routeIs('admin.delivery') ? 'active' : '' }}">
+                <a href="{{ route('seller.delivery') }}"
+                    class="nav-link {{ request()->routeIs('seller.delivery') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
                         <path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>
@@ -612,9 +600,8 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="javascript:void(0)"
-                    class="nav-link {{ request()->routeIs('admin.settings') || request()->routeIs('admin.categories') || request()->routeIs('admin.currency') || request()->routeIs('admin.sellers') ? 'active' : '' }}"
-                    id="settings-toggle">
+                <a href="{{ route('seller.settings') }}"
+                    class="nav-link {{ request()->routeIs('seller.settings') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
                         <circle cx="12" cy="12" r="3"></circle>
@@ -623,36 +610,12 @@
                         </path>
                     </svg>
                     <span>Settings</span>
-                    <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
                 </a>
-                <ul class="dropdown-menu"
-                    id="settings-dropdown">
-                    <li class="dropdown-item">
-                        <a href="{{ route('admin.categories') }}"
-                            class="dropdown-link {{ request()->routeIs('admin.categories') ? 'active' : '' }}">Categories</a>
-                    </li>
-                    <li class="dropdown-item">
-                        <a href="{{ route('admin.currency') }}"
-                            class="dropdown-link {{ request()->routeIs('admin.currency') ? 'active' : '' }}">Currency & Rates</a>
-                    </li>
-                    <li class="dropdown-item">
-                        <a href="{{ route('admin.sellers') }}"
-                            class="dropdown-link {{ request()->routeIs('admin.sellers') ? 'active' : '' }}">Seller Management</a>
-                    </li>
-                    <li class="dropdown-item">
-                        <a href="{{ route('admin.settings') }}"
-                            class="dropdown-link {{ request()->routeIs('admin.settings') ? 'active' : '' }}">General
-                            Settings</a>
-                    </li>
-                </ul>
             </li>
         </ul>
 
         <div class="sidebar-footer">
-            <form action="{{ route('logout') }}" method="POST" id="admin-logout-form">
+            <form action="{{ route('logout') }}" method="POST" id="seller-logout-form">
                 @csrf
                 <button type="button" class="logout-link" onclick="openLogoutModal()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
@@ -702,7 +665,7 @@
                             </div>
                             <div class="bell-menu-body" id="cancelNotifList">
                                 @forelse($cancelledOrders as $order)
-                                    <a href="{{ route('admin.orders') }}" class="notification-item">
+                                    <a href="{{ route('seller.orders') }}" class="notification-item">
                                         <div class="notif-icon" style="background: #FEE2E2; color: #EF4444;">
                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                                         </div>
@@ -715,7 +678,7 @@
                                     <div class="no-notif">No new cancellations.</div>
                                 @endforelse
                                 @if($cancelledCount > 0)
-                                    <a href="{{ route('admin.orders') }}" class="view-all-link" style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #EF4444; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View All Cancellations</a>
+                                    <a href="{{ route('seller.orders') }}" class="view-all-link" style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #EF4444; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View All Cancellations</a>
                                 @endif
                             </div>
                         </div>
@@ -743,7 +706,7 @@
                             </div>
                             <div class="bell-menu-body" id="deliveryNotifList">
                                 @forelse($deliveryNotifications as $notif)
-                                    <a href="{{ route('admin.delivery') }}" class="notification-item">
+                                    <a href="{{ route('seller.delivery') }}" class="notification-item">
                                         <div class="notif-icon" style="background: #FDEEE4; color: #F25C3B;">
                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
                                         </div>
@@ -756,7 +719,7 @@
                                     <div class="no-notif">No new applications.</div>
                                 @endforelse
                                 @if($deliveryNotifCount > 0)
-                                    <a href="{{ route('admin.delivery') }}" class="view-all-link" style="display: block; text-align: center; padding: 10px; font-size: 12px; color: var(--admin-primary); text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View All Applications</a>
+                                    <a href="{{ route('seller.delivery') }}" class="view-all-link" style="display: block; text-align: center; padding: 10px; font-size: 12px; color: var(--admin-primary); text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View All Applications</a>
                                 @endif
                             </div>
                         </div>
@@ -779,7 +742,7 @@
                             </div>
                             <div class="bell-menu-body" id="orderNotifList">
                                 @forelse($newOrders as $order)
-                                    <a href="{{ route('admin.orders') }}" class="notification-item">
+                                    <a href="{{ route('seller.orders') }}" class="notification-item">
                                         <div class="notif-icon">
                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                         </div>
@@ -792,7 +755,7 @@
                                     <div class="no-notif">No new payments.</div>
                                 @endforelse
                                 @if($newOrdersCount > 0)
-                                    <a href="{{ route('admin.orders') }}" class="view-all-link" style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #4CAF50; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View All Orders</a>
+                                    <a href="{{ route('seller.orders') }}" class="view-all-link" style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #4CAF50; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View All Orders</a>
                                 @endif
                             </div>
                         </div>
@@ -815,7 +778,7 @@
                 </svg>
             </div>
             <h3>Sign Out</h3>
-            <p>Are you sure you want to sign out? You will need to sign-in again to access the admin panel.</p>
+            <p>Are you sure you want to sign out? You will need to sign-in again to access the Seller Panel.</p>
             <div class="modal-actions">
                 <button class="modal-btn btn-cancel" onclick="closeLogoutModal()">Cancel</button>
                 <button class="modal-btn btn-confirm" onclick="confirmLogout()">Yes, Sign Out</button>
@@ -938,7 +901,7 @@
         const toggleBtn = document.getElementById('sidebar-toggle');
         const toggleIcon = document.getElementById('toggle-icon');
         const logoutModal = document.getElementById('logoutModal');
-        const logoutForm = document.getElementById('admin-logout-form');
+        const logoutForm = document.getElementById('seller-logout-form');
 
         const updateToggleIcon = (isCollapsed) => {
             if (isCollapsed) {
@@ -979,7 +942,7 @@
         };
 
         const confirmLogout = () => {
-            document.getElementById('admin-logout-form').submit();
+            document.getElementById('seller-logout-form').submit();
         };
 
         // Close modal when clicking outside
@@ -1087,7 +1050,7 @@
                     let html = '';
                     data.orders.items.forEach(order => {
                         html += `
-                            <a href="{{ route('admin.orders') }}" class="notification-item">
+                            <a href="{{ route('seller.orders') }}" class="notification-item">
                                 <div class="notif-icon">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                 </div>
@@ -1098,7 +1061,7 @@
                             </a>
                         `;
                     });
-                    html += `<a href="{{ route('admin.orders') }}" class="view-all-link" style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #4CAF50; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View All Orders</a>`;
+                    html += `<a href="{{ route('seller.orders') }}" class="view-all-link" style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #4CAF50; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View All Orders</a>`;
                     orderNotifList.innerHTML = html;
                 } else {
                     orderNotifList.innerHTML = '<div class="no-notif">No new payments.</div>';
@@ -1122,7 +1085,7 @@
                     let html = '';
                     data.delivery.items.forEach(notif => {
                         html += `
-                            <a href="{{ route('admin.delivery') }}" class="notification-item">
+                            <a href="{{ route('seller.delivery') }}" class="notification-item">
                                 <div class="notif-icon" style="background: #FDEEE4; color: #F25C3B;">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
                                 </div>
@@ -1133,7 +1096,7 @@
                             </a>
                         `;
                     });
-                    html += `<a href="{{ route('admin.delivery') }}" class="view-all-link" style="display: block; text-align: center; padding: 10px; font-size: 12px; color: var(--admin-primary); text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View All Applications</a>`;
+                    html += `<a href="{{ route('seller.delivery') }}" class="view-all-link" style="display: block; text-align: center; padding: 10px; font-size: 12px; color: var(--admin-primary); text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View All Applications</a>`;
                     deliveryNotifList.innerHTML = html;
                 } else {
                     deliveryNotifList.innerHTML = '<div class="no-notif">No new applications.</div>';
@@ -1150,89 +1113,6 @@
         
         startNotificationStreaming();
     </script>
-
-    @if(auth()->check() && auth()->user()->role === 'admin' && !auth()->user()->business_type)
-        @php
-            $businessTypes = \App\Models\BusinessType::all();
-        @endphp
-        <div id="businessTypeModal" class="modal-overlay active" style="z-index: 9999; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 20px;">
-            <div style="background: white; width: 100%; max-width: 450px; border-radius: 24px; padding: 40px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
-                <div style="width: 70px; height: 70px; background: #FFF1EE; color: var(--admin-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
-                    <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 21h18M3 7l9-4 9 4M4 7v14M20 7v14M9 21v-6a3 3 0 0 1 6 0v6"/></svg>
-                </div>
-                <h2 style="font-size: 24px; font-weight: 700; color: #1a1a1a; margin-bottom: 10px;">Setup Your Store</h2>
-                <p style="color: #666; margin-bottom: 30px;">What type of business are you running? This helps sellers find your store.</p>
-                
-                <form id="businessTypeForm">
-                    @csrf
-                    <div style="margin-bottom: 20px; text-align: left;">
-                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Select Business Category</label>
-                        <select name="business_type" id="bt_select" style="width: 100%; padding: 14px; border: 2px solid #F3F4F6; border-radius: 12px; font-family: inherit;" onchange="toggleCustomBT(this.value)">
-                            <option value="" disabled selected>Choose a category...</option>
-                            @foreach($businessTypes as $bt)
-                                <option value="{{ $bt->name }}">{{ $bt->name }}</option>
-                            @endforeach
-                            <option value="custom">+ Other (Type your own)</option>
-                        </select>
-                    </div>
-
-                    <div id="customBTWrapper" style="margin-bottom: 25px; text-align: left; display: none;">
-                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Enter Business Type</label>
-                        <input type="text" name="custom_type" id="bt_custom" style="width: 100%; padding: 14px; border: 2px solid #F3F4F6; border-radius: 12px; font-family: inherit;" placeholder="e.g. Electronics, Furniture...">
-                    </div>
-
-                    <button type="submit" id="btnSaveBT" style="width: 100%; padding: 16px; background: var(--admin-primary); color: white; border: none; border-radius: 14px; font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.2s;">
-                        Continue to Dashboard
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <script>
-            function toggleCustomBT(val) {
-                const wrapper = document.getElementById('customBTWrapper');
-                const customInput = document.getElementById('bt_custom');
-                if (val === 'custom') {
-                    wrapper.style.display = 'block';
-                    customInput.focus();
-                    customInput.required = true;
-                } else {
-                    wrapper.style.display = 'none';
-                    customInput.required = false;
-                }
-            }
-
-            document.getElementById('businessTypeForm').onsubmit = async (e) => {
-                e.preventDefault();
-                const btn = document.getElementById('btnSaveBT');
-                btn.disabled = true;
-                btn.innerText = 'Saving...';
-
-                try {
-                    const response = await fetch('{{ route("admin.save-business-type") }}', {
-                        method: 'POST',
-                        body: new FormData(e.target),
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        }
-                    });
-                    const result = await response.json();
-                    if (result.success) {
-                        location.reload();
-                    } else {
-                        alert(result.message);
-                        btn.disabled = false;
-                        btn.innerText = 'Continue to Dashboard';
-                    }
-                } catch (error) {
-                    console.error(error);
-                    alert('An error occurred.');
-                    btn.disabled = false;
-                    btn.innerText = 'Continue to Dashboard';
-                }
-            };
-        </script>
-    @endif
 
     @yield('scripts')
 </body>

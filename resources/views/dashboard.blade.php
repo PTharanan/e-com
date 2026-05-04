@@ -163,6 +163,108 @@
         padding: 40px 0;
         color: var(--color-text-medium);
     }
+
+    .btn-cancel {
+        background: #FEE2E2;
+        color: #EF4444;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-cancel:hover {
+        background: #EF4444;
+        color: white;
+    }
+
+    .alert {
+        padding: 15px 20px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        font-weight: 600;
+    }
+    .alert-success { background: #DCFCE7; color: #10B981; border: 1px solid #10B981; }
+    .alert-error { background: #FEE2E2; color: #EF4444; border: 1px solid #EF4444; }
+
+    /* MOBILE RESPONSIVE OVERRIDES */
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 30px 15px;
+        }
+
+        .welcome-text {
+            font-size: 1.8rem;
+        }
+
+        .dashboard-subtitle {
+            font-size: 1rem;
+        }
+
+        .stat-card {
+            padding: 20px;
+            gap: 15px;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+        }
+
+        .stat-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .stat-value {
+            font-size: 1.4rem;
+        }
+
+        .orders-section {
+            padding: 20px;
+        }
+
+        /* Responsive Table to Cards */
+        .order-table thead {
+            display: none;
+        }
+
+        .order-table tr {
+            display: block;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #F1F5F9;
+        }
+
+        .order-table td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border: none;
+            text-align: right;
+        }
+
+        .order-table td::before {
+            content: attr(data-label);
+            font-weight: 700;
+            color: var(--color-text-medium);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            text-align: left;
+        }
+
+        .order-table td:last-child {
+            justify-content: center;
+            padding-top: 15px;
+        }
+    }
 </style>
 @endsection
 
@@ -172,6 +274,18 @@
         <h1 class="welcome-text">Hello, <span>{{ Auth::user()->name }}!</span></h1>
         <p class="dashboard-subtitle">Welcome back! Here's an overview of your shopping journey.</p>
     </div>
+
+    @if(session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-error">
+            {{ session('error') }}
+        </div>
+    @endif
 
     <!-- STATS GRID -->
     <div class="stats-grid">
@@ -243,16 +357,44 @@
                             <th>Items</th>
                             <th>Total Amount</th>
                             <th>Status</th>
+                            <th>Secret Code</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($orders->sortByDesc('created_at') as $order)
-                        <tr>
-                            <td>#ORD-{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}</td>
-                            <td>{{ $order->created_at->format('M d, Y') }}</td>
-                            <td>{{ $order->total_items }} Items</td>
-                            <td style="font-weight: 700;">${{ number_format($order->total_price, 2) }}</td>
-                            <td><span class="status-badge status-{{ $order->status }}">{{ $order->status }}</span></td>
+                        <tr id="order-row-{{ $order->id }}">
+                            <td data-label="Order ID" style="font-weight: 600;">#ORD-{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}</td>
+                            <td data-label="Date">{{ $order->created_at->format('M d, Y') }}</td>
+                            <td data-label="Items">{{ $order->total_items }} Items</td>
+                            <td data-label="Total Amount" style="font-weight: 700;">${{ number_format($order->total_price, 2) }}</td>
+                            <td data-label="Status" id="status-container-{{ $order->id }}">
+                                <span id="badge-{{ $order->id }}" class="status-badge status-{{ $order->status }}">
+                                    {{ $order->status == 'completed' ? 'payment complet' : ($order->status == 'refunded' ? 'Refund' : $order->status) }}
+                                </span>
+                            </td>
+                            <td data-label="Secret Code" id="code-container-{{ $order->id }}">
+                                @if($order->status == 'shipped' && $order->secret_code)
+                                    <div style="background: #FFFBEB; color: #B45309; padding: 6px 12px; border-radius: 8px; font-weight: 800; font-family: monospace; border: 1px dashed #F59E0B; display: inline-block;">
+                                        {{ $order->secret_code }}
+                                    </div>
+                                @else
+                                    <span style="color: #94A3B8; font-size: 0.85rem;">---</span>
+                                @endif
+                            </td>
+                            <td data-label="Action" id="action-container-{{ $order->id }}">
+                                @if($order->status == 'completed')
+                                    <button type="button" class="btn-cancel" onclick="cancelOrder({{ $order->id }})">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                        Cancel
+                                    </button>
+                                @else
+                                    <span style="color: #94A3B8; font-size: 0.85rem;">No actions</span>
+                                @endif
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -265,4 +407,93 @@
         </div>
     </div>
 </div>
+@section('scripts')
+<script>
+    // Real-time status updates via SSE
+    const evtSource = new EventSource("{{ route('sse.stream') }}");
+    
+    evtSource.onopen = function() {
+        console.log("SSE Connection established.");
+    };
+
+    evtSource.addEventListener("update", function(event) {
+        console.log("SSE Update received:", event.data);
+        const data = JSON.parse(event.data);
+        
+        if (data.user_orders) {
+            data.user_orders.forEach(order => {
+                const statusContainer = document.getElementById(`status-container-${order.id}`);
+                const actionContainer = document.getElementById(`action-container-${order.id}`);
+                
+                if (statusContainer) {
+                    const currentBadge = statusContainer.querySelector('.status-badge');
+                    const currentStatusStr = currentBadge ? currentBadge.textContent.trim().toLowerCase() : '';
+                    const newStatusStr = order.display_status.toLowerCase();
+                    
+                    // Only update if status changed
+                    if (currentStatusStr !== newStatusStr) {
+                        console.log(`Updating order ${order.id} status to ${order.display_status}`);
+                        statusContainer.innerHTML = `<span id="badge-${order.id}" class="status-badge status-${order.status}">${order.display_status}</span>`;
+                        
+                        // Update Action column: Hide cancel button if no longer 'completed'
+                        if (actionContainer) {
+                            if (order.status !== 'completed') {
+                                actionContainer.innerHTML = '<span style="color: #94A3B8; font-size: 0.85rem;">No actions</span>';
+                            }
+                        }
+
+                        // Update Secret Code container
+                        const codeContainer = document.getElementById(`code-container-${order.id}`);
+                        if (codeContainer) {
+                            if (order.status === 'shipped' && order.secret_code) {
+                                codeContainer.innerHTML = `
+                                    <div style="background: #FFFBEB; color: #B45309; padding: 6px 12px; border-radius: 8px; font-weight: 800; font-family: monospace; border: 1px dashed #F59E0B; display: inline-block;">
+                                        ${order.secret_code}
+                                    </div>
+                                `;
+                            } else if (order.status === 'delivered') {
+                                codeContainer.innerHTML = '<span style="color: #10B981; font-weight: 700;">VERIFIED</span>';
+                            } else {
+                                codeContainer.innerHTML = '<span style="color: #94A3B8; font-size: 0.85rem;">---</span>';
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+
+    async function cancelOrder(orderId) {
+        if (!confirm('Are you sure you want to cancel this order?')) return;
+
+        try {
+            const response = await fetch(`{{ url('dashboard/orders') }}/${orderId}/cancel`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+            const result = await response.json();
+            if (result.success) {
+                // Update UI immediately
+                const statusContainer = document.getElementById(`status-container-${orderId}`);
+                if (statusContainer) {
+                    statusContainer.innerHTML = '<span class="status-badge status-cancelled">cancelled</span>';
+                }
+                const actionContainer = document.getElementById(`action-container-${orderId}`);
+                if (actionContainer) {
+                    actionContainer.innerHTML = '<span style="color: #94A3B8; font-size: 0.85rem;">No actions</span>';
+                }
+            } else {
+                alert(result.message || 'Cancellation failed');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('An error occurred.');
+        }
+    }
+</script>
+@endsection
 @endsection

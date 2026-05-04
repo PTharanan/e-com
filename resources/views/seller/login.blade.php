@@ -5,9 +5,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="Sign in to your account - E-Commerce Shopping Platform">
+    <meta name="description" content="Sign in to your seller account - E-Commerce Shopping Platform">
 
-    <title>User Login - {{ config('app.name', 'E-Commerce') }}</title>
+    <title>Seller Login - {{ config('app.name', 'E-Commerce') }}</title>
 
     <!-- Favicon -->
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
@@ -132,7 +132,7 @@
             font-size: 32px;
             font-weight: 700;
             color: var(--color-primary-hover);
-            margin-bottom: 36px;
+            margin-bottom: 20px;
             line-height: 1.2;
         }
 
@@ -710,27 +710,18 @@
     <div class="login-container">
         {{-- Left Panel - Login Form --}}
         <div class="login-left">
-            <!-- Mobile Shop Now -->
-            <div class="mobile-shop-now">
-                <a href="{{ url('/') }}" class="btn-shop-now">
-                    <span>SHOP NOW</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                    </svg>
-                </a>
-            </div>
+            <!-- Mobile Shop Now Removed for Admin -->
 
             <div class="login-form-wrapper">
                 {{-- Logo --}}
-                <div class="logo-animation" id="login-logo" style="margin-bottom: 1px; margin-left: -55px;">
+                <div class="logo-animation" id="login-logo" style="margin-bottom: -15px; margin-left: -40px;">
                     <lottie-player src="{{ asset('lottie/shop-cart-kdp.json') }}" background="transparent" speed="1"
-                        style="width: 200px; height: auto;" loop autoplay></lottie-player>
+                        style="width: 150px; height: auto;" loop autoplay></lottie-player>
                 </div>
 
                 {{-- Welcome Heading --}}
-                <p class="welcome-text">Welcome back !!!</p>
-                <h1 class="signin-title">Sign in</h1>
+                <p class="welcome-text">Seller Panel</p>
+                <h1 class="signin-title">Seller Login</h1>
 
                 {{-- Error Messages --}}
                 @if ($errors->any())
@@ -744,7 +735,7 @@
                 @endif
 
                 {{-- Login Form --}}
-                <form class="login-form" method="POST" action="{{ url('/sign-in') }}" id="user-login-form">
+                <form class="login-form" method="POST" action="{{ route('seller.login.post') }}" id="seller-login-form">
                     @csrf
 
                     {{-- Email Field --}}
@@ -804,13 +795,11 @@
                             </svg>
                         </span>
                     </button>
+                    
+                    <p class="signup-text" style="margin-top: 15px;">
+                        Don't have an account? <a href="{{ url('/seller/sign-up') }}" class="signup-link">Sign up</a>
+                    </p>
                 </form>
-
-                {{-- Sign Up Link --}}
-                <p class="signup-text">
-                    I don't have an account ? <a href="{{ url('/sign-up') }}" class="signup-link"
-                        id="signup-redirect-link">Sign up</a>
-                </p>
             </div>
         </div>
 
@@ -818,17 +807,8 @@
         <div class="login-right">
             <div class="illustration-wrapper">
                 <div class="illustration-content">
-                    <lottie-player src="{{ asset('lottie/shopping.json') }}" background="transparent" speed="1"
+                    <lottie-player src="{{ asset('lottie/login-animation.json') }}" background="transparent" speed="1"
                         style="width: 100%; height: auto;" loop autoplay></lottie-player>
-
-                    <a href="{{ url('/') }}" class="btn-shop-now">
-                        <span>SHOP NOW</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                        </svg>
-                    </a>
                 </div>
             </div>
         </div>
@@ -849,12 +829,14 @@
         });
 
         // Form submit loading state
-        const loginForm = document.getElementById('user-login-form');
+        const loginForm = document.getElementById('seller-login-form');
         const signinBtn = document.getElementById('btn-user-signin');
 
-        loginForm.addEventListener('submit', function () {
-            signinBtn.classList.add('loading');
-        });
+        if(loginForm) {
+            loginForm.addEventListener('submit', function () {
+                signinBtn.classList.add('loading');
+            });
+        }
     </script>
 
 </body>

@@ -1,11 +1,11 @@
-@extends('layouts.admin')
+@extends('layouts.seller')
 
 @section('title', 'Manage Orders')
 
 @section('styles')
 <style>
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-    .page-title h1 { font-size: 24px; font-weight: 700; color: var(--admin-dark); }
+    .page-title h1 { font-size: 24px; font-weight: 700; color: var(--Seller-dark); }
     .page-title p { color: #64748B; font-size: 14px; }
     
     .data-card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
@@ -30,7 +30,7 @@
         cursor: pointer;
         transition: 0.2s;
     }
-    .status-select:focus { border-color: var(--admin-primary); }
+    .status-select:focus { border-color: var(--Seller-primary); }
 
     /* ORDER DETAILS MODAL */
     .order-modal-overlay {
@@ -116,7 +116,7 @@
     }
     .item-name { font-weight: 600; font-size: 13px; color: #1E293B; }
     .item-qty { font-size: 12px; color: #64748B; margin-top: 2px; }
-    .item-price { font-weight: 700; font-size: 14px; color: var(--admin-primary); }
+    .item-price { font-weight: 700; font-size: 14px; color: var(--Seller-primary); }
 
     .detail-total {
         display: flex;
@@ -162,7 +162,7 @@
         <p>Monitor and fulfill customer orders.</p>
     </div>
     <div class="header-actions">
-        <form action="{{ route('admin.orders') }}" method="GET" id="filterForm">
+        <form action="{{ route('seller.orders') }}" method="GET" id="filterForm">
             <select name="status" onchange="document.getElementById('filterForm').submit()" style="padding: 10px 15px; border-radius: 10px; border: 1px solid #E2E8F0; background: white; font-family: inherit; font-size: 14px; font-weight: 500; color: #1E293B; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
                 <option value="">All Orders</option>
                 <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Payment Complet</option>
@@ -202,7 +202,7 @@
                     @if(is_array($order->items_json))
                         @foreach($order->items_json as $item)
                             <div style="font-size: 12px; margin-bottom: 2px;">
-                                <span style="font-weight: 700; color: var(--admin-primary);">{{ $item['qty'] }}x</span> {{ $item['name'] }}
+                                <span style="font-weight: 700; color: var(--Seller-primary);">{{ $item['qty'] }}x</span> {{ $item['name'] }}
                             </div>
                         @endforeach
                     @else
@@ -345,7 +345,7 @@ function viewOrderDetails(id) {
                             <option value="${boy.id}" ${order.delivery_boy_id == boy.id ? 'selected' : ''}>${boy.name}</option>
                         `).join('') : ''}
                     </select>
-                    <button class="status-select" style="background: var(--admin-primary); color: white; border: none;" onclick="assignPartner(${order.id})">Assign</button>
+                    <button class="status-select" style="background: var(--Seller-primary); color: white; border: none;" onclick="assignPartner(${order.id})">Assign</button>
                 </div>
             ` : ''}
         </div>
@@ -370,7 +370,7 @@ async function refundOrder(orderId) {
     if (!confirm('Are you sure you want to refund this order? The money will be added back to the customer\'s balance.')) return;
     
     try {
-        const response = await fetch(`{{ url('admin/orders') }}/${orderId}/refund`, {
+        const response = await fetch(`{{ url('seller/orders') }}/${orderId}/refund`, {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -404,7 +404,7 @@ async function assignPartner(orderId) {
     }
 
     try {
-        const response = await fetch(`{{ url('admin/orders') }}/${orderId}/assign`, {
+        const response = await fetch(`{{ url('seller/orders') }}/${orderId}/assign`, {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -443,7 +443,7 @@ async function updateOrderStatus(id, el) {
     el.disabled = true;
 
     try {
-        const response = await fetch(`{{ url('admin/orders') }}/${id}/status`, {
+        const response = await fetch(`{{ url('seller/orders') }}/${id}/status`, {
             method: 'PATCH',
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -476,14 +476,14 @@ async function updateOrderStatus(id, el) {
 }
     // Real-time Updates via SSE
     const eventSource = new EventSource("{{ route('sse.stream') }}");
-    console.log("Admin SSE: Connecting...");
+    console.log("Seller SSE: Connecting...");
 
-    eventSource.onopen = () => console.log("Admin SSE: Connected ✅");
-    eventSource.onerror = (e) => console.error("Admin SSE: Connection error ❌", e);
+    eventSource.onopen = () => console.log("Seller SSE: Connected ✅");
+    eventSource.onerror = (e) => console.error("Seller SSE: Connection error ❌", e);
 
     eventSource.addEventListener('update', (e) => {
         const data = JSON.parse(e.data);
-        console.log("Admin SSE: Received update", data);
+        console.log("Seller SSE: Received update", data);
         
         if (data.orders && data.orders.all_statuses) {
             data.orders.all_statuses.forEach(o => {

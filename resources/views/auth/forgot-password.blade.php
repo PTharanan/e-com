@@ -94,7 +94,7 @@
         <div class="left-panel">
             <div class="form-wrapper">
                 <div style="margin-bottom: 20px; margin-left: -50px;">
-                    <lottie-player src="{{ asset('images/shop-cart-kdp.json') }}" background="transparent" speed="1" style="width: 180px; height: auto;" loop autoplay></lottie-player>
+                    <lottie-player src="{{ asset('lottie/shop-cart-kdp.json') }}" background="transparent" speed="1" style="width: 180px; height: auto;" loop autoplay></lottie-player>
                 </div>
                 
                 <h1 class="signin-title">Forgot Password?</h1>
@@ -120,7 +120,7 @@
 
         <div class="right-panel">
             <div class="illustration-wrapper">
-                <lottie-player src="{{ asset('images/shopping.json') }}" background="transparent" speed="1" style="width: 100%; height: auto;" loop autoplay></lottie-player>
+                <lottie-player src="{{ asset('lottie/shopping.json') }}" background="transparent" speed="1" style="width: 100%; height: auto;" loop autoplay></lottie-player>
             </div>
         </div>
     </div>

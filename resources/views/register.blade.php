@@ -723,7 +723,7 @@
             <div class="login-form-wrapper">
                 {{-- Logo --}}
                 <div class="logo-animation" id="login-logo" style="margin-bottom: 8px; margin-left: -40px;">
-                    <lottie-player src="{{ asset('images/shop-cart-kdp.json') }}" background="transparent" speed="1"
+                    <lottie-player src="{{ asset('lottie/shop-cart-kdp.json') }}" background="transparent" speed="1"
                         style="width: 200px; height: auto;" loop autoplay></lottie-player>
                 </div>
 
@@ -898,7 +898,7 @@
         <div class="login-right">
             <div class="illustration-wrapper">
                 <div class="illustration-content">
-                    <lottie-player src="{{ asset('images/mobile-shopping.json') }}" background="transparent" speed="1"
+                    <lottie-player src="{{ asset('lottie/mobile-shopping.json') }}" background="transparent" speed="1"
                         style="width: 100%; height: auto;" loop autoplay></lottie-player>
 
                     <a href="{{ url('/') }}" class="btn-shop-now">

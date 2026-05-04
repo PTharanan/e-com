@@ -124,7 +124,7 @@
         </div>
 
         <div class="right-panel">
-            <lottie-player src="{{ asset('images/shopping.json') }}" background="transparent" speed="1" style="width: 85%; height: auto;" loop autoplay></lottie-player>
+            <lottie-player src="{{ asset('lottie/shopping.json') }}" background="transparent" speed="1" style="width: 85%; height: auto;" loop autoplay></lottie-player>
         </div>
     </div>
 

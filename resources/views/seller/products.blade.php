@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.seller')
 
 @section('title', 'Manage Products')
 
@@ -548,13 +548,25 @@
             <h1>Products Catalog</h1>
             <p>Manage your inventory and product listings.</p>
         </div>
-        <button class="btn-primary" id="openProductModal">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-            Add Product
-        </button>
+        @if($hasAssignment)
+            <button class="btn-primary" id="openProductModal">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Add Product
+            </button>
+        @else
+            <button class="btn-primary" id="openJoinStoreModal">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                    <line x1="20" y1="8" x2="20" y2="14"></line>
+                    <line x1="17" y1="11" x2="23" y2="11"></line>
+                </svg>
+                Connect to Store
+            </button>
+        @endif
     </div>
 
     <div class="data-card">
@@ -675,10 +687,20 @@
                 <!-- Step 1: Basic Details -->
                 <div class="step active" id="p-step1">
                     <div class="form-grid">
-                        <div class="form-group full">
+                        <div class="form-group">
                             <label class="form-label">Product Name</label>
                             <input type="text" name="name" id="p_name" class="form-input" placeholder="Enter product name"
                                 required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Target Store (Admin)</label>
+                            <select name="admin_id" class="form-select" required>
+                                @if(isset($store))
+                                    <option value="{{ $store->id }}" selected>{{ $store->name }}'s Store</option>
+                                @else
+                                    <option value="" disabled selected>No store assigned</option>
+                                @endif
+                            </select>
                         </div>
 
                         <div class="form-group">
@@ -792,25 +814,105 @@
             </div>
         </div>
     </div>
+
+    <!-- Join Store Modal -->
+    <div class="modal-overlay" id="joinStoreModal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header" style="text-align: center; margin-bottom: 25px;">
+                <div style="width: 60px; height: 60px; background: #FFF1EE; color: var(--admin-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="17" y1="11" x2="23" y2="11"></line></svg>
+                </div>
+                <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 5px;">Join a Store</h2>
+                <p style="color: #666; font-size: 14px;">Select an Admin account to associate your seller account with.</p>
+            </div>
+
+            <form id="joinStoreForm">
+                @csrf
+                <div class="form-group full">
+                    <label class="form-label">Select Admin Store</label>
+                    <select name="admin_id" class="form-select" required>
+                        <option value="" disabled selected>Choose a Store Owner...</option>
+                        @foreach($availableAdmins as $admin)
+                            <option value="{{ $admin->id }}">
+                                {{ $admin->name }}'s Store 
+                                @if($admin->business_type)
+                                    ({{ $admin->business_type }})
+                                @endif
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="modal-btn btn-cancel" onclick="closeJoinStoreModal()">Cancel</button>
+                    <button type="submit" class="modal-btn btn-save" id="btnJoinStore">Connect Now</button>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection
 
 @section('scripts')
     <script>
-        const modal = document.getElementById('productModal');
-        const openBtn = document.getElementById('openProductModal');
+        const productModal = document.getElementById('productModal');
+        const joinStoreModal = document.getElementById('joinStoreModal');
+        const openProductBtn = document.getElementById('openProductModal');
+        const openJoinStoreBtn = document.getElementById('openJoinStoreModal');
+        const joinStoreForm = document.getElementById('joinStoreForm');
+
+        if (openJoinStoreBtn) {
+            openJoinStoreBtn.onclick = () => joinStoreModal.classList.add('active');
+        }
+
+        function closeJoinStoreModal() {
+            joinStoreModal.classList.remove('active');
+        }
+
+        if (joinStoreForm) {
+            joinStoreForm.onsubmit = async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('btnJoinStore');
+                btn.disabled = true;
+                btn.innerText = 'Connecting...';
+
+                try {
+                    const response = await fetch('{{ route("seller.join-store") }}', {
+                        method: 'POST',
+                        body: new FormData(joinStoreForm),
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        location.reload();
+                    } else {
+                        alert(result.message || 'Failed to join store.');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred.');
+                } finally {
+                    btn.disabled = false;
+                    btn.innerText = 'Connect Now';
+                }
+            };
+        }
         const form = document.getElementById('addProductForm');
         const mainImgOptionsContainer = document.getElementById('mainImageOptions');
         const productStepDesc = document.getElementById('productStepDesc');
         const assetBase = "{{ asset('') }}";
 
-        openBtn.onclick = () => {
-            document.getElementById('modalTitle').innerText = 'Add New Product';
-            document.getElementById('saveProductBtn').innerText = 'Save';
-            document.getElementById('form_method').value = 'POST';
-            document.getElementById('product_id').value = '';
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        };
+        if (openProductBtn) {
+            openProductBtn.onclick = () => {
+                document.getElementById('modalTitle').innerText = 'Add New Product';
+                document.getElementById('saveProductBtn').innerText = 'Save';
+                document.getElementById('form_method').value = 'POST';
+                document.getElementById('product_id').value = '';
+                productModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            };
+        }
 
         function editProduct(product) {
             document.getElementById('modalTitle').innerText = 'Edit Product';
@@ -857,7 +959,7 @@
                 updateMainImageOptions();
             }
 
-            modal.classList.add('active');
+            productModal.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
 
@@ -883,7 +985,7 @@
             btn.innerText = 'Deleting...';
 
             try {
-                const response = await fetch(`{{ url('admin/products') }}/${productToDelete}`, {
+                const response = await fetch(`{{ url('seller/products') }}/${productToDelete}`, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
@@ -906,7 +1008,7 @@
         };
 
         function closeProductModal() {
-            modal.classList.remove('active');
+            productModal.classList.remove('active');
             document.body.style.overflow = 'auto';
             resetProductForm();
         }
@@ -925,7 +1027,7 @@
             formData.append(field, value);
 
             try {
-                const response = await fetch(`{{ url('admin/products') }}/${id}/quick`, {
+                const response = await fetch(`{{ url('seller/products') }}/${id}/quick`, {
                     method: 'POST', // Use POST with X-HTTP-Method-Override or just use PATCH if supported
                     body: formData,
                     headers: {
@@ -1106,6 +1208,7 @@
 
             const formData = new FormData();
             formData.append('name', form.name.value);
+            formData.append('admin_id', form.admin_id.value);
             formData.append('category_id', form.category_id.value);
             formData.append('price', form.price.value);
             formData.append('discount_percentage', form.discount_percentage.value || 0);
@@ -1144,7 +1247,7 @@
             
             formData.set('main_image_index', actualMainIndex);
 
-            const url = productId ? `{{ url('admin/products') }}/${productId}` : '{{ route("admin.products.store") }}';
+            const url = productId ? `{{ url('seller/products') }}/${productId}` : '{{ route("seller.products.store") }}';
 
             try {
                 const response = await fetch(url, {

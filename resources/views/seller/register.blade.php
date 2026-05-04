@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="Sign in to your account - E-Commerce Shopping Platform">
 
-    <title>Admin Sign Up - {{ config('app.name', 'E-Commerce') }}</title>
+    <title>Seller Sign Up - {{ config('app.name', 'E-Commerce') }}</title>
 
     <!-- Favicon -->
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
@@ -861,8 +861,8 @@
                 </div>
 
                 {{-- Welcome Heading --}}
-                <p class="welcome-text">Create Admin Account</p>
-                <h1 class="signin-title">Admin Sign Up</h1>
+                <p class="welcome-text">Create Seller Account</p>
+                <h1 class="signin-title">Seller Sign Up</h1>
 
                 <div class="step-indicator">
                     <span id="step-text">Step 1 of 2</span>
@@ -884,7 +884,7 @@
                 @endif
 
                 {{-- Register Form --}}
-                <form class="login-form" method="POST" action="{{ url('/admin/sign-up') }}" id="admin-register-form">
+                <form class="login-form" method="POST" action="{{ route('seller.register.post') }}" id="seller-register-form">
                     @csrf
 
                     {{-- STEP 1 --}}
@@ -916,6 +916,19 @@
                             <label for="user-address" class="form-label">Address</label>
                             <textarea id="user-address" name="address" class="form-input" rows="2"
                                 placeholder="Enter address">{{ old('address') }}</textarea>
+                        </div>
+
+                        {{-- Store Selection Field --}}
+                        <div class="form-group">
+                            <label for="admin-id" class="form-label">Select Store Owner (Admin)</label>
+                            <select id="admin-id" name="admin_id" class="form-input" required>
+                                <option value="" disabled selected>Choose a Store...</option>
+                                @foreach($admins as $admin)
+                                    <option value="{{ $admin->id }}" {{ old('admin_id') == $admin->id ? 'selected' : '' }}>
+                                        {{ $admin->name }}'s Store
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
 
                         <div class="btn-group">
@@ -1003,9 +1016,9 @@
 
                     {{-- STEP 3 (OTP) --}}
                     <div class="form-step" id="step-3">
-                        <h3 style="font-size: 18px; margin-bottom: 8px;">Super Admin Approval</h3>
+                        <h3 style="font-size: 18px; margin-bottom: 8px;">Email Verification</h3>
                         <p style="font-size: 13px; color: var(--color-text-medium); margin-bottom: 16px;">
-                            We've sent a 6-digit OTP to <b>ptharanan@gmail.com</b> for approval. It expires in <span id="otp-timer" style="font-weight:bold;color:var(--color-primary)">60</span>s.
+                            We've sent a 6-digit OTP to your email. It expires in <span id="otp-timer" style="font-weight:bold;color:var(--color-primary)">60</span>s.
                         </p>
                         
                         <div class="form-group">
@@ -1032,7 +1045,7 @@
                     </div>
 
                     <p class="signup-text" style="margin-top: 15px;">
-                        Already have an account? <a href="{{ url('/admin/sign-in') }}" class="signup-link">Sign in</a>
+                        Already have an account? <a href="{{ route('seller.login') }}" class="signup-link">Sign in</a>
                     </p>
                 </form>
             </div>
@@ -1042,7 +1055,7 @@
         <div class="login-right">
             <div class="illustration-wrapper">
                 <div class="illustration-content">
-                    <lottie-player src="{{ asset('lottie/Login.json') }}" background="transparent" speed="1"
+                    <lottie-player src="{{ asset('lottie/seller-signup-animation.json') }}" background="transparent" speed="1"
                         style="width: 100%; height: auto;" loop autoplay></lottie-player>
                 </div>
             </div>
@@ -1064,7 +1077,7 @@
         });
 
         // Form submit loading state
-        const registerForm = document.getElementById('admin-register-form');
+        const registerForm = document.getElementById('seller-register-form');
         const submitBtn = document.getElementById('btn-user-signin');
         const toastContainer = document.getElementById('toast-container');
 
@@ -1134,7 +1147,7 @@
             const formData = new FormData(registerForm);
             
             try {
-                const response = await fetch("{{ route('admin.register.post') }}", {
+                const response = await fetch("{{ route('seller.register.post') }}", {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -1194,7 +1207,7 @@
             btn.classList.add('loading');
 
             try {
-                const response = await fetch("{{ route('admin.verify-otp.post') }}", {
+                const response = await fetch("{{ route('seller.verify-otp.post') }}", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1228,7 +1241,7 @@
             btn.classList.add('loading');
 
             try {
-                const response = await fetch("{{ route('admin.resend-otp.post') }}", {
+                const response = await fetch("{{ route('seller.resend-otp.post') }}", {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,

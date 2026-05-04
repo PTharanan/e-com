@@ -51,28 +51,26 @@
             <p style="color: var(--color-text-medium);">Don't miss out on these exclusive deals.</p>
         </div>
         
-        <div class="offer-card">
-            <div class="offer-image">
-                <img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=800" alt="Summer Sale">
+        @forelse($products as $product)
+            <div class="offer-card" @if($loop->iteration % 2 == 0) style="flex-direction: row-reverse;" @endif>
+                <div class="offer-image">
+                    <img src="{{ asset($product->main_image_url) }}" alt="{{ $product->name }}">
+                </div>
+                <div class="offer-details">
+                    <div class="offer-badge" @if($loop->iteration % 2 == 0) style="background: #28a745;" @endif>Save {{ $product->discount_percentage }}%</div>
+                    <h3 class="offer-title">{{ $product->name }}</h3>
+                    <p class="offer-desc">{{ Str::limit($product->description, 150) }}</p>
+                    <div style="margin-bottom: 20px;">
+                        <span style="font-size: 1.1rem; color: #9CA3AF; text-decoration: line-through; margin-right: 10px;">${{ number_format($product->price, 2) }}</span>
+                        <span style="color: #10B981; font-weight: 800; font-size: 1.8rem;">${{ number_format($product->final_price, 2) }}</span>
+                    </div>
+                    <a href="{{ route('products') }}" class="btn-claim">Shop Now</a>
+                </div>
             </div>
-            <div class="offer-details">
-                <div class="offer-badge">Save 30%</div>
-                <h3 class="offer-title">Summer Electronics Sale</h3>
-                <p class="offer-desc">Upgrade your tech this summer. Get up to 30% off on all premium headphones, smartwatches, and speakers. Limited time only!</p>
-                <a href="#" class="btn-claim">Claim Offer</a>
+        @empty
+            <div style="text-align: center; padding: 100px 0; color: var(--color-text-medium);">
+                <p>No special offers at the moment. Check back later!</p>
             </div>
-        </div>
-
-        <div class="offer-card" style="flex-direction: row-reverse;">
-            <div class="offer-image">
-                <img src="https://images.unsplash.com/photo-1606220838315-056192d5e927?auto=format&fit=crop&q=80&w=800" alt="BOGO Offer">
-            </div>
-            <div class="offer-details">
-                <div class="offer-badge" style="background: #28a745;">BOGO Free</div>
-                <h3 class="offer-title">Buy One Get One Free</h3>
-                <p class="offer-desc">Buy any pair of running shoes and get the second pair absolutely free. Mix and match styles and sizes.</p>
-                <a href="#" class="btn-claim">Shop Sneakers</a>
-            </div>
-        </div>
+        @endforelse
     </section>
 @endsection
