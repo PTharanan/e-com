@@ -643,6 +643,10 @@
                             class="dropdown-link {{ request()->routeIs('admin.sellers') ? 'active' : '' }}">Seller Management</a>
                     </li>
                     <li class="dropdown-item">
+                        <a href="{{ route('admin.banners') }}"
+                            class="dropdown-link {{ request()->routeIs('admin.banners') ? 'active' : '' }}">Home Banners</a>
+                    </li>
+                    <li class="dropdown-item">
                         <a href="{{ route('admin.settings') }}"
                             class="dropdown-link {{ request()->routeIs('admin.settings') ? 'active' : '' }}">General
                             Settings</a>
@@ -673,12 +677,12 @@
             <div class="topbar-right">
                 @php
                     // Fetch cancelled orders
-                    $cancelledOrders = \App\Models\Order::with('user')->where('status', 'cancelled')->orderBy('updated_at', 'desc')->take(5)->get();
-                    $cancelledCount = \App\Models\Order::where('status', 'cancelled')->count();
+                    $cancelledOrders = \App\Models\Order::with('user')->where('admin_id', Auth::id())->where('status', 'cancelled')->orderBy('updated_at', 'desc')->take(5)->get();
+                    $cancelledCount = \App\Models\Order::where('admin_id', Auth::id())->where('status', 'cancelled')->count();
 
                     // Fetch recent paid orders
-                    $newOrders = \App\Models\Order::with('user')->where('status', 'completed')->orderBy('created_at', 'desc')->take(5)->get();
-                    $newOrdersCount = \App\Models\Order::where('status', 'completed')->count();
+                    $newOrders = \App\Models\Order::with('user')->where('admin_id', Auth::id())->where('status', 'completed')->orderBy('created_at', 'desc')->take(5)->get();
+                    $newOrdersCount = \App\Models\Order::where('admin_id', Auth::id())->where('status', 'completed')->count();
 
                     // Fetch unread delivery applications
                     $deliveryNotifications = Auth::user()->unreadNotifications()->where('type', 'like', '%DeliveryApplicationNotification')->take(5)->get();
@@ -1150,89 +1154,6 @@
         
         startNotificationStreaming();
     </script>
-
-    @if(auth()->check() && auth()->user()->role === 'admin' && !auth()->user()->business_type)
-        @php
-            $businessTypes = \App\Models\BusinessType::all();
-        @endphp
-        <div id="businessTypeModal" class="modal-overlay active" style="z-index: 9999; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 20px;">
-            <div style="background: white; width: 100%; max-width: 450px; border-radius: 24px; padding: 40px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
-                <div style="width: 70px; height: 70px; background: #FFF1EE; color: var(--admin-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
-                    <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 21h18M3 7l9-4 9 4M4 7v14M20 7v14M9 21v-6a3 3 0 0 1 6 0v6"/></svg>
-                </div>
-                <h2 style="font-size: 24px; font-weight: 700; color: #1a1a1a; margin-bottom: 10px;">Setup Your Store</h2>
-                <p style="color: #666; margin-bottom: 30px;">What type of business are you running? This helps sellers find your store.</p>
-                
-                <form id="businessTypeForm">
-                    @csrf
-                    <div style="margin-bottom: 20px; text-align: left;">
-                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Select Business Category</label>
-                        <select name="business_type" id="bt_select" style="width: 100%; padding: 14px; border: 2px solid #F3F4F6; border-radius: 12px; font-family: inherit;" onchange="toggleCustomBT(this.value)">
-                            <option value="" disabled selected>Choose a category...</option>
-                            @foreach($businessTypes as $bt)
-                                <option value="{{ $bt->name }}">{{ $bt->name }}</option>
-                            @endforeach
-                            <option value="custom">+ Other (Type your own)</option>
-                        </select>
-                    </div>
-
-                    <div id="customBTWrapper" style="margin-bottom: 25px; text-align: left; display: none;">
-                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Enter Business Type</label>
-                        <input type="text" name="custom_type" id="bt_custom" style="width: 100%; padding: 14px; border: 2px solid #F3F4F6; border-radius: 12px; font-family: inherit;" placeholder="e.g. Electronics, Furniture...">
-                    </div>
-
-                    <button type="submit" id="btnSaveBT" style="width: 100%; padding: 16px; background: var(--admin-primary); color: white; border: none; border-radius: 14px; font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.2s;">
-                        Continue to Dashboard
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <script>
-            function toggleCustomBT(val) {
-                const wrapper = document.getElementById('customBTWrapper');
-                const customInput = document.getElementById('bt_custom');
-                if (val === 'custom') {
-                    wrapper.style.display = 'block';
-                    customInput.focus();
-                    customInput.required = true;
-                } else {
-                    wrapper.style.display = 'none';
-                    customInput.required = false;
-                }
-            }
-
-            document.getElementById('businessTypeForm').onsubmit = async (e) => {
-                e.preventDefault();
-                const btn = document.getElementById('btnSaveBT');
-                btn.disabled = true;
-                btn.innerText = 'Saving...';
-
-                try {
-                    const response = await fetch('{{ route("admin.save-business-type") }}', {
-                        method: 'POST',
-                        body: new FormData(e.target),
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        }
-                    });
-                    const result = await response.json();
-                    if (result.success) {
-                        location.reload();
-                    } else {
-                        alert(result.message);
-                        btn.disabled = false;
-                        btn.innerText = 'Continue to Dashboard';
-                    }
-                } catch (error) {
-                    console.error(error);
-                    alert('An error occurred.');
-                    btn.disabled = false;
-                    btn.innerText = 'Continue to Dashboard';
-                }
-            };
-        </script>
-    @endif
 
     @yield('scripts')
 </body>

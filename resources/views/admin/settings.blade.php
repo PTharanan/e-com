@@ -58,5 +58,10 @@
             <button type="button" class="btn-save">Update Security</button>
         </form>
     </div>
+    <div class="settings-card">
+        <h3>Marketing & Content</h3>
+        <p style="color: #64748B; font-size: 14px; margin-bottom: 20px;">Manage promotional content and home page banners to attract customers.</p>
+        <a href="{{ route('admin.banners') }}" style="display: inline-block; color: var(--admin-primary); text-decoration: none; font-weight: 600; font-size: 15px;">Manage Home Banners &rarr;</a>
+    </div>
 </div>
 @endsection

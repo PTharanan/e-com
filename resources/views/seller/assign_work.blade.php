@@ -5,7 +5,7 @@
 @section('styles')
 <style>
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-    .page-title h1 { font-size: 24px; font-weight: 700; color: var(--Seller-dark); }
+    .page-title h1 { font-size: 24px; font-weight: 700; color: var(--admin-dark); }
     
     .assign-container { display: grid; grid-template-columns: 1fr 350px; gap: 30px; }
     
@@ -16,7 +16,7 @@
         background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 15px; margin-bottom: 15px;
         display: flex; justify-content: space-between; align-items: center; transition: 0.2s;
     }
-    .order-item:hover { border-color: var(--Seller-primary); transform: translateX(5px); }
+    .order-item:hover { border-color: var(--admin-primary); transform: translateX(5px); }
     .order-info h4 { margin: 0 0 4px; font-size: 14px; }
     .order-info p { margin: 0; font-size: 12px; color: #64748B; }
     
@@ -70,7 +70,7 @@
                             <option value="{{ $boy->id }}">{{ $boy->name }} ({{ $boy->active_orders_count }} active)</option>
                         @endforeach
                     </select>
-                    <button class="btn-release" style="background: var(--Seller-primary); color: white; padding: 8px 15px;" onclick="assignWork({{ $order->id }})">Assign</button>
+                    <button class="btn-release" style="background: var(--admin-primary); color: white; padding: 8px 15px;" onclick="assignWork({{ $order->id }})">Assign</button>
                 </div>
             </div>
         @empty

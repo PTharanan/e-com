@@ -13,12 +13,21 @@
         .ad-banner-section {
             padding: 30px 5%;
             margin-top: 10px;
+            position: relative;
+        }
+
+        .ad-banner-container {
+            position: relative;
+            height: 450px;
+            width: 100%;
         }
 
         .ad-banner {
-            position: relative;
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 450px;
+            height: 100%;
             background: var(--color-bg-light);
             border-radius: var(--radius-md);
             overflow: hidden;
@@ -26,6 +35,38 @@
             align-items: center;
             padding: 0 8%;
             box-shadow: var(--shadow-sm);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1s ease, visibility 1s ease;
+            z-index: 1;
+        }
+
+        .ad-banner.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 2;
+        }
+
+        .banner-dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #E2E8F0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: var(--color-primary);
+            width: 25px;
+            border-radius: 10px;
         }
 
         .ad-content {
@@ -204,20 +245,52 @@
 @section('content')
     <!-- ========== AD BANNER ========== -->
     <section class="ad-banner-section">
-        <div class="ad-banner">
-            <div class="ad-content">
-                <div class="ad-badge">Special Promo</div>
-                <h1 class="ad-title">Upgrade Your Lifestyle</h1>
-                <p class="ad-subtitle">Discover our exclusive collection of premium gadgets. Unbeatable prices, stunning quality, and free shipping on all orders over $50.</p>
-                <a href="#" class="btn-primary-custom" style="display: inline-flex; align-items: center; justify-content: center; padding: 14px 32px; font-size: 1.05rem; background: var(--color-primary); color: white; border-radius: 50px; text-decoration: none; font-weight: 600; box-shadow: 0 4px 15px rgba(242, 92, 59, 0.3); transition: 0.3s;">
-                    Shop Now
-                    <svg style="margin-left: 8px;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                </a>
-            </div>
-            <div class="ad-image-wrapper">
-                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=800" alt="Headphones Banner">
-            </div>
+        <div class="ad-banner-container">
+            @forelse($banners as $index => $banner)
+                <div class="ad-banner {{ $index === 0 ? 'active' : '' }}" id="banner-{{ $index }}">
+                    <div class="ad-content">
+                        @if($banner->badge_text)
+                            <div class="ad-badge">{{ $banner->badge_text }}</div>
+                        @endif
+                        <h1 class="ad-title">{{ $banner->title }}</h1>
+                        @if($banner->subtitle)
+                            <p class="ad-subtitle">{{ $banner->subtitle }}</p>
+                        @endif
+                        <a href="{{ $banner->button_link }}" class="btn-primary-custom" style="display: inline-flex; align-items: center; justify-content: center; padding: 14px 32px; font-size: 1.05rem; background: var(--color-primary); color: white; border-radius: 50px; text-decoration: none; font-weight: 600; box-shadow: 0 4px 15px rgba(242, 92, 59, 0.3); transition: 0.3s;">
+                            {{ $banner->button_text }}
+                            <svg style="margin-left: 8px;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        </a>
+                    </div>
+                    <div class="ad-image-wrapper">
+                        <img src="{{ asset($banner->image_url) }}" alt="{{ $banner->title }}">
+                    </div>
+                </div>
+            @empty
+                <!-- Fallback if no banners -->
+                <div class="ad-banner active">
+                    <div class="ad-content">
+                        <div class="ad-badge">Special Promo</div>
+                        <h1 class="ad-title">Upgrade Your Lifestyle</h1>
+                        <p class="ad-subtitle">Discover our exclusive collection of premium gadgets. Unbeatable prices, stunning quality, and free shipping on all orders over $50.</p>
+                        <a href="#" class="btn-primary-custom" style="display: inline-flex; align-items: center; justify-content: center; padding: 14px 32px; font-size: 1.05rem; background: var(--color-primary); color: white; border-radius: 50px; text-decoration: none; font-weight: 600; box-shadow: 0 4px 15px rgba(242, 92, 59, 0.3); transition: 0.3s;">
+                            Shop Now
+                            <svg style="margin-left: 8px;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        </a>
+                    </div>
+                    <div class="ad-image-wrapper">
+                        <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=800" alt="Headphones Banner">
+                    </div>
+                </div>
+            @endforelse
         </div>
+        
+        @if($banners->count() > 1)
+            <div class="banner-dots">
+                @foreach($banners as $index => $banner)
+                    <div class="dot {{ $index === 0 ? 'active' : '' }}" onclick="showBanner({{ $index }})"></div>
+                @endforeach
+            </div>
+        @endif
     </section>
 
     <!-- ========== PRODUCTS SECTION ========== -->
@@ -282,4 +355,34 @@
             @endforelse
         </div>
     </section>
+    @if($banners->count() > 1)
+    <script>
+        let currentBanner = 0;
+        const banners = document.querySelectorAll('.ad-banner');
+        const dots = document.querySelectorAll('.dot');
+        const totalBanners = banners.length;
+
+        function showBanner(index) {
+            banners.forEach(b => b.classList.remove('active'));
+            dots.forEach(d => d.classList.remove('active'));
+            
+            banners[index].classList.add('active');
+            dots[index].classList.add('active');
+            currentBanner = index;
+        }
+
+        function nextBanner() {
+            let next = (currentBanner + 1) % totalBanners;
+            showBanner(next);
+        }
+
+        let bannerInterval = setInterval(nextBanner, 5000); // 5 seconds
+
+        // Reset interval on manual click
+        document.querySelector('.banner-dots').onclick = () => {
+            clearInterval(bannerInterval);
+            bannerInterval = setInterval(nextBanner, 5000);
+        };
+    </script>
+    @endif
 @endsection

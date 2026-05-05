@@ -81,7 +81,7 @@
         <h1>Welcome back, {{ Auth::user()->name }}! 👋</h1>
         <p>Here's what's happening with your store today.</p>
     </div>
-    <div class="Seller-badge" style="background: var(--Seller-primary); color: white; padding: 8px 20px; border-radius: 50px; font-weight: 600; font-size: 14px;">
+    <div class="Seller-badge" style="background: var(--admin-primary); color: white; padding: 8px 20px; border-radius: 50px; font-weight: 600; font-size: 14px;">
         Seller
     </div>
 </div>

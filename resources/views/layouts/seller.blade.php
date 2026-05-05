@@ -635,13 +635,22 @@
         <div class="admin-topbar">
             <div class="topbar-right">
                 @php
+                    // Fetch seller orders
+                    $sellerId = Auth::id();
+                    $sellerOrdersQuery = \App\Models\Order::with('user')
+                        ->where('admin_id', Auth::user()->admin_id)
+                        ->where(function($q) use ($sellerId) {
+                            $q->where('items_json', 'like', '%"seller_id":'.$sellerId.'%')
+                              ->orWhere('items_json', 'like', '%"seller_id": '.$sellerId.'%');
+                        });
+
                     // Fetch cancelled orders
-                    $cancelledOrders = \App\Models\Order::with('user')->where('status', 'cancelled')->orderBy('updated_at', 'desc')->take(5)->get();
-                    $cancelledCount = \App\Models\Order::where('status', 'cancelled')->count();
+                    $cancelledOrders = (clone $sellerOrdersQuery)->where('status', 'cancelled')->orderBy('updated_at', 'desc')->take(5)->get();
+                    $cancelledCount = (clone $sellerOrdersQuery)->where('status', 'cancelled')->count();
 
                     // Fetch recent paid orders
-                    $newOrders = \App\Models\Order::with('user')->where('status', 'completed')->orderBy('created_at', 'desc')->take(5)->get();
-                    $newOrdersCount = \App\Models\Order::where('status', 'completed')->count();
+                    $newOrders = (clone $sellerOrdersQuery)->where('status', 'completed')->orderBy('created_at', 'desc')->take(5)->get();
+                    $newOrdersCount = (clone $sellerOrdersQuery)->where('status', 'completed')->count();
 
                     // Fetch unread delivery applications
                     $deliveryNotifications = Auth::user()->unreadNotifications()->where('type', 'like', '%DeliveryApplicationNotification')->take(5)->get();

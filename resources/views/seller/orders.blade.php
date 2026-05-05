@@ -5,7 +5,7 @@
 @section('styles')
 <style>
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-    .page-title h1 { font-size: 24px; font-weight: 700; color: var(--Seller-dark); }
+    .page-title h1 { font-size: 24px; font-weight: 700; color: var(--admin-dark); }
     .page-title p { color: #64748B; font-size: 14px; }
     
     .data-card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
@@ -30,7 +30,7 @@
         cursor: pointer;
         transition: 0.2s;
     }
-    .status-select:focus { border-color: var(--Seller-primary); }
+    .status-select:focus { border-color: var(--admin-primary); }
 
     /* ORDER DETAILS MODAL */
     .order-modal-overlay {
@@ -116,7 +116,7 @@
     }
     .item-name { font-weight: 600; font-size: 13px; color: #1E293B; }
     .item-qty { font-size: 12px; color: #64748B; margin-top: 2px; }
-    .item-price { font-weight: 700; font-size: 14px; color: var(--Seller-primary); }
+    .item-price { font-weight: 700; font-size: 14px; color: var(--admin-primary); }
 
     .detail-total {
         display: flex;
@@ -202,7 +202,7 @@
                     @if(is_array($order->items_json))
                         @foreach($order->items_json as $item)
                             <div style="font-size: 12px; margin-bottom: 2px;">
-                                <span style="font-weight: 700; color: var(--Seller-primary);">{{ $item['qty'] }}x</span> {{ $item['name'] }}
+                                <span style="font-weight: 700; color: var(--admin-primary);">{{ $item['qty'] }}x</span> {{ $item['name'] }}
                             </div>
                         @endforeach
                     @else
@@ -345,7 +345,7 @@ function viewOrderDetails(id) {
                             <option value="${boy.id}" ${order.delivery_boy_id == boy.id ? 'selected' : ''}>${boy.name}</option>
                         `).join('') : ''}
                     </select>
-                    <button class="status-select" style="background: var(--Seller-primary); color: white; border: none;" onclick="assignPartner(${order.id})">Assign</button>
+                    <button class="status-select" style="background: var(--admin-primary); color: white; border: none;" onclick="assignPartner(${order.id})">Assign</button>
                 </div>
             ` : ''}
         </div>

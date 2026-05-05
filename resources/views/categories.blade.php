@@ -108,7 +108,7 @@
         
         <div class="category-grid">
             @forelse($categories as $category)
-                <a href="#" class="category-card">
+                <a href="{{ route('products', ['category' => $category->id]) }}" class="category-card">
                     <img class="category-image" src="{{ asset($category->dp_img_url) }}" alt="{{ $category->name }}">
                     <div class="category-content">
                         <h3 class="category-title">{{ $category->name }}</h3>
@@ -122,4 +122,11 @@
             @endforelse
         </div>
     </section>
+    <script>
+        document.querySelectorAll('.category-card').forEach(card => {
+            card.addEventListener('click', () => {
+                sessionStorage.setItem('filter_drawer_open', 'false');
+            });
+        });
+    </script>
 @endsection

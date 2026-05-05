@@ -5,7 +5,7 @@
 @section('styles')
 <style>
     .page-header { margin-bottom: 30px; }
-    .page-title h1 { font-size: 24px; font-weight: 700; color: var(--Seller-dark); }
+    .page-title h1 { font-size: 24px; font-weight: 700; color: var(--admin-dark); }
     .page-title p { color: #64748B; font-size: 14px; }
     
     .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; }
@@ -16,7 +16,7 @@
     .form-label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 500; color: #64748B; }
     .form-input { width: 100%; padding: 12px; border: 1.5px solid #E2E8F0; border-radius: 10px; font-family: inherit; }
     
-    .btn-save { background: var(--Seller-primary); color: white; border: none; padding: 12px 25px; border-radius: 10px; cursor: pointer; font-weight: 600; width: 100%; }
+    .btn-save { background: var(--admin-primary); color: white; border: none; padding: 12px 25px; border-radius: 10px; cursor: pointer; font-weight: 600; width: 100%; }
 </style>
 @endsection
 

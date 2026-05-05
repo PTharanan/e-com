@@ -16,5 +16,5 @@ Thank you for your purchase. Here is a summary of your order:
 We are preparing your order for shipment. You will receive another email once your items have shipped.
 
 Thanks,<br>
-{{ config('app.name') }}
+{{ $storeName }}
 </x-mail::message>

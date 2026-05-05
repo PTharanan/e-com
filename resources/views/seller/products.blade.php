@@ -834,10 +834,7 @@
                         <option value="" disabled selected>Choose a Store Owner...</option>
                         @foreach($availableAdmins as $admin)
                             <option value="{{ $admin->id }}">
-                                {{ $admin->name }}'s Store 
-                                @if($admin->business_type)
-                                    ({{ $admin->business_type }})
-                                @endif
+                                {{ $admin->name }}'s Store
                             </option>
                         @endforeach
                     </select>

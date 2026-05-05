@@ -5,7 +5,7 @@
 @section('styles')
 <style>
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-    .page-title h1 { font-size: 24px; font-weight: 700; color: var(--Seller-dark); }
+    .page-title h1 { font-size: 24px; font-weight: 700; color: var(--admin-dark); }
     .page-title p { color: #64748B; font-size: 14px; }
     
     .data-card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }

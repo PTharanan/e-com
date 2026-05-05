@@ -331,13 +331,48 @@
         color: var(--color-text-dark);
         font-size: 1.2rem;
     }
+
+    .payment-timer {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--color-text-medium);
+        padding: 6px 14px;
+        background: #F8F9FA;
+        border-radius: var(--radius-pill);
+        border: 1px solid var(--color-border);
+    }
+
+    .payment-timer svg {
+        flex-shrink: 0;
+    }
+
+    .payment-timer.warning {
+        color: #EF4444;
+        background: #FEF2F2;
+        border-color: #FECACA;
+        animation: timerPulse 1s ease-in-out infinite;
+    }
+
+    @keyframes timerPulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
 </style>
 
 <div class="payment-modal-overlay" id="payment-modal">
     <div class="payment-card">
         <div class="payment-header">
             <h2>Secure Payment</h2>
-            <div id="payment-total-display" style="font-weight: 700;"></div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="payment-timer" id="payment-timer">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <span id="timer-display">05:00</span>
+                </div>
+                <div id="payment-total-display" style="font-weight: 700;"></div>
+            </div>
         </div>
 
         <form id="payment-form">
@@ -620,6 +655,9 @@
                     paymentModal.style.display = 'flex';
                     document.body.classList.add('modal-open');
                     
+                    // Start 5-minute countdown timer
+                    startPaymentTimer();
+                    
                     // Auto-focus the card field
                     setTimeout(() => card.focus(), 100);
                 } else {
@@ -634,9 +672,49 @@
         });
 
         closePayment.addEventListener('click', () => {
+            closePaymentModal();
+        });
+
+        // Payment Timer Logic
+        let paymentTimerInterval = null;
+
+        function startPaymentTimer() {
+            clearInterval(paymentTimerInterval);
+            let timeLeft = 300; // 5 minutes in seconds
+            const timerDisplay = document.getElementById('timer-display');
+            const timerContainer = document.getElementById('payment-timer');
+            timerContainer.classList.remove('warning');
+
+            updateTimerDisplay(timeLeft, timerDisplay);
+
+            paymentTimerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay(timeLeft, timerDisplay);
+
+                // Add warning style when less than 60 seconds
+                if (timeLeft <= 60) {
+                    timerContainer.classList.add('warning');
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(paymentTimerInterval);
+                    closePaymentModal();
+                    alert('Payment session expired. Please try checkout again.');
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay(seconds, el) {
+            const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const secs = (seconds % 60).toString().padStart(2, '0');
+            el.textContent = `${mins}:${secs}`;
+        }
+
+        function closePaymentModal() {
             paymentModal.style.display = 'none';
             document.body.classList.remove('modal-open');
-        });
+            clearInterval(paymentTimerInterval);
+        }
 
         paymentForm.addEventListener('submit', async (e) => {
             e.preventDefault();

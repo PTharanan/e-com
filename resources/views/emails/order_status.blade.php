@@ -26,5 +26,5 @@ Your order **{{ $orderId }}** has been updated to:
 If you have any questions about your order, feel free to reach out to our support team.
 
 Thanks,<br>
-{{ config('app.name') }}
+{{ $storeName }}
 </x-mail::message>
