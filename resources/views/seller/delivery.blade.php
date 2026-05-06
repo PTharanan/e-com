@@ -182,6 +182,12 @@
     <div class="success-msg">{{ session('success') }}</div>
 @endif
 
+@if(session('error'))
+    <div style="background: #FEE2E2; color: #991B1B; padding: 15px; border-radius: 12px; margin-bottom: 20px; font-weight: 500;">
+        {{ session('error') }}
+    </div>
+@endif
+
 <div class="data-card">
     @if($applications->count() > 0)
     <table>
@@ -254,13 +260,19 @@
                 <td>
                     <div class="action-btns">
                         @if($app->status === 'pending' || $app->status === 'rejected')
-                        <form action="{{ route('seller.delivery.status', $app->id) }}" method="POST" id="hire-form-{{ $app->id }}">
-                            @csrf
-                            @method('PATCH')
-                            <input type="hidden" name="status" value="approved">
-                            <input type="hidden" name="delivery_fee" id="hire-fee-input-{{ $app->id }}" value="0">
-                            <button type="button" class="btn-action btn-accept" onclick="showConfirmModal('hire', {{ $app->id }}, '{{ $app->deliveryBoy->name }}')">Hire</button>
-                        </form>
+                            @if(isset($isEmployedElsewhere[$app->delivery_boy_id]) && $isEmployedElsewhere[$app->delivery_boy_id])
+                                <div style="background: #F1F5F9; color: #64748B; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; text-align: center;">
+                                    BUSY: WORKING FOR <br> {{ strtoupper($isEmployedElsewhere[$app->delivery_boy_id]) }}
+                                </div>
+                            @else
+                                <form action="{{ route('seller.delivery.status', $app->id) }}" method="POST" id="hire-form-{{ $app->id }}">
+                                    @csrf
+                                    @method('PATCH')
+                                    <input type="hidden" name="status" value="approved">
+                                    <input type="hidden" name="delivery_fee" id="hire-fee-input-{{ $app->id }}" value="0">
+                                    <button type="button" class="btn-action btn-accept" onclick="showConfirmModal('hire', {{ $app->id }}, '{{ $app->deliveryBoy->name }}')">Hire</button>
+                                </form>
+                            @endif
                         @endif
 
                         @if($app->status === 'pending' || $app->status === 'approved')

@@ -82,6 +82,11 @@
         flex: 1;
         overflow-y: auto;
         padding: 25px 30px;
+        -webkit-overflow-scrolling: touch; /* Smooth scroll for iOS */
+    }
+
+    .order-modal {
+        overscroll-behavior: contain;
     }
 
     .detail-section {
@@ -332,6 +337,26 @@ function viewOrderDetails(id) {
         </div>
 
         <div class="detail-section">
+            <div class="detail-section-title">Delivery Proof</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                    <span class="detail-label" style="display: block; margin-bottom: 5px;">Pickup Photo</span>
+                    ${order.pickup_image ? 
+                        `<a href="${order.pickup_image}" target="_blank"><img src="${order.pickup_image}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 10px; border: 1px solid #eee;"></a>` : 
+                        '<div style="background: #f8fafc; height: 100px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #94A3B8; border: 1px dashed #E2E8F0;">Not available</div>'
+                    }
+                </div>
+                <div>
+                    <span class="detail-label" style="display: block; margin-bottom: 5px;">Delivery Photo</span>
+                    ${order.delivery_image ? 
+                        `<a href="${order.delivery_image}" target="_blank"><img src="${order.delivery_image}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 10px; border: 1px solid #eee;"></a>` : 
+                        '<div style="background: #f8fafc; height: 100px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #94A3B8; border: 1px dashed #E2E8F0;">Not available</div>'
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
             <div class="detail-section-title">Delivery Assignment</div>
             <div class="detail-row">
                 <span class="detail-label">Current Partner</span>
@@ -362,6 +387,7 @@ function viewOrderDetails(id) {
 
     document.getElementById('order-overlay').classList.add('active');
     document.getElementById('order-modal').classList.add('active');
+    document.body.style.overflow = 'hidden';
 }
 
 const deliveryBoysData = @json($deliveryBoys);
@@ -435,6 +461,7 @@ async function assignPartner(orderId) {
 function closeOrderModal() {
     document.getElementById('order-overlay').classList.remove('active');
     document.getElementById('order-modal').classList.remove('active');
+    document.body.style.overflow = '';
 }
 
 async function updateOrderStatus(id, el) {

@@ -11,6 +11,16 @@ Your order **{{ $orderId }}** has been updated to:
 
 {{ $statusMessage }}
 
+@if($pickupImage && $newStatus == 'Shipped')
+### Pickup Confirmation
+The pickup proof photo has been **attached to this email** for your security.
+@endif
+
+@if($deliveryImage && $newStatus == 'Delivered')
+### Delivery Confirmation
+The delivery proof photo has been **attached to this email** for your security.
+@endif
+
 <x-mail::table>
 | Item | Qty | Price |
 | :--- | :---: | :--- |

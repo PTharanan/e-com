@@ -30,6 +30,34 @@
         }
     }
 
+    @media (max-width: 768px) {
+        .cart-item {
+            grid-template-columns: 80px 1fr;
+            padding: 15px;
+            gap: 15px;
+        }
+
+        .item-image {
+            width: 80px;
+            height: 80px;
+            align-self: flex-start;
+        }
+
+        .item-actions {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            grid-column: 1 / -1;
+            margin-top: 10px;
+            padding-top: 15px;
+            border-top: 1px dashed var(--color-border);
+        }
+
+        .item-price {
+            font-size: 1.1rem;
+        }
+    }
+
     .cart-items {
         background: var(--color-white);
         border-radius: var(--radius-md);
@@ -359,6 +387,40 @@
     @keyframes timerPulse {
         0%, 100% { opacity: 1; }
         50% { opacity: 0.6; }
+    }
+
+    /* Mobile Responsive Payment Modal */
+    @media (max-width: 768px) {
+        .payment-card {
+            padding: 25px;
+            margin: 0 15px;
+            border-radius: 15px;
+        }
+
+        .payment-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .payment-header h2 {
+            font-size: 1.25rem;
+        }
+
+        .payment-footer {
+            flex-direction: column-reverse;
+            margin-top: 25px;
+            gap: 10px;
+        }
+
+        .btn-pay-back {
+            max-width: 100%;
+        }
+        
+        .btn-payment {
+            padding: 14px;
+        }
     }
 </style>
 

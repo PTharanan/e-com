@@ -108,6 +108,13 @@
             .container { margin-top: 20px; padding-bottom: 100px; }
             .nav-brand { font-size: 18px; }
             .btn-end-shift { padding: 6px 12px; font-size: 11px; }
+
+            /* Responsive Notification Dropdown */
+            #notificationDropdown {
+                width: calc(100vw - 40px) !important;
+                right: -70px !important;
+                max-width: 320px;
+            }
         }
     </style>
     @yield('styles')
@@ -139,6 +146,25 @@
         </div>
 
         <div class="nav-right">
+            <!-- Notification Dropdown -->
+            <div class="notification-wrapper" style="position: relative;">
+                <button id="notificationBtn" style="background: none; border: none; color: var(--partner-white); cursor: pointer; position: relative; padding: 5px; margin-right: 15px;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span id="notificationBadge" style="display: none; position: absolute; top: -2px; right: -2px; background: #E04A2A; color: white; font-size: 10px; font-weight: bold; width: 16px; height: 16px; border-radius: 50%; align-items: center; justify-content: center; border: 2px solid var(--partner-dark);">0</span>
+                </button>
+                <div id="notificationDropdown" style="display: none; position: absolute; top: 45px; right: 0; width: 320px; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 1px solid var(--color-border); z-index: 2000; overflow: hidden;">
+                    <div style="padding: 15px 20px; border-bottom: 1px solid #eee; background: #fafafa; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 600; font-size: 14px; color: var(--partner-dark);">Work Notifications</span>
+                    </div>
+                    <div id="notificationList" style="max-height: 320px; overflow-y: auto;">
+                        <div style="padding: 30px 20px; text-align: center; color: var(--partner-text-gray); font-size: 13px;">No new assigned work</div>
+                    </div>
+                </div>
+            </div>
+
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="btn-end-shift">END SHIFT</button>
@@ -171,5 +197,96 @@
     </div>
 
     @yield('scripts')
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const notifBtn = document.getElementById('notificationBtn');
+            const notifDropdown = document.getElementById('notificationDropdown');
+            const notifBadge = document.getElementById('notificationBadge');
+            const notifList = document.getElementById('notificationList');
+            let lastWorkCount = 0;
+
+            // Toggle dropdown
+            if (notifBtn) {
+                notifBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    notifDropdown.style.display = notifDropdown.style.display === 'none' ? 'block' : 'none';
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!notifBtn.contains(e.target) && !notifDropdown.contains(e.target)) {
+                        notifDropdown.style.display = 'none';
+                    }
+                });
+            }
+
+            function fetchNotifications() {
+                fetch("{{ route('delivery.notifications.poll') }}")
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.work) {
+                            const count = data.work.count;
+                            const items = data.work.items;
+
+                            // Update Badge
+                            if (count > 0) {
+                                notifBadge.style.display = 'flex';
+                                notifBadge.innerText = count > 9 ? '9+' : count;
+                            } else {
+                                notifBadge.style.display = 'none';
+                            }
+
+                            // Trigger sound/alert if new work comes in
+                            if (count > lastWorkCount) {
+                                // Play standard notification sound if allowed by browser
+                                try {
+                                    let audio = new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"+Array(1e3).join("123")); 
+                                    audio.play().catch(e => {});
+                                    
+                                    // Also show browser notification if permitted
+                                    if (Notification.permission === "granted") {
+                                        new Notification("New Work Assigned!", {
+                                            body: "You have been assigned new delivery work.",
+                                            icon: "{{ asset('favicon.ico') }}"
+                                        });
+                                    } else if (Notification.permission !== "denied") {
+                                        Notification.requestPermission();
+                                    }
+                                } catch(e) {}
+                            }
+                            lastWorkCount = count;
+
+                            // Update Dropdown List
+                            notifList.innerHTML = '';
+                            if (items.length === 0) {
+                                notifList.innerHTML = '<div style="padding: 30px 20px; text-align: center; color: var(--partner-text-gray); font-size: 13px;">No new assigned work</div>';
+                            } else {
+                                items.forEach(item => {
+                                    notifList.innerHTML += `
+                                        <a href="{{ route('delivery.work') }}" style="display: block; padding: 15px 20px; border-bottom: 1px solid #eee; text-decoration: none; transition: background 0.2s;">
+                                            <div style="font-size: 13px; font-weight: 600; color: var(--partner-dark); margin-bottom: 4px;">New Order Assigned!</div>
+                                            <div style="font-size: 12px; color: var(--partner-text-gray);">Customer: ${item.customer}</div>
+                                            <div style="font-size: 11px; color: #999; margin-top: 6px;">${item.time}</div>
+                                        </a>
+                                    `;
+                                });
+                            }
+                        }
+                    })
+                    .catch(e => console.error("Notification polling failed", e));
+            }
+
+            // Request Notification Permission on load
+            if ("Notification" in window && Notification.permission !== "denied") {
+                Notification.requestPermission();
+            }
+
+            // Initial fetch
+            fetchNotifications();
+
+            // Poll every 10 seconds
+            setInterval(fetchNotifications, 10000);
+        });
+    </script>
 </body>
 </html>

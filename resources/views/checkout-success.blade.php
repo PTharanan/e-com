@@ -42,6 +42,13 @@
         .btn-continue:hover svg {
             transform: translateX(-5px);
         }
+
+        /* Hide Bottom Navigation on Success Page for Mobile */
+        @media (max-width: 768px) {
+            .bottom-nav-container {
+                display: none !important;
+            }
+        }
     </style>
 
     <a href="{{ route('home') }}" class="btn-continue">

@@ -847,7 +847,33 @@
 
         .cart-label-mobile {
             display: none;
-            /* Remove text for center FAB for cleaner look */
+        }
+
+        @media (max-width: 480px) {
+            .product-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .product-card {
+                padding: 18px;
+            }
+            .product-image {
+                height: 200px;
+                margin-bottom: 15px;
+            }
+            .product-title {
+                font-size: 1.05rem;
+                height: auto;
+                min-height: 2.8rem;
+                margin-bottom: 12px;
+            }
+            .product-price {
+                font-size: 1.25rem;
+            }
+            .btn-add {
+                width: 40px;
+                height: 40px;
+            }
         }
 
         /* ========== Logout Modal ========== */

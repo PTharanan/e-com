@@ -473,23 +473,77 @@
             padding: 15px 20px;
             text-decoration: none;
             border-bottom: 1px solid #f9f9f9;
-            transition: var(--transition);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            max-height: 200px;
         }
 
         .notification-item:hover {
             background: #fdfdfd;
         }
 
-        .notif-icon {
+        .notif-icon-wrapper {
+            position: relative;
             width: 36px;
             height: 36px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        .notif-icon {
+            width: 100%;
+            height: 100%;
             background: #E8F5E9;
             color: #4CAF50;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
+            transition: transform 0.2s;
+        }
+
+        .notif-icon-wrapper:active .notif-icon {
+            transform: scale(0.9);
+        }
+
+        .progress-ring {
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            width: 40px;
+            height: 40px;
+            transform: rotate(-90deg);
+            pointer-events: none;
+        }
+
+        .progress-ring__circle {
+            stroke: var(--admin-primary);
+            stroke-width: 2.5;
+            fill: transparent;
+            stroke-dasharray: 113.1; /* 2 * PI * 18 */
+            stroke-dashoffset: 113.1;
+            transition: none;
+        }
+
+        .notif-icon-wrapper.pressing .progress-ring__circle {
+            transition: stroke-dashoffset 3s linear; /* Hold for 3 seconds */
+            stroke-dashoffset: 0;
+        }
+
+        .notif-icon .icon-close {
+            display: none !important;
+        }
+
+        .notif-icon-wrapper.pressing .notif-icon .icon-arrow {
+            display: none !important;
+        }
+
+        .notif-icon-wrapper.pressing .notif-icon .icon-close {
+            display: block !important;
         }
 
         .notif-content p {
@@ -747,15 +801,26 @@
                             </div>
                             <div class="bell-menu-body" id="deliveryNotifList">
                                 @forelse($deliveryNotifications as $notif)
-                                    <a href="{{ route('admin.delivery') }}" class="notification-item">
-                                        <div class="notif-icon" style="background: #FDEEE4; color: #F25C3B;">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                                    <div class="notification-item" id="notif-{{ $notif->id }}">
+                                        <div class="notif-icon-wrapper" 
+                                             onmousedown="startNotifDismiss(event, '{{ $notif->id }}')" 
+                                             onmouseup="stopNotifDismiss()" 
+                                             onmouseleave="stopNotifDismiss()"
+                                             ontouchstart="startNotifDismiss(event, '{{ $notif->id }}')"
+                                             ontouchend="stopNotifDismiss()">
+                                            <svg class="progress-ring">
+                                                <circle class="progress-ring__circle" r="18" cx="20" cy="20"/>
+                                            </svg>
+                                            <div class="notif-icon" style="background: #FDEEE4; color: #F25C3B;">
+                                                <svg class="icon-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                                                <svg class="icon-close" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                            </div>
                                         </div>
-                                        <div class="notif-content">
+                                        <a href="{{ route('admin.delivery') }}" class="notif-content" style="text-decoration: none; flex: 1;">
                                             <p><strong>{{ $notif->data['delivery_boy_name'] }}</strong> applied as a partner.</p>
                                             <span>{{ $notif->created_at->diffForHumans() }}</span>
-                                        </div>
-                                    </a>
+                                        </a>
+                                    </div>
                                 @empty
                                     <div class="no-notif">No new applications.</div>
                                 @endforelse
@@ -1014,24 +1079,29 @@
         const bellMenu = document.getElementById('bellMenu');
         const deliveryToggle = document.getElementById('deliveryNotifToggle');
         const deliveryMenu = document.getElementById('deliveryNotifMenu');
-
-        // Cancel Toggle
         const cancelToggle = document.getElementById('cancelNotifToggle');
         const cancelMenu = document.getElementById('cancelNotifMenu');
-        if (cancelToggle && cancelMenu) {
-            cancelToggle.addEventListener('click', (e) => {
-                e.stopPropagation();
-                cancelMenu.classList.toggle('active');
-                bellMenu.classList.remove('active');
-                deliveryMenu.classList.remove('active');
-            });
-        }
 
         const closeAllMenus = () => {
             if (bellMenu) bellMenu.classList.remove('active');
             if (deliveryMenu) deliveryMenu.classList.remove('active');
             if (cancelMenu) cancelMenu.classList.remove('active');
         };
+
+        const setupToggle = (toggle, menu) => {
+            if (toggle && menu) {
+                toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isActive = menu.classList.contains('active');
+                    closeAllMenus();
+                    if (!isActive) menu.classList.add('active');
+                });
+            }
+        };
+
+        setupToggle(bellToggle, bellMenu);
+        setupToggle(deliveryToggle, deliveryMenu);
+        setupToggle(cancelToggle, cancelMenu);
 
         document.addEventListener('click', (e) => {
             if (bellToggle && !bellToggle.contains(e.target) && bellMenu && !bellMenu.contains(e.target) &&
@@ -1041,32 +1111,74 @@
             }
         });
 
-        if (bellToggle && bellMenu) {
-            bellToggle.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const isActive = bellMenu.classList.contains('active');
-                closeAllMenus();
-                if (!isActive) bellMenu.classList.add('active');
-            });
-        }
-
-        if (deliveryToggle && deliveryMenu) {
-            deliveryToggle.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const isActive = deliveryMenu.classList.contains('active');
-                closeAllMenus();
-                if (!isActive) deliveryMenu.classList.add('active');
-            });
-        }
-
-        document.addEventListener('click', (e) => {
-            if (bellToggle && !bellToggle.contains(e.target) && bellMenu && !bellMenu.contains(e.target) &&
-                deliveryToggle && !deliveryToggle.contains(e.target) && deliveryMenu && !deliveryMenu.contains(e.target)) {
-                closeAllMenus();
-            }
-        });
-
         // --- Real-time Push Notifications (SSE) ---
+        let dismissTimer = null;
+        let currentDismissId = null;
+
+        function startNotifDismiss(e, id) {
+            e.preventDefault();
+            currentDismissId = id;
+            const wrapper = e.currentTarget;
+            wrapper.classList.add('pressing');
+            
+            dismissTimer = setTimeout(() => {
+                executeDismiss(id, wrapper);
+            }, 2800); // Trigger slightly before 3s to ensure it fires before release
+        }
+
+        function stopNotifDismiss() {
+            clearTimeout(dismissTimer);
+            const wrappers = document.querySelectorAll('.notif-icon-wrapper.pressing');
+            wrappers.forEach(w => w.classList.remove('pressing'));
+        }
+
+        async function executeDismiss(id, wrapper) {
+            if (wrapper) wrapper.classList.remove('pressing');
+            clearTimeout(dismissTimer);
+
+            try {
+                const url = "{{ route(auth()->user()->role . '.notifications.dismiss', ['id' => ':id']) }}".replace(':id', id);
+                const response = await fetch(url, {
+                    method: 'PATCH',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+                const result = await response.json();
+                if (result.success) {
+                    const item = document.getElementById(`notif-${id}`);
+                    if (item) {
+                        item.style.opacity = '0';
+                        item.style.transform = 'translateX(100px)';
+                        item.style.maxHeight = '0';
+                        item.style.paddingTop = '0';
+                        item.style.paddingBottom = '0';
+                        item.style.borderBottom = '0';
+                        item.style.margin = '0';
+                        
+                        setTimeout(() => {
+                            item.remove();
+                            // Update counts
+                            const badge = document.getElementById('deliveryBadge');
+                            const count = parseInt(badge.innerText) - 1;
+                            if (count > 0) {
+                                badge.innerText = count;
+                                document.getElementById('deliveryHeaderCount').innerText = count + ' New';
+                            } else {
+                                badge.style.display = 'none';
+                                document.getElementById('deliveryHeaderCount').innerText = '0 New';
+                                document.getElementById('deliveryNotifList').innerHTML = '<div class="no-notif">No new applications.</div>';
+                            }
+                        }, 300);
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to dismiss notification:", error);
+            }
+        }
+
         function startNotificationStreaming() {
             const eventSource = new EventSource("{{ route('sse.stream') }}");
             
@@ -1078,34 +1190,73 @@
                 const orderHeaderCount = document.getElementById('orderHeaderCount');
                 const orderNotifList = document.getElementById('orderNotifList');
                 
-                if (data.orders.count > 0) {
-                    orderBadge.innerText = data.orders.count;
-                    orderBadge.style.display = 'flex';
-                    orderHeaderCount.innerText = data.orders.count + ' Successful';
-                } else {
-                    orderBadge.style.display = 'none';
-                    orderHeaderCount.innerText = '0 Successful';
-                }
-                
-                if (data.orders.items.length > 0) {
-                    let html = '';
-                    data.orders.items.forEach(order => {
-                        html += `
-                            <a href="{{ route('admin.orders') }}" class="notification-item">
-                                <div class="notif-icon">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                </div>
-                                <div class="notif-content">
-                                    <p>Order <strong>#${order.id}</strong> paid by ${order.customer}.</p>
-                                    <span>${order.time}</span>
-                                </div>
-                            </a>
-                        `;
-                    });
-                    html += `<a href="{{ route('admin.orders') }}" class="view-all-link" style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #4CAF50; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View All Orders</a>`;
-                    orderNotifList.innerHTML = html;
-                } else {
-                    orderNotifList.innerHTML = '<div class="no-notif">No new payments.</div>';
+                if (data.orders && data.orders.count !== undefined) {
+                    if (data.orders.count > 0) {
+                        orderBadge.innerText = data.orders.count;
+                        orderBadge.style.display = 'flex';
+                        orderHeaderCount.innerText = data.orders.count + ' Successful';
+                    } else {
+                        orderBadge.style.display = 'none';
+                        orderHeaderCount.innerText = '0 Successful';
+                    }
+                    
+                    if (data.orders.items && data.orders.items.length > 0) {
+                        let html = '';
+                        data.orders.items.forEach(order => {
+                            html += `
+                                <a href="{{ route('admin.orders') }}" class="notification-item">
+                                    <div class="notif-icon">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    </div>
+                                    <div class="notif-content">
+                                        <p>Order <strong>#${order.id}</strong> paid by ${order.customer}.</p>
+                                        <span>${order.time}</span>
+                                    </div>
+                                </a>
+                            `;
+                        });
+                        html += `<a href="{{ route('admin.orders') }}" class="view-all-link" style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #4CAF50; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View All Orders</a>`;
+                        orderNotifList.innerHTML = html;
+                    } else {
+                        orderNotifList.innerHTML = '<div class="no-notif">No new payments.</div>';
+                    }
+
+                    // Update Cancelled Order Notifications
+                    const cancelBadge = document.getElementById('cancelBadge');
+                    const cancelHeaderCount = document.getElementById('cancelHeaderCount');
+                    const cancelNotifList = document.getElementById('cancelNotifList');
+                    
+                    if (data.orders.cancelled_count !== undefined) {
+                        if (data.orders.cancelled_count > 0) {
+                            cancelBadge.innerText = data.orders.cancelled_count;
+                            cancelBadge.style.display = 'flex';
+                            cancelHeaderCount.innerText = data.orders.cancelled_count + ' New';
+                        } else {
+                            cancelBadge.style.display = 'none';
+                            cancelHeaderCount.innerText = '0 New';
+                        }
+                    }
+
+                    if (data.orders.cancelled_items && data.orders.cancelled_items.length > 0) {
+                        let html = '';
+                        data.orders.cancelled_items.forEach(order => {
+                            html += `
+                                <a href="{{ route('admin.orders') }}" class="notification-item">
+                                    <div class="notif-icon" style="background: #FEE2E2; color: #EF4444;">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                    </div>
+                                    <div class="notif-content">
+                                        <p>Order <strong>#${order.id}</strong> cancelled by ${order.customer}.</p>
+                                        <span>${order.time}</span>
+                                    </div>
+                                </a>
+                            `;
+                        });
+                        html += `<a href="{{ route('admin.orders') }}" class="view-all-link" style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #EF4444; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View All Cancellations</a>`;
+                        cancelNotifList.innerHTML = html;
+                    } else {
+                        cancelNotifList.innerHTML = '<div class="no-notif">No new cancellations.</div>';
+                    }
                 }
                 
                 // 2. Update Delivery Partner Notifications
@@ -1113,34 +1264,47 @@
                 const deliveryHeaderCount = document.getElementById('deliveryHeaderCount');
                 const deliveryNotifList = document.getElementById('deliveryNotifList');
                 
-                if (data.delivery.count > 0) {
-                    deliveryBadge.innerText = data.delivery.count;
-                    deliveryBadge.style.display = 'flex';
-                    deliveryHeaderCount.innerText = data.delivery.count + ' New';
-                } else {
-                    deliveryBadge.style.display = 'none';
-                    deliveryHeaderCount.innerText = '0 New';
-                }
-                
-                if (data.delivery.items.length > 0) {
-                    let html = '';
-                    data.delivery.items.forEach(notif => {
-                        html += `
-                            <a href="{{ route('admin.delivery') }}" class="notification-item">
-                                <div class="notif-icon" style="background: #FDEEE4; color: #F25C3B;">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                if (data.delivery && data.delivery.count !== undefined) {
+                    if (data.delivery.count > 0) {
+                        deliveryBadge.innerText = data.delivery.count;
+                        deliveryBadge.style.display = 'flex';
+                        deliveryHeaderCount.innerText = data.delivery.count + ' New';
+                    } else {
+                        deliveryBadge.style.display = 'none';
+                        deliveryHeaderCount.innerText = '0 New';
+                    }
+                    
+                    if (data.delivery.items && data.delivery.items.length > 0) {
+                        let html = '';
+                        data.delivery.items.forEach(notif => {
+                            html += `
+                                <div class="notification-item" id="notif-${notif.id}">
+                                    <div class="notif-icon-wrapper" 
+                                         onmousedown="startNotifDismiss(event, '${notif.id}')" 
+                                         onmouseup="stopNotifDismiss()" 
+                                         onmouseleave="stopNotifDismiss()"
+                                         ontouchstart="startNotifDismiss(event, '${notif.id}')"
+                                         ontouchend="stopNotifDismiss()">
+                                        <svg class="progress-ring">
+                                            <circle class="progress-ring__circle" r="18" cx="20" cy="20"/>
+                                        </svg>
+                                        <div class="notif-icon" style="background: #FDEEE4; color: #F25C3B;">
+                                            <svg class="icon-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                                            <svg class="icon-close" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                        </div>
+                                    </div>
+                                    <a href="{{ route('admin.delivery') }}" class="notif-content" style="text-decoration: none; flex: 1;">
+                                        <p><strong>${notif.name}</strong> applied as a partner.</p>
+                                        <span>${notif.time}</span>
+                                    </a>
                                 </div>
-                                <div class="notif-content">
-                                    <p><strong>${notif.name}</strong> applied as a partner.</p>
-                                    <span>${notif.time}</span>
-                                </div>
-                            </a>
-                        `;
-                    });
-                    html += `<a href="{{ route('admin.delivery') }}" class="view-all-link" style="display: block; text-align: center; padding: 10px; font-size: 12px; color: var(--admin-primary); text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View All Applications</a>`;
-                    deliveryNotifList.innerHTML = html;
-                } else {
-                    deliveryNotifList.innerHTML = '<div class="no-notif">No new applications.</div>';
+                            `;
+                        });
+                        html += `<a href="{{ route('admin.delivery') }}" class="view-all-link" style="display: block; text-align: center; padding: 10px; font-size: 12px; color: var(--admin-primary); text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View All Applications</a>`;
+                        deliveryNotifList.innerHTML = html;
+                    } else {
+                        deliveryNotifList.innerHTML = '<div class="no-notif">No new applications.</div>';
+                    }
                 }
             });
 

@@ -358,6 +358,7 @@
                             <th>Total Amount</th>
                             <th>Status</th>
                             <th>Secret Code</th>
+                            <th>Proof</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -370,14 +371,23 @@
                             <td data-label="Total Amount" style="font-weight: 700;">${{ number_format($order->total_price, 2) }}</td>
                             <td data-label="Status" id="status-container-{{ $order->id }}">
                                 <span id="badge-{{ $order->id }}" class="status-badge status-{{ $order->status }}">
-                                    {{ $order->status == 'completed' ? 'payment complet' : ($order->status == 'refunded' ? 'Refund' : $order->status) }}
+                                     {{ $order->status == 'completed' ? 'payment complet' : ($order->status == 'refunded' ? 'Refund' : $order->status) }}
                                 </span>
                             </td>
                             <td data-label="Secret Code" id="code-container-{{ $order->id }}">
-                                @if($order->status == 'shipped' && $order->secret_code)
+                                @if($order->status == 'shipped' && $order->delivery?->secret_code)
                                     <div style="background: #FFFBEB; color: #B45309; padding: 6px 12px; border-radius: 8px; font-weight: 800; font-family: monospace; border: 1px dashed #F59E0B; display: inline-block;">
-                                        {{ $order->secret_code }}
+                                        {{ $order->delivery->secret_code }}
                                     </div>
+                                @else
+                                    <span style="color: #94A3B8; font-size: 0.85rem;">---</span>
+                                @endif
+                            </td>
+                            <td data-label="Proof">
+                                @if($order->delivery?->delivery_image)
+                                    <a href="{{ asset($order->delivery->delivery_image) }}" target="_blank">
+                                        <img src="{{ asset($order->delivery->delivery_image) }}" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid #eee;">
+                                    </a>
                                 @else
                                     <span style="color: #94A3B8; font-size: 0.85rem;">---</span>
                                 @endif

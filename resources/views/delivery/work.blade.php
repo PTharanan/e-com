@@ -127,10 +127,11 @@
                     @endif
 
                     @if($order->status == 'shipped')
-                        <button class="btn-action btn-deliver" onclick="deliverOrder({{ $order->id }})">
+                        <button class="btn-action btn-deliver" onclick="triggerDelivery({{ $order->id }})">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            DELIVER (Ask for Code)
+                            DELIVER (Code & Photo)
                         </button>
+                        <input type="file" id="delivery-input-{{ $order->id }}" style="display: none;" accept="image/*" onchange="handleDelivery({{ $order->id }}, this)">
                         @if(($order->payment_method ?? '') == 'COD')
                             <button class="btn-action btn-cash">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
@@ -182,34 +183,49 @@
         }
     }
 
-    async function deliverOrder(orderId) {
+    function triggerDelivery(orderId) {
+        document.getElementById(`delivery-input-${orderId}`).click();
+    }
+
+    async function handleDelivery(orderId, input) {
+        if (!input.files || !input.files[0]) return;
+        
         const code = prompt('Please enter the 6-digit Secret Code provided by the customer:');
-        if (!code) return;
-        if (code.length !== 6) {
-            alert('The code must be 6 digits.');
+        if (!code) {
+            input.value = ''; // Reset input
             return;
         }
+        if (code.length !== 6) {
+            alert('The code must be 6 digits.');
+            input.value = '';
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('delivery_image', input.files[0]);
+        formData.append('code', code);
+        formData.append('_token', '{{ csrf_token() }}');
 
         try {
             const response = await fetch(`{{ url('delivery/verify-delivery') }}/${orderId}`, {
                 method: 'POST',
+                body: formData,
                 headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json',
                     'Accept': 'application/json'
-                },
-                body: JSON.stringify({ code: code })
+                }
             });
             const result = await response.json();
             if (result.success) {
-                alert('Order delivered successfully! Good job.');
+                alert(result.message);
                 location.reload();
             } else {
                 alert(result.message);
+                input.value = '';
             }
         } catch (error) {
             console.error(error);
             alert('An error occurred during delivery verification.');
+            input.value = '';
         }
     }
 

@@ -242,14 +242,28 @@
         .filter-bar a.btn-clear:hover {
             background: #cbd5e1;
         }
+
+        @media (max-width: 480px) {
+            .products-section {
+                padding: 30px 5%;
+            }
+            .section-title {
+                font-size: 1.5rem;
+            }
+            .floating-filter-btn {
+                position: sticky;
+                top: 10px; /* 10px below the 75px navbar */
+                float: right;
+                margin-top: 2px; /* Align with "All Products" title */
+                margin-right: 0;
+                width: 46px;
+                height: 46px;
+                z-index: 1001;
+                box-shadow: 0 8px 20px rgba(242, 92, 59, 0.2);
+            }
+        }
     </style>
-@endsection
-
 @section('content')
-    <button class="floating-filter-btn" id="openFilterBtn" title="Filter Products">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-    </button>
-
     <div class="filter-overlay" id="filterOverlay"></div>
 
     <div class="filter-drawer" id="filterDrawer">
@@ -295,6 +309,10 @@
     </div>
 
     <section class="products-section">
+        <button class="floating-filter-btn" id="openFilterBtn" title="Filter Products">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+        </button>
+
         <div class="section-header" style="margin-bottom: 40px;">
             <h2 class="section-title">All Products</h2>
         </div>
@@ -318,7 +336,13 @@
                         <img src="{{ asset($product->main_image_url) }}" alt="{{ $product->name }}">
                     </div>
                     <div class="product-info">
-                        <span class="product-category">{{ $product->category->name }}</span>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span class="product-category">{{ $product->category->name }}</span>
+                            <span style="font-size: 0.7rem; color: var(--color-primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; background: rgba(242, 92, 59, 0.1); padding: 2px 8px; border-radius: 4px;">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 3px; vertical-align: middle;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                {{ $product->seller->name ?? ($product->admin->name ?? 'E-Shop') }}
+                            </span>
+                        </div>
                         <h3 class="product-title">{{ $product->name }}</h3>
                         <div class="product-footer">
                             <div class="product-price">
@@ -388,6 +412,7 @@
                 if(drawer && overlay) {
                     drawer.classList.add('active');
                     overlay.classList.add('active');
+                    document.body.style.overflow = 'hidden';
                 }
                 
                 if (sessionStorage.getItem('search_focused') === 'true') {
@@ -411,12 +436,14 @@
                 drawer.classList.add('active');
                 overlay.classList.add('active');
                 sessionStorage.setItem('filter_drawer_open', 'true');
+                document.body.style.overflow = 'hidden';
             }
 
             function closeDrawer() {
                 drawer.classList.remove('active');
                 overlay.classList.remove('active');
                 sessionStorage.setItem('filter_drawer_open', 'false');
+                document.body.style.overflow = '';
             }
 
             if (openBtn) openBtn.addEventListener('click', openDrawer);
