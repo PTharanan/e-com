@@ -61,7 +61,7 @@
             <div class="order-item">
                 <div class="order-info">
                     <h4>#ORD-{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }} - {{ $order->user->name }}</h4>
-                    <p>{{ $order->total_items }} items | ${{ number_format($order->total_price, 2) }} | {{ $order->created_at->diffForHumans() }}</p>
+                    <p>{{ $order->total_items }} items | {{ currency_symbol() }}{{ number_format($order->total_price, 2) }} | {{ $order->created_at->diffForHumans() }}</p>
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <select class="assign-select" style="width: 180px; margin-bottom: 0;" id="assign-{{ $order->id }}">

@@ -313,7 +313,7 @@
                 </svg>
             </div>
             <div class="stat-info">
-                <div class="stat-value">${{ number_format($totalCashSpent, 2) }}</div>
+                <div class="stat-value">{{ currency_symbol() }}{{ number_format($totalCashSpent, 2) }}</div>
                 <div class="stat-label">Total Cash Spent</div>
             </div>
         </div>
@@ -368,7 +368,7 @@
                             <td data-label="Order ID" style="font-weight: 600;">#ORD-{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}</td>
                             <td data-label="Date">{{ $order->created_at->format('M d, Y') }}</td>
                             <td data-label="Items">{{ $order->total_items }} Items</td>
-                            <td data-label="Total Amount" style="font-weight: 700;">${{ number_format($order->total_price, 2) }}</td>
+                            <td data-label="Total Amount" style="font-weight: 700;">{{ currency_symbol() }}{{ number_format($order->total_price, 2) }}</td>
                             <td data-label="Status" id="status-container-{{ $order->id }}">
                                 <span id="badge-{{ $order->id }}" class="status-badge status-{{ $order->status }}">
                                      {{ $order->status == 'completed' ? 'payment complet' : ($order->status == 'refunded' ? 'Refund' : $order->status) }}

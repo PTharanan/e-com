@@ -1,6 +1,6 @@
-@extends('layouts.admin')
+@extends('layouts.seller')
 
-@section('title', 'Manage Customers')
+@section('title', 'My Customers')
 
 @section('styles')
 <style>
@@ -121,8 +121,8 @@
 @section('content')
 <div class="page-header">
     <div class="page-title">
-        <h1>Customers List</h1>
-        <p>View and manage your registered customers.</p>
+        <h1>My Customers</h1>
+        <p>People who have purchased your products.</p>
     </div>
 </div>
 
@@ -134,13 +134,13 @@
                 <th>Role</th>
                 <th>Email</th>
                 <th>Joined Date</th>
-                <th>Total Orders</th>
-                <th>Amount</th>
+                <th>My Orders</th>
+                <th>Total Spent</th>
                 <th>History</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($customers as $customer)
+            @forelse($customers as $customer)
             <tr>
                 <td style="font-weight: 600;">{{ $customer->name }}</td>
                 <td>
@@ -160,7 +160,13 @@
                     <button class="btn-history" onclick="showHistory({{ $customer->id }})">View History</button>
                 </td>
             </tr>
-            @endforeach
+            @empty
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 40px; color: #94A3B8;">
+                    No customers found yet.
+                </td>
+            </tr>
+            @endforelse
         </tbody>
     </table>
 </div>
@@ -189,18 +195,18 @@ function showHistory(id) {
         <div class="hm-stats">
             <div class="hm-stat">
                 <div class="hm-stat-value">${customer.orders_count}</div>
-                <div class="hm-stat-label">Total Orders</div>
+                <div class="hm-stat-label">Your Orders</div>
             </div>
             <div class="hm-stat">
                 <div class="hm-stat-value" style="color: #10B981;">${currencySymbol}${parseFloat(customer.total_spent).toFixed(2)}</div>
                 <div class="hm-stat-label">Total Spent</div>
             </div>
         </div>
-        <div class="hm-section-title">Order History</div>
+        <div class="hm-section-title">Purchased Items</div>
     `;
 
     if (customer.orders.length === 0) {
-        html += `<div class="hm-empty">No orders yet from this customer.</div>`;
+        html += `<div class="hm-empty">No orders found.</div>`;
     } else {
         customer.orders.forEach(order => {
             let itemsHtml = '';
@@ -225,10 +231,6 @@ function showHistory(id) {
                         <span class="hm-order-date">${order.date}</span>
                     </div>
                     ${itemsHtml}
-                    <div class="hm-order-total">
-                        <span>Total</span>
-                        <span class="hm-order-total-val">${currencySymbol}${parseFloat(order.total_price).toFixed(2)}</span>
-                    </div>
                 </div>
             `;
         });

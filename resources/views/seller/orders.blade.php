@@ -157,6 +157,55 @@
     .status-toast.success { background: linear-gradient(135deg, #10B981, #059669); }
     .status-toast.warning { background: linear-gradient(135deg, #F59E0B, #D97706); }
     .status-toast.error { background: linear-gradient(135deg, #EF4444, #DC2626); }
+
+    /* PAGINATION STYLES */
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 25px;
+        padding: 0 10px;
+    }
+    .pagination-info {
+        font-size: 14px;
+        color: #64748B;
+        font-weight: 500;
+    }
+    .pagination-nav {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    .pagination-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: white;
+        border: 1px solid #E2E8F0;
+        color: #1E293B;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .pagination-link:hover:not(.disabled) {
+        border-color: var(--admin-primary);
+        color: var(--admin-primary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .pagination-link.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background: #F8FAFC;
+    }
+    .pagination-link svg {
+        width: 20px;
+        height: 20px;
+    }
 </style>
 @endsection
 
@@ -215,7 +264,7 @@
                     @endif
                 </td>
                 <td>{{ $order->created_at->format('M d, Y') }}</td>
-                <td style="font-weight: 700;">${{ number_format($order->total_price, 2) }}</td>
+                <td style="font-weight: 700;">{{ currency_symbol() }}{{ number_format($order->total_price, 2) }}</td>
                 <td>
                     <span id="order-status-{{ $order->id }}" class="status-badge status-{{ $order->status }}" style="text-transform: capitalize; width: 100%; text-align: center;">
                         {{ $order->status === 'completed' ? 'payment complet' : ($order->status === 'refunded' ? 'Refund' : $order->status) }}
@@ -240,6 +289,39 @@
     </table>
 </div>
 
+@if($orders->hasPages())
+<div class="pagination-container">
+    <div class="pagination-info">
+        Showing <b>{{ $orders->firstItem() }}</b> to <b>{{ $orders->lastItem() }}</b> of <b>{{ $orders->total() }}</b> orders
+    </div>
+    <div class="pagination-nav">
+        @if($orders->onFirstPage())
+            <span class="pagination-link disabled">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </span>
+        @else
+            <a href="{{ $orders->appends(request()->query())->previousPageUrl() }}" class="pagination-link" title="Previous Page">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </a>
+        @endif
+
+        <div style="font-weight: 700; color: #1E293B; margin: 0 10px;">
+            Page {{ $orders->currentPage() }}
+        </div>
+
+        @if($orders->hasMorePages())
+            <a href="{{ $orders->appends(request()->query())->nextPageUrl() }}" class="pagination-link" title="Next Page">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+        @else
+            <span class="pagination-link disabled">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </span>
+        @endif
+    </div>
+</div>
+@endif
+
 <!-- TOAST NOTIFICATION -->
 <div class="status-toast" id="status-toast"></div>
 
@@ -256,6 +338,7 @@
 </div>
 
 <script>
+const currencySymbol = @json(currency_symbol());
 // Embed all orders as JSON for instant detail access
 const ordersData = @json($ordersJson);
 
@@ -292,9 +375,9 @@ function viewOrderDetails(id) {
                 <div class="item-row">
                     <div>
                         <div class="item-name">${item.name}</div>
-                        <div class="item-qty">${item.qty}x @ $${parseFloat(item.price).toFixed(2)}</div>
+                        <div class="item-qty">${item.qty}x @ ${currencySymbol}${parseFloat(item.price).toFixed(2)}</div>
                     </div>
-                    <div class="item-price">$${itemTotal}</div>
+                    <div class="item-price">${currencySymbol}${itemTotal}</div>
                 </div>
             `;
         });
@@ -330,7 +413,7 @@ function viewOrderDetails(id) {
                 </div>
                 ${order.status === 'cancelled' ? `
                     <button class="status-btn" onclick="refundOrder(${order.id})" style="background: #10B981; color: white; border: none; padding: 6px 15px; border-radius: 8px; cursor: pointer; font-weight: 700;">
-                        REFUND $${order.total_price}
+                        REFUND ${currencySymbol}${order.total_price}
                     </button>
                 ` : ''}
             </div>
@@ -380,7 +463,7 @@ function viewOrderDetails(id) {
             ${itemsHtml || '<div style="color: #94A3B8; font-size: 13px;">No item details available</div>'}
             <div class="detail-total">
                 <span class="detail-label">Grand Total</span>
-                <span class="detail-value">$${parseFloat(order.total_price).toFixed(2)}</span>
+                <span class="detail-value">${currencySymbol}${parseFloat(order.total_price).toFixed(2)}</span>
             </div>
         </div>
     `;
@@ -513,16 +596,35 @@ async function updateOrderStatus(id, el) {
         console.log("Seller SSE: Received update", data);
         
         if (data.orders && data.orders.all_statuses) {
+            const serverIds = data.orders.all_statuses.map(o => o.id);
+
+            // 1. Update statuses
             data.orders.all_statuses.forEach(o => {
                 const el = document.getElementById(`order-status-${o.id}`);
                 if (el) {
                     const newStatus = o.status;
                     const displayText = newStatus === 'completed' ? 'payment complet' : (newStatus === 'refunded' ? 'Refund' : newStatus);
-                    
-                    // Update text and classes
                     if (el.innerText.toLowerCase() !== displayText.toLowerCase()) {
                         el.innerText = displayText;
                         el.className = `status-badge status-${newStatus}`;
+                    }
+                }
+            });
+
+            // 2. Remove deleted rows
+            const tableRows = document.querySelectorAll('tbody tr');
+            tableRows.forEach(row => {
+                const orderIdCell = row.querySelector('td:first-child');
+                if (orderIdCell) {
+                    const idMatch = orderIdCell.innerText.match(/#ORD-(\d+)/);
+                    if (idMatch) {
+                        const orderId = parseInt(idMatch[1]);
+                        if (!serverIds.includes(orderId) && orderId > 0) {
+                            row.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+                            row.style.opacity = '0';
+                            row.style.transform = 'translateX(20px)';
+                            setTimeout(() => row.remove(), 800);
+                        }
                     }
                 }
             });

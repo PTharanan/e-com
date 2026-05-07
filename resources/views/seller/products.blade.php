@@ -539,6 +539,86 @@
         .delete-btn-confirm:hover {
             background: #DC2626;
         }
+
+        /* SEARCH BAR STYLES */
+        .search-container {
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 12px;
+            padding: 4px 15px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            width: 300px;
+            transition: all 0.3s ease;
+        }
+        .search-container:focus-within {
+            border-color: var(--admin-primary);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            width: 350px;
+        }
+        .search-input {
+            border: none;
+            padding: 8px 10px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            width: 100%;
+            color: #1E293B;
+        }
+        .search-icon {
+            color: #94A3B8;
+            flex-shrink: 0;
+        }
+
+        /* PAGINATION STYLES */
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+            padding: 0 10px;
+        }
+        .pagination-info {
+            font-size: 14px;
+            color: #64748B;
+            font-weight: 500;
+        }
+        .pagination-nav {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .pagination-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: white;
+            border: 1px solid #E2E8F0;
+            color: #1E293B;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .pagination-link:hover:not(.disabled) {
+            border-color: var(--admin-primary);
+            color: var(--admin-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .pagination-link.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #F8FAFC;
+        }
+        .pagination-link svg {
+            width: 20px;
+            height: 20px;
+        }
     </style>
 @endsection
 
@@ -548,25 +628,36 @@
             <h1>Products Catalog</h1>
             <p>Manage your inventory and product listings.</p>
         </div>
-        @if($hasAssignment)
-            <button class="btn-primary" id="openProductModal">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                Add Product
-            </button>
-        @else
-            <button class="btn-primary" id="openJoinStoreModal">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="8.5" cy="7" r="4"></circle>
-                    <line x1="20" y1="8" x2="20" y2="14"></line>
-                    <line x1="17" y1="11" x2="23" y2="11"></line>
-                </svg>
-                Connect to Store
-            </button>
-        @endif
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <form action="{{ route('seller.products') }}" method="GET" id="searchForm">
+                <div class="search-container">
+                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" name="search" id="sellerSearchInput" class="search-input" placeholder="Search name or category..." value="{{ request('search') }}" oninput="debounceSearch()">
+                </div>
+            </form>
+            @if($hasAssignment)
+                <button class="btn-primary" id="openProductModal">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Add Product
+                </button>
+            @else
+                <button class="btn-primary" id="openJoinStoreModal">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                        <line x1="20" y1="8" x2="20" y2="14"></line>
+                        <line x1="17" y1="11" x2="23" y2="11"></line>
+                    </svg>
+                    Connect to Store
+                </button>
+            @endif
+        </div>
     </div>
 
     <div class="data-card">
@@ -593,7 +684,7 @@
                             </div>
                         </td>
                         <td>{{ $product->category->name }}</td>
-                        <td>${{ number_format($product->price, 2) }}</td>
+                        <td>{{ currency_symbol() }}{{ number_format($product->price, 2) }}</td>
                         <td>
                             <div class="discount-edit-wrapper">
                                 <div class="discount-badge" onclick="toggleDiscountPopover({{ $product->id }})">
@@ -670,6 +761,39 @@
             </tbody>
         </table>
     </div>
+
+    @if($products->hasPages())
+    <div class="pagination-container">
+        <div class="pagination-info">
+            Showing <b>{{ $products->firstItem() }}</b> to <b>{{ $products->lastItem() }}</b> of <b>{{ $products->total() }}</b> products
+        </div>
+        <div class="pagination-nav">
+            @if($products->onFirstPage())
+                <span class="pagination-link disabled">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </span>
+            @else
+                <a href="{{ $products->appends(request()->query())->previousPageUrl() }}" class="pagination-link" title="Previous Page">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </a>
+            @endif
+
+            <div style="font-weight: 700; color: #1E293B; margin: 0 10px;">
+                Page {{ $products->currentPage() }}
+            </div>
+
+            @if($products->hasMorePages())
+                <a href="{{ $products->appends(request()->query())->nextPageUrl() }}" class="pagination-link" title="Next Page">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </a>
+            @else
+                <span class="pagination-link disabled">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </span>
+            @endif
+        </div>
+    </div>
+    @endif
 
     <!-- Add Product Modal -->
     <div class="modal-overlay" id="productModal">
@@ -895,6 +1019,32 @@
                 }
             };
         }
+        
+        // Live Search Logic
+        let searchTimeout = null;
+        function debounceSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                sessionStorage.setItem('seller_search_focused', 'true');
+                document.getElementById('searchForm').submit();
+            }, 600);
+        }
+
+        // Restore focus on reload
+        document.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('seller_search_focused') === 'true') {
+                sessionStorage.removeItem('seller_search_focused');
+                const input = document.getElementById('sellerSearchInput');
+                if (input) {
+                    input.focus();
+                    // Move cursor to end
+                    const val = input.value;
+                    input.value = '';
+                    input.value = val;
+                }
+            }
+        });
+
         const form = document.getElementById('addProductForm');
         const mainImgOptionsContainer = document.getElementById('mainImageOptions');
         const productStepDesc = document.getElementById('productStepDesc');

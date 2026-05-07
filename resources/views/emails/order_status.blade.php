@@ -26,12 +26,12 @@ The delivery proof photo has been **attached to this email** for your security.
 | :--- | :---: | :--- |
 @if(is_array($order->items_json))
 @foreach($order->items_json as $item)
-| {{ $item['name'] }} | {{ $item['qty'] }} | ${{ number_format($item['price'] * $item['qty'], 2) }} |
+| {{ $item['name'] }} | {{ $item['qty'] }} | {{ currency_symbol() }}{{ number_format($item['price'] * $item['qty'], 2) }} |
 @endforeach
 @endif
 </x-mail::table>
 
-**Order Total: ${{ number_format($order->total_price, 2) }}**
+**Order Total: {{ currency_symbol() }}{{ number_format($order->total_price, 2) }}**
 
 If you have any questions about your order, feel free to reach out to our support team.
 

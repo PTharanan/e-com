@@ -40,7 +40,7 @@
             <div class="hist-status">
                 <span class="badge badge-delivered">Delivered</span>
             </div>
-            <div class="hist-price">+ ${{ number_format($order->total_price, 2) }}</div>
+            <div class="hist-price">+ {{ currency_symbol() }}{{ number_format($order->total_price, 2) }}</div>
         </div>
     @empty
         <div style="text-align: center; padding: 60px 20px; background: white; border-radius: 16px; border: 1px dashed #ccc;">

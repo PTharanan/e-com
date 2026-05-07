@@ -63,5 +63,10 @@
         <p style="color: #64748B; font-size: 14px; margin-bottom: 20px;">Manage promotional content and home page banners to attract customers.</p>
         <a href="{{ route('admin.banners') }}" style="display: inline-block; color: var(--admin-primary); text-decoration: none; font-weight: 600; font-size: 15px;">Manage Home Banners &rarr;</a>
     </div>
+    <div class="settings-card">
+        <h3>Data Management</h3>
+        <p style="color: #64748B; font-size: 14px; margin-bottom: 20px;">Keep your database optimized by setting up automatic cleanup for old orders and notifications.</p>
+        <a href="{{ route('admin.settings.auto-delete') }}" style="display: inline-block; color: var(--admin-primary); text-decoration: none; font-weight: 600; font-size: 15px;">Auto Delete Settings &rarr;</a>
+    </div>
 </div>
 @endsection

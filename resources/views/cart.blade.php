@@ -475,7 +475,7 @@
                 <h2 class="summary-title">Order Summary</h2>
                 <div class="summary-row">
                     <span>Subtotal</span>
-                    <span id="subtotal-val">$0.00</span>
+                    <span id="subtotal-val">{{ currency_symbol() }}0.00</span>
                 </div>
                 <div class="summary-row">
                     <span>Shipping</span>
@@ -483,7 +483,7 @@
                 </div>
                 <div class="summary-total">
                     <span>Total</span>
-                    <span id="total-val">$0.00</span>
+                    <span id="total-val">{{ currency_symbol() }}0.00</span>
                 </div>
                 <button class="btn-checkout-page">Proceed to Checkout</button>
             </div>
@@ -509,6 +509,7 @@
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        const currencySymbol = @json(currency_symbol());
         const productsData = @json($products);
         const cartItemsList = document.getElementById('cart-items-list');
         const filledCart = document.getElementById('filled-cart');
@@ -550,9 +551,9 @@
                             <h3>${product.name}</h3>
                             <div class="item-price">
                                 ${product.discount_percentage ? `
-                                    <span style="text-decoration: line-through; font-size: 0.8rem; color: #9CA3AF; margin-right: 8px;">$${parseFloat(product.price).toFixed(2)}</span>
-                                    <span style="color: #10B981;">$${parseFloat(product.final_price).toFixed(2)}</span>
-                                ` : `$${parseFloat(product.price).toFixed(2)}`}
+                                    <span style="text-decoration: line-through; font-size: 0.8rem; color: #9CA3AF; margin-right: 8px;">${currencySymbol}${parseFloat(product.price).toFixed(2)}</span>
+                                    <span style="color: #10B981;">${currencySymbol}${parseFloat(product.final_price).toFixed(2)}</span>
+                                ` : `${currencySymbol}${parseFloat(product.price).toFixed(2)}`}
                             </div>
                         </div>
                         <div class="item-actions">
@@ -561,15 +562,15 @@
                                 <span class="qty-val">${qty}</span>
                                 <button class="qty-btn inc" data-id="${id}">+</button>
                             </div>
-                            <div class="item-total">$${itemTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                            <div class="item-total">${currencySymbol}${itemTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
                         </div>
                     </div>
                 `;
                 cartItemsList.insertAdjacentHTML('beforeend', itemHtml);
             });
 
-            subtotalVal.innerText = `$${total.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-            totalVal.innerText = `$${total.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+            subtotalVal.innerText = `${currencySymbol}${total.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+            totalVal.innerText = `${currencySymbol}${total.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
 
             attachListeners();
         };
@@ -712,8 +713,8 @@
                 
                 if (data.clientSecret) {
                     clientSecret = data.clientSecret;
-                    totalDisplay.innerText = `Total: $${parseFloat(data.total).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-                    document.getElementById('submit-payment').innerText = `Pay $${parseFloat(data.total).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                    totalDisplay.innerText = `Total: ${currencySymbol}${parseFloat(data.total).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                    document.getElementById('submit-payment').innerText = `Pay ${currencySymbol}${parseFloat(data.total).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                     paymentModal.style.display = 'flex';
                     document.body.classList.add('modal-open');
                     

@@ -348,11 +348,11 @@
                             <div class="product-price">
                                 @if($product->discount_percentage)
                                     <div class="price-wrapper">
-                                        <span class="old-price">${{ number_format($product->price, 2) }}</span>
-                                        <span class="new-price">${{ number_format($product->final_price, 2) }}</span>
+                                        <span class="old-price">{{ currency_symbol() }}{{ number_format($product->price, 2) }}</span>
+                                        <span class="new-price">{{ currency_symbol() }}{{ number_format($product->final_price, 2) }}</span>
                                     </div>
                                 @else
-                                    ${{ number_format($product->price, 2) }}
+                                    {{ currency_symbol() }}{{ number_format($product->price, 2) }}
                                 @endif
                             </div>
                             <div class="product-actions">

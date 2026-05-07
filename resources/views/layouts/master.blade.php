@@ -434,7 +434,7 @@
         .bottom-nav {
             width: 100%;
             height: 100%;
-            background: var(--color-white);
+            background: var(--color-bg-light);
             display: flex;
             justify-content: space-around;
             align-items: center;
@@ -453,9 +453,9 @@
             left: 0;
             width: 70px;
             height: 70px;
-            background: var(--color-white);
+            background: var(--color-bg-light);
             border-radius: 50%;
-            border: 6px solid var(--color-white);
+            border: 6px solid var(--color-bg-light);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 2500;
@@ -532,7 +532,7 @@
             display: none;
             align-items: center;
             justify-content: center;
-            border: 2px solid var(--color-white);
+            border: 2px solid var(--color-bg-light);
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 2400;
             padding: 0 3px;
@@ -562,7 +562,7 @@
             justify-content: center;
             box-shadow: 0 10px 25px rgba(242, 92, 59, 0.4);
             color: var(--color-white);
-            border: 6px solid var(--color-white);
+            border: 6px solid var(--color-bg-light);
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 

@@ -58,7 +58,7 @@
                             </div>
                         </div>
                         <div style="background: #f9f9f9; padding: 12px; border-radius: 8px; font-size: 13px;">
-                            <p style="margin: 0;">Items: <strong>{{ $order->total_items }}</strong> | Amount: <strong>${{ number_format($order->total_price, 2) }}</strong></p>
+                            <p style="margin: 0;">Items: <strong>{{ $order->total_items }}</strong> | Amount: <strong>{{ currency_symbol() }}{{ number_format($order->total_price, 2) }}</strong></p>
                         </div>
                     </div>
                     <div class="work-footer">
@@ -114,7 +114,7 @@
                     
                     <div style="background: #f9f9f9; padding: 15px; border-radius: 10px; border-left: 4px solid var(--partner-primary);">
                         <p style="margin: 0; font-size: 14px; font-weight: 600;">Payment: <span style="color: {{ ($order->payment_method ?? '') == 'COD' ? '#FF9800' : '#4CAF50' }}">{{ $order->payment_method ?? 'Prepaid' }}</span></p>
-                        <p style="margin: 5px 0 0; font-size: 14px;">Total Amount: <strong>${{ number_format($order->total_price, 2) }}</strong></p>
+                        <p style="margin: 5px 0 0; font-size: 14px;">Total Amount: <strong>{{ currency_symbol() }}{{ number_format($order->total_price, 2) }}</strong></p>
                     </div>
                 </div>
                 <div class="work-footer">

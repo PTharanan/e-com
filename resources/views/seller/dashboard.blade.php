@@ -41,6 +41,7 @@
         align-items: center;
         gap: 20px;
         transition: transform 0.3s ease;
+        overflow: hidden;
     }
 
     .stat-card:hover {
@@ -62,9 +63,17 @@
     .icon-products { background: #F3E5F5; color: #9C27B0; }
     .icon-refunds { background: #F1F5F9; color: #475569; }
 
+    .stat-info {
+        min-width: 0;
+        flex: 1;
+    }
+
     .stat-info h3 {
-        font-size: 28px;
+        font-size: clamp(18px, 2.5vw, 28px);
         margin-bottom: 2px;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        line-height: 1.2;
     }
 
     .stat-info p {
@@ -110,7 +119,7 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
         </div>
         <div class="stat-info">
-            <h3>${{ number_format($totalRevenue, 2) }}</h3>
+            <h3>{{ currency_symbol() }}{{ number_format($totalRevenue, 2) }}</h3>
             <p>Total Revenue</p>
         </div>
     </div>

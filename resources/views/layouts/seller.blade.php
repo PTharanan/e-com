@@ -38,6 +38,31 @@
             padding: 0;
         }
 
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(246, 48, 3, 0.5);
+            border-radius: 20px;
+            border: 2px solid transparent;
+            background-clip: content-box;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--admin-primary-hover);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--admin-primary);
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
             background: var(--admin-bg);
@@ -313,11 +338,26 @@
         }
 
         .dropdown-menu.active {
-            max-height: 200px;
+            max-height: 100px;
             opacity: 1;
             padding: 8px 0;
             margin-top: 5px;
             margin-bottom: 10px;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+        }
+
+        .dropdown-menu::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .dropdown-menu::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .dropdown-menu::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
         }
 
         .dropdown-item {
@@ -495,8 +535,9 @@
         }
 
         .notif-icon {
-            width: 100%;
-            height: 100%;
+            width: 36px;
+            height: 36px;
+            flex-shrink: 0;
             background: #E8F5E9;
             color: #4CAF50;
             border-radius: 50%;
@@ -608,7 +649,7 @@
 
         <ul class="nav-menu">
             <li class="nav-item">
-                <a href="{{ route('seller.dashboard') }}"
+                <a href="{{ route('seller.dashboard') }}" title="Dashboard"
                     class="nav-link {{ request()->routeIs('seller.dashboard') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
@@ -619,7 +660,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('seller.products') }}"
+                <a href="{{ route('seller.products') }}" title="Products"
                     class="nav-link {{ request()->routeIs('seller.products') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
@@ -631,7 +672,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('seller.orders') }}"
+                <a href="{{ route('seller.orders') }}" title="Orders"
                     class="nav-link {{ request()->routeIs('seller.orders') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
@@ -642,9 +683,22 @@
                     <span>Orders</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ route('seller.customers') }}" title="Customers"
+                    class="nav-link {{ request()->routeIs('seller.customers') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    <span>Customers</span>
+                </a>
+            </li>
 
             <li class="nav-item">
-                <a href="{{ route('seller.delivery') }}"
+                <a href="{{ route('seller.delivery') }}" title="Delivery Partners"
                     class="nav-link {{ request()->routeIs('seller.delivery') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
@@ -654,8 +708,9 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('seller.settings') }}"
-                    class="nav-link {{ request()->routeIs('seller.settings') ? 'active' : '' }}">
+                <a href="javascript:void(0)" title="Settings"
+                    class="nav-link {{ request()->routeIs('seller.settings') || request()->routeIs('seller.settings.auto-delete') ? 'active' : '' }}"
+                    id="settings-toggle">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
                         <circle cx="12" cy="12" r="3"></circle>
@@ -664,14 +719,29 @@
                         </path>
                     </svg>
                     <span>Settings</span>
+                    <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
                 </a>
+                <ul class="dropdown-menu" id="settings-dropdown">
+                    <li class="dropdown-item">
+                        <a href="{{ route('seller.settings.auto-delete') }}"
+                            class="dropdown-link {{ request()->routeIs('seller.settings.auto-delete') ? 'active' : '' }}">Auto Delete Data</a>
+                    </li>
+                    <li class="dropdown-item">
+                        <a href="{{ route('seller.settings') }}"
+                            class="dropdown-link {{ request()->routeIs('seller.settings') ? 'active' : '' }}">General Settings</a>
+                    </li>
+                </ul>
             </li>
+
         </ul>
 
         <div class="sidebar-footer">
             <form action="{{ route('logout') }}" method="POST" id="seller-logout-form">
                 @csrf
-                <button type="button" class="logout-link" onclick="openLogoutModal()">
+                <button type="button" class="logout-link" onclick="openLogoutModal()" title="Sign Out">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                         stroke-linejoin="round">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -689,26 +759,36 @@
         <div class="admin-topbar">
             <div class="topbar-right">
                 @php
-                    // Fetch seller orders
-                    $sellerId = Auth::id();
-                    $sellerOrdersQuery = \App\Models\Order::with('user')
-                        ->where('admin_id', Auth::user()->admin_id)
-                        ->where(function($q) use ($sellerId) {
-                            $q->where('items_json', 'like', '%"seller_id":'.$sellerId.'%')
-                              ->orWhere('items_json', 'like', '%"seller_id": '.$sellerId.'%');
-                        });
+                    $cancelledCount = 0;
+                    $cancelledOrders = collect();
+                    $newOrdersCount = 0;
+                    $newOrders = collect();
+                    $deliveryNotifCount = 0;
+                    $deliveryNotifications = collect();
 
-                    // Fetch cancelled orders
-                    $cancelledOrders = (clone $sellerOrdersQuery)->where('status', 'cancelled')->orderBy('updated_at', 'desc')->take(5)->get();
-                    $cancelledCount = (clone $sellerOrdersQuery)->where('status', 'cancelled')->count();
+                    if (Auth::check()) {
+                        $sellerId = Auth::id();
+                        $user = Auth::user();
+                        
+                        $sellerOrdersQuery = \App\Models\Order::with('user')
+                            ->whereJsonContains('items_json', ['seller_id' => (int)$sellerId]);
 
-                    // Fetch recent paid orders
-                    $newOrders = (clone $sellerOrdersQuery)->where('status', 'completed')->orderBy('created_at', 'desc')->take(5)->get();
-                    $newOrdersCount = (clone $sellerOrdersQuery)->where('status', 'completed')->count();
+                        if ($user->admin_id) {
+                            $sellerOrdersQuery->where('admin_id', $user->admin_id);
+                        }
 
-                    // Fetch unread delivery applications
-                    $deliveryNotifications = Auth::user()->unreadNotifications()->where('type', 'like', '%DeliveryApplicationNotification')->take(5)->get();
-                    $deliveryNotifCount = Auth::user()->unreadNotifications()->where('type', 'like', '%DeliveryApplicationNotification')->count();
+                        // Fetch cancelled orders
+                        $cancelledOrders = (clone $sellerOrdersQuery)->where('status', 'cancelled')->orderBy('updated_at', 'desc')->take(5)->get();
+                        $cancelledCount = (clone $sellerOrdersQuery)->where('status', 'cancelled')->count();
+
+                        // Fetch recent paid orders
+                        $newOrders = (clone $sellerOrdersQuery)->where('status', 'completed')->orderBy('created_at', 'desc')->take(5)->get();
+                        $newOrdersCount = (clone $sellerOrdersQuery)->where('status', 'completed')->count();
+
+                        // Fetch unread delivery applications
+                        $deliveryNotifications = $user->unreadNotifications()->where('type', 'like', '%DeliveryApplicationNotification')->take(5)->get();
+                        $deliveryNotifCount = $user->unreadNotifications()->where('type', 'like', '%DeliveryApplicationNotification')->count();
+                    }
                 @endphp
                 <div style="display: flex; gap: 15px;">
                     {{-- Cancellation Notification --}}

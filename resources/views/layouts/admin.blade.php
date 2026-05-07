@@ -38,6 +38,27 @@
             padding: 0;
         }
 
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(248, 47, 2, 0.5);
+            border-radius: 20px;
+            border: 2px solid transparent;
+            background-clip: content-box;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--admin-primary);
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
             background: var(--admin-bg);
@@ -313,11 +334,26 @@
         }
 
         .dropdown-menu.active {
-            max-height: 200px;
+            max-height: 100px;
             opacity: 1;
             padding: 8px 0;
             margin-top: 5px;
             margin-bottom: 10px;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+        }
+
+        .dropdown-menu::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .dropdown-menu::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .dropdown-menu::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
         }
 
         .dropdown-item {
@@ -495,8 +531,9 @@
         }
 
         .notif-icon {
-            width: 100%;
-            height: 100%;
+            width: 36px;
+            height: 36px;
+            flex-shrink: 0;
             background: #E8F5E9;
             color: #4CAF50;
             border-radius: 50%;
@@ -608,7 +645,7 @@
 
         <ul class="nav-menu">
             <li class="nav-item">
-                <a href="{{ route('admin.dashboard') }}"
+                <a href="{{ route('admin.dashboard') }}" title="Dashboard"
                     class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
@@ -619,7 +656,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('admin.products') }}"
+                <a href="{{ route('admin.products') }}" title="Products"
                     class="nav-link {{ request()->routeIs('admin.products') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
@@ -631,7 +668,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('admin.orders') }}"
+                <a href="{{ route('admin.orders') }}" title="Orders"
                     class="nav-link {{ request()->routeIs('admin.orders') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
@@ -643,7 +680,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('admin.customers') }}"
+                <a href="{{ route('admin.customers') }}" title="Customers"
                     class="nav-link {{ request()->routeIs('admin.customers') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
@@ -656,7 +693,7 @@
             </li>
 
             <li class="nav-item">
-                <a href="{{ route('admin.delivery') }}"
+                <a href="{{ route('admin.delivery') }}" title="Delivery Partners"
                     class="nav-link {{ request()->routeIs('admin.delivery') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
@@ -666,7 +703,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="javascript:void(0)"
+                <a href="javascript:void(0)" title="Settings"
                     class="nav-link {{ request()->routeIs('admin.settings') || request()->routeIs('admin.categories') || request()->routeIs('admin.currency') || request()->routeIs('admin.sellers') ? 'active' : '' }}"
                     id="settings-toggle">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -701,6 +738,10 @@
                             class="dropdown-link {{ request()->routeIs('admin.banners') ? 'active' : '' }}">Home Banners</a>
                     </li>
                     <li class="dropdown-item">
+                        <a href="{{ route('admin.settings.auto-delete') }}"
+                            class="dropdown-link {{ request()->routeIs('admin.settings.auto-delete') ? 'active' : '' }}">Auto Delete Data</a>
+                    </li>
+                    <li class="dropdown-item">
                         <a href="{{ route('admin.settings') }}"
                             class="dropdown-link {{ request()->routeIs('admin.settings') ? 'active' : '' }}">General
                             Settings</a>
@@ -712,7 +753,7 @@
         <div class="sidebar-footer">
             <form action="{{ route('logout') }}" method="POST" id="admin-logout-form">
                 @csrf
-                <button type="button" class="logout-link" onclick="openLogoutModal()">
+                <button type="button" class="logout-link" onclick="openLogoutModal()" title="Sign Out">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                         stroke-linejoin="round">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>

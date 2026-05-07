@@ -61,8 +61,8 @@
                     <h3 class="offer-title">{{ $product->name }}</h3>
                     <p class="offer-desc">{{ Str::limit($product->description, 150) }}</p>
                     <div style="margin-bottom: 20px;">
-                        <span style="font-size: 1.1rem; color: #9CA3AF; text-decoration: line-through; margin-right: 10px;">${{ number_format($product->price, 2) }}</span>
-                        <span style="color: #10B981; font-weight: 800; font-size: 1.8rem;">${{ number_format($product->final_price, 2) }}</span>
+                        <span style="font-size: 1.1rem; color: #9CA3AF; text-decoration: line-through; margin-right: 10px;">{{ currency_symbol() }}{{ number_format($product->price, 2) }}</span>
+                        <span style="color: #10B981; font-weight: 800; font-size: 1.8rem;">{{ currency_symbol() }}{{ number_format($product->final_price, 2) }}</span>
                     </div>
                     <a href="{{ route('products') }}" class="btn-claim">Shop Now</a>
                 </div>
