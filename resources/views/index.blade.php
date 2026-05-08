@@ -23,6 +23,7 @@
             overflow: hidden;
             border-radius: var(--radius-md);
             box-shadow: var(--shadow-sm);
+            background: var(--color-bg-light);
         }
 
         .banner-track {
@@ -106,10 +107,10 @@
 
         .ad-image-wrapper {
             position: absolute;
-            right: 5%;
+            right: 0;
             bottom: 0;
-            height: 110%;
-            width: 50%;
+            height: 100%;
+            width: 55%;
             display: flex;
             align-items: flex-end;
             justify-content: center;
@@ -119,10 +120,9 @@
         }
 
         .ad-image-wrapper img {
-            max-height: 100%;
-            max-width: 100%;
-            object-fit: contain;
-            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.15));
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         /* ========== PRODUCTS SECTION OVERRIDES ========== */
@@ -232,22 +232,34 @@
         }
 
         @media (max-width: 768px) {
-            .ad-banner-container { height: 520px; }
-            .ad-banner { flex-direction: column-reverse; padding: 30px 5%; text-align: center; justify-content: center; }
-            .ad-content { display: flex; flex-direction: column; align-items: center; max-width: 100%; z-index: 20; transform: none; animation: none; opacity: 1; margin-top: 20px; }
-            .ad-image-wrapper { position: relative; width: 100%; height: 220px; opacity: 1; right: auto; bottom: auto; transform: none; animation: none; }
-            .ad-title { font-size: 2.2rem; }
+            .ad-banner-container { height: auto; min-height: 520px; }
+            .ad-banner { flex-direction: column-reverse; padding: 0 0 40px 0; text-align: center; justify-content: center; gap: 30px; }
+            .ad-content { display: flex; flex-direction: column; align-items: center; max-width: 100%; z-index: 20; padding: 0 5%; }
+            .ad-image-wrapper { 
+                position: relative; 
+                width: 100%; 
+                height: 320px; 
+                opacity: 1; 
+                right: auto; 
+                bottom: auto; 
+                border-radius: 16px 16px 0 0;
+                overflow: hidden;
+                box-shadow: none;
+            }
+            .ad-image-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+            .ad-title { font-size: 2.2rem; margin-top: 10px; }
             .section-title { font-size: 1.8rem; }
         }
 
         @media (max-width: 480px) {
-            .ad-banner-section { padding: 15px 5%; margin-top: 5px; }
-            .ad-banner-container { height: 500px; }
+            .ad-banner-section { padding: 10px 4%; margin-top: 0; }
+            .ad-banner-container { height: auto; min-height: 480px; }
+            .ad-banner { padding: 0 0 30px 0; }
             .ad-title { font-size: 1.8rem; margin-bottom: 10px; }
-            .ad-subtitle { font-size: 0.95rem; margin-bottom: 20px; line-height: 1.5; }
+            .ad-subtitle { font-size: 0.95rem; margin-bottom: 20px; line-height: 1.5; padding: 0 8%; }
             .btn-primary-custom { padding: 12px 28px !important; font-size: 0.95rem !important; }
             .ad-badge { font-size: 0.75rem; padding: 6px 14px; margin-bottom: 15px; }
-            .ad-image-wrapper { width: 90%; height: 180px; }
+            .ad-image-wrapper { width: 100%; height: 260px; border-radius: 12px 12px 0 0; margin: 0; }
             .products-section { padding: 40px 5%; }
             .section-header { flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 25px; }
             .section-title { font-size: 1.5rem; }
@@ -276,7 +288,7 @@
                             </a>
                         </div>
                         <div class="ad-image-wrapper">
-                            <img src="{{ asset($banner->image_url) }}" alt="{{ $banner->title }}">
+                            <img src="{{ asset($banner->image_url) }}" alt="{{ $banner->title }}" {{ $index > 0 ? 'loading="lazy"' : '' }}>
                         </div>
                     </div>
                 @empty
@@ -292,7 +304,7 @@
                             </a>
                         </div>
                         <div class="ad-image-wrapper">
-                            <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=800" alt="Headphones Banner">
+                            <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=800" alt="Headphones Banner" loading="lazy">
                         </div>
                     </div>
                 @endforelse
@@ -331,7 +343,7 @@
                     </div>
 
                     <div class="product-image">
-                        <img src="{{ asset($product->main_image_url) }}" alt="{{ $product->name }}">
+                        <img src="{{ asset($product->main_image_url) }}" alt="{{ $product->name }}" loading="lazy">
                     </div>
                     <div class="product-info">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -358,12 +370,6 @@
                                     <button class="btn-add">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                                     </button>
-                                    <div class="qty-selector">
-                                        <button class="qty-btn minus">−</button>
-                                        <span class="qty-value">1</span>
-                                        <button class="qty-btn plus">+</button>
-                                        <button class="btn-confirm-add">ADD TO CART (1)</button>
-                                    </div>
                                 @endif
                             </div>
                         </div>

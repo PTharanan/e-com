@@ -232,7 +232,7 @@
                             <p>Click to upload image or drag & drop</p>
                             <span style="font-size: 11px; color: #9CA3AF;">JPG, PNG or GIF (Max 2MB)</span>
                         </div>
-                        <input type="file" name="image" id="cat_image" accept="image/*" required onchange="previewFile()">
+                        <input type="file" name="image" id="cat_image" accept=".jpg,.jpeg,.png,.webp" required onchange="previewFile()">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -292,24 +292,83 @@
         stepDesc.innerText = 'Step 1: Enter Category Details';
     };
 
+    let compressedImageBlob = null;
+
     const previewFile = () => {
         const preview = document.getElementById('previewImage');
         const placeholder = document.getElementById('uploadPlaceholder');
-        const file = document.getElementById('cat_image').files[0];
-        const reader = new FileReader();
+        const fileInput = document.getElementById('cat_image');
+        const file = fileInput.files[0];
+        
+        if (!file) return;
 
-        reader.onloadend = () => {
-            preview.src = reader.result;
-            preview.style.display = 'block';
-            placeholder.style.display = 'none';
+        // 10MB Limit
+        if (file.size > 10 * 1024 * 1024) {
+            alert('File is too large. Maximum size is 10MB.');
+            fileInput.value = '';
+            return;
         }
 
-        if (file) {
-            reader.readAsDataURL(file);
-        } else {
-            preview.src = "";
-        }
+        const wrapper = document.querySelector('.image-upload-wrapper');
+        wrapper.style.opacity = '0.5';
+
+        compressImageClientSide(file).then(blob => {
+            compressedImageBlob = blob;
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                preview.src = reader.result;
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+                wrapper.style.opacity = '1';
+            }
+            reader.readAsDataURL(blob);
+        }).catch(err => {
+            console.error(err);
+            wrapper.style.opacity = '1';
+        });
     };
+
+    async function compressImageClientSide(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = event => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const maxWidth = 800; // Categories can be smaller
+                    const maxHeight = 800;
+
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height *= maxWidth / width;
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width *= maxHeight / height;
+                            height = maxHeight;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob(blob => {
+                        if (blob) resolve(blob);
+                        else reject(new Error('Canvas toBlob failed'));
+                    }, 'image/webp', 0.8);
+                };
+                img.onerror = reject;
+            };
+            reader.onerror = reject;
+        });
+    }
 
     form.onsubmit = async (e) => {
         e.preventDefault();
@@ -320,6 +379,10 @@
         saveBtn.innerText = 'Saving...';
 
         const formData = new FormData(form);
+        if (compressedImageBlob) {
+            const fileName = document.getElementById('cat_image').files[0].name.split('.')[0] + '.webp';
+            formData.set('image', compressedImageBlob, fileName);
+        }
 
         try {
             const response = await fetch('{{ route("admin.categories.store") }}', {

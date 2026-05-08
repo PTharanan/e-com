@@ -434,7 +434,7 @@
         .bottom-nav {
             width: 100%;
             height: 100%;
-            background: var(--color-bg-light);
+            background: #fcf6f1ff;
             display: flex;
             justify-content: space-around;
             align-items: center;
@@ -453,9 +453,9 @@
             left: 0;
             width: 70px;
             height: 70px;
-            background: var(--color-bg-light);
+            background: #fcf6f1ff;
             border-radius: 50%;
-            border: 6px solid var(--color-bg-light);
+            border: 6px solid #fcf6f1ff;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 2500;
@@ -576,7 +576,6 @@
         .product-card {
             background: var(--color-white);
             border-radius: var(--radius-md);
-            padding: 20px;
             box-shadow: var(--shadow-sm);
             border: 1px solid var(--color-border);
             transition: var(--transition-normal);
@@ -608,27 +607,29 @@
         }
 
         .product-image {
-            width: 100%;
-            height: 220px;
-            background: #F8F9FA;
-            border-radius: var(--radius-sm);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            position: relative;
+            width: 100% !important;
+            height: 220px !important;
+            overflow: hidden !important;
+            position: relative !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: none !important;
         }
 
         .product-image img {
-            max-width: 80%;
-            max-height: 80%;
-            object-fit: contain;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            display: block !important;
             transition: var(--transition-normal);
         }
 
         .product-card:hover .product-image img {
             transform: scale(1.1);
+        }
+
+        .product-info {
+            padding: 20px;
         }
 
         .product-category {
@@ -854,22 +855,27 @@
                 grid-template-columns: 1fr;
                 gap: 20px;
             }
+
             .product-card {
-                padding: 18px;
+                /* Padding removed to allow full image */
             }
+
             .product-image {
                 height: 200px;
-                margin-bottom: 15px;
+                /* margin removed to allow full image */
             }
+
             .product-title {
                 font-size: 1.05rem;
                 height: auto;
                 min-height: 2.8rem;
                 margin-bottom: 12px;
             }
+
             .product-price {
                 font-size: 1.25rem;
             }
+
             .btn-add {
                 width: 40px;
                 height: 40px;
@@ -1114,87 +1120,87 @@
 
 <body>
     @if(!request()->is('admin/dashboard'))
-    <nav class="navbar">
-        <a href="{{ route('home') }}" class="navbar-brand">
-            <div
-                style="width: 40px; height: 40px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--color-bg-light); border-radius: 50%;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)"
-                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <path d="M16 10a4 4 0 0 1-8 0"></path>
-                </svg>
-            </div>
-            <span class="brand-text">E-<span>Shop</span></span>
-        </a>
-
-        <div class="nav-links">
-            <a href="{{ route('home') }}"
-                class="{{ request()->routeIs('home') ? 'nav-link active' : 'nav-link' }}">Home</a>
-            <a href="{{ route('products') }}"
-                class="{{ request()->routeIs('products') ? 'nav-link active' : 'nav-link' }}">Products</a>
-            <a href="{{ route('categories') }}"
-                class="{{ request()->routeIs('categories') ? 'nav-link active' : 'nav-link' }}">Categories</a>
-            <a href="{{ route('offers') }}"
-                class="{{ request()->routeIs('offers') ? 'nav-link active' : 'nav-link' }}">Offers</a>
-        </div>
-
-        <div class="nav-actions">
-            <a href="{{ route('cart') }}" class="cart-wrapper" style="text-decoration: none;">
-                <div class="profile-btn" title="Shopping Cart">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+        <nav class="navbar">
+            <a href="{{ route('home') }}" class="navbar-brand">
+                <div
+                    style="width: 40px; height: 40px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--color-bg-light); border-radius: 50%;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)"
+                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
                     </svg>
-                    <span class="cart-badge" id="cart-badge">0</span>
                 </div>
-                <span class="cart-label-display">Cart</span>
+                <span class="brand-text">E-<span>Shop</span></span>
             </a>
 
-            @auth
-                <div class="user-info-wrapper">
-                    <a href="#" class="profile-btn" title="My Account">
+            <div class="nav-links">
+                <a href="{{ route('home') }}"
+                    class="{{ request()->routeIs('home') ? 'nav-link active' : 'nav-link' }}">Home</a>
+                <a href="{{ route('products') }}"
+                    class="{{ request()->routeIs('products', 'product.show') ? 'nav-link active' : 'nav-link' }}">Products</a>
+                <a href="{{ route('categories') }}"
+                    class="{{ request()->routeIs('categories') ? 'nav-link active' : 'nav-link' }}">Categories</a>
+                <a href="{{ route('offers') }}"
+                    class="{{ request()->routeIs('offers') ? 'nav-link active' : 'nav-link' }}">Offers</a>
+            </div>
+
+            <div class="nav-actions">
+                <a href="{{ route('cart') }}" class="cart-wrapper" style="text-decoration: none;">
+                    <div class="profile-btn" title="Shopping Cart">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                                d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
                         </svg>
-                        <span class="online-dot"></span>
-                    </a>
-                    <span class="user-name-display">{{ Auth::user()->name }}</span>
+                        <span class="cart-badge" id="cart-badge">0</span>
+                    </div>
+                    <span class="cart-label-display">Cart</span>
+                </a>
 
-                    <!-- Dropdown -->
-                    <div class="profile-dropdown">
-                        <a href="{{ route('dashboard') }}" class="dropdown-item" style="text-decoration: none;">
+                @auth
+                    <div class="user-info-wrapper">
+                        <a href="#" class="profile-btn" title="My Account">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
-                            <span>My Account</span>
+                            <span class="online-dot"></span>
                         </a>
-                        <button type="button" class="dropdown-item" id="logout-trigger">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-                            </svg>
-                            <span>Sign Out</span>
-                        </button>
+                        <span class="user-name-display">{{ Auth::user()->name }}</span>
+
+                        <!-- Dropdown -->
+                        <div class="profile-dropdown">
+                            <a href="{{ route('dashboard') }}" class="dropdown-item" style="text-decoration: none;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span>My Account</span>
+                            </a>
+                            <button type="button" class="dropdown-item" id="logout-trigger">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                                </svg>
+                                <span>Sign Out</span>
+                            </button>
+                        </div>
                     </div>
-                </div>
-            @else
-                <a href="{{ route('sign-in') }}" class="profile-btn" title="Sign In">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                    </svg>
-                </a>
-            @endauth
-        </div>
-    </nav>
+                @else
+                    <a href="{{ route('sign-in') }}" class="profile-btn" title="Sign In">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                        </svg>
+                    </a>
+                @endauth
+            </div>
+        </nav>
     @endif
 
     <main>
@@ -1202,62 +1208,63 @@
     </main>
 
     @if(!request()->is('admin/dashboard'))
-    <!-- Mobile Bottom Navigation Container -->
-    <div class="bottom-nav-container" id="magic-nav-container">
-        <!-- Moving Indicator Circle (Moved OUTSIDE the mask) -->
-        <div class="nav-indicator" id="nav-indicator"></div>
+        <!-- Mobile Bottom Navigation Container -->
+        <div class="bottom-nav-container" id="magic-nav-container">
+            <!-- Moving Indicator Circle (Moved OUTSIDE the mask) -->
+            <div class="nav-indicator" id="nav-indicator"></div>
 
-        <nav class="bottom-nav" id="magic-nav">
-            <a href="{{ route('home') }}"
-                class="bottom-nav-item {{ request()->routeIs('home') ? 'active' : 'nav-item-js' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                </svg>
-                <span>Home</span>
-            </a>
-            <a href="{{ route('products') }}"
-                class="bottom-nav-item {{ request()->routeIs('products') ? 'active' : 'nav-item-js' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                </svg>
-                <span>Products</span>
-            </a>
+            <nav class="bottom-nav" id="magic-nav">
+                <a href="{{ route('home') }}"
+                    class="bottom-nav-item {{ request()->routeIs('home') ? 'active' : 'nav-item-js' }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                    </svg>
+                    <span>Home</span>
+                </a>
+                <a href="{{ route('products') }}"
+                    class="bottom-nav-item {{ request()->routeIs('products', 'product.show') ? 'active' : 'nav-item-js' }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                    </svg>
+                    <span>Products</span>
+                </a>
 
-            <a href="{{ route('cart') }}" class="bottom-nav-item {{ request()->is('cart*') ? 'active' : 'nav-item-js' }}"
-                id="cart-trigger-mobile">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
-                </svg>
-                <span class="cart-badge cart-badge-mobile">0</span>
-                <span>Cart</span>
-            </a>
+                <a href="{{ route('cart') }}"
+                    class="bottom-nav-item {{ request()->is('cart*') ? 'active' : 'nav-item-js' }}"
+                    id="cart-trigger-mobile">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                    </svg>
+                    <span class="cart-badge cart-badge-mobile">0</span>
+                    <span>Cart</span>
+                </a>
 
-            <a href="{{ route('categories') }}"
-                class="bottom-nav-item {{ request()->routeIs('categories') ? 'active' : 'nav-item-js' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25a2.25 2.25 0 01-2.25 2.25h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25h-2.25a2.25 2.25 0 01-2.25-2.25v-2.25z" />
-                </svg>
-                <span>Categories</span>
-            </a>
-            <a href="{{ Auth::check() ? route('dashboard') : route('login') }}"
-                class="bottom-nav-item {{ request()->routeIs('dashboard') || request()->routeIs('login') ? 'active' : 'nav-item-js' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.963-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span>Account</span>
-            </a>
-        </nav>
-    </div>
+                <a href="{{ route('categories') }}"
+                    class="bottom-nav-item {{ request()->routeIs('categories') ? 'active' : 'nav-item-js' }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25a2.25 2.25 0 01-2.25 2.25h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25h-2.25a2.25 2.25 0 01-2.25-2.25v-2.25z" />
+                    </svg>
+                    <span>Categories</span>
+                </a>
+                <a href="{{ Auth::check() ? route('dashboard') : route('login') }}"
+                    class="bottom-nav-item {{ request()->routeIs('dashboard') || request()->routeIs('login') ? 'active' : 'nav-item-js' }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.963-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span>Account</span>
+                </a>
+            </nav>
+        </div>
     @endif
 
     <!-- Logout Confirmation Modal -->
@@ -1459,99 +1466,25 @@
 
             // ========== GLOBAL PRODUCT CARD INTERACTION ==========
             const initProductCards = () => {
-                const productActions = document.querySelectorAll('.product-actions');
-                productActions.forEach(action => {
-                    if (action.dataset.initialized) return;
-                    action.dataset.initialized = "true";
-
-                    const card = action.closest('.product-card');
-                    if (!card) return;
-                    
+                document.querySelectorAll('.product-card').forEach(card => {
+                    const btnAdd = card.querySelector('.btn-add');
                     const productId = card.dataset.productId;
                     const stockLimit = parseInt(card.dataset.stock || 0);
-                    const btnAdd = action.querySelector('.btn-add');
-                    const qtyValue = action.querySelector('.qty-value');
-                    const btnPlus = action.querySelector('.plus');
-                    const btnMinus = action.querySelector('.minus');
-                    const btnConfirm = action.querySelector('.btn-confirm-add');
-
-                    const updateAddButtonState = () => {
-                        if (!btnAdd) return;
-                        const inCart = window.cartItems[productId] ? window.cartItems[productId].qty : 0;
-                        if (inCart >= stockLimit) {
-                            btnAdd.classList.add('max-reached');
-                            btnAdd.innerHTML = `<span>MAX</span><svg class="prohibited-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>`;
-                        } else {
-                            btnAdd.classList.remove('max-reached');
-                            btnAdd.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
-                        }
-                    };
-
-                    updateAddButtonState();
 
                     if (btnAdd) {
-                        btnAdd.addEventListener('click', (e) => {
+                        btnAdd.addEventListener('click', async (e) => {
                             e.stopPropagation();
                             if (!isAuthenticated) { window.location.href = "{{ route('sign-in') }}"; return; }
-                            
+
                             const inCart = window.cartItems[productId] ? window.cartItems[productId].qty : 0;
                             if (inCart >= stockLimit) {
-                                alert('Sorry, item not enough in stock!');
+                                alert('Sorry, out of stock!');
                                 return;
                             }
-                            
-                            card.classList.add('active-qty');
-                            btnAdd.style.display = 'none';
-                            if (qtyValue) qtyValue.innerText = '1';
-                            if (btnConfirm) btnConfirm.innerText = 'ADD TO CART (1)';
-                            if (btnPlus) btnPlus.disabled = (1 + inCart >= stockLimit);
-                        });
-                    }
 
-                    if (btnPlus) {
-                        btnPlus.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            if (!qtyValue) return;
-                            let val = parseInt(qtyValue.innerText);
-                            const inCart = window.cartItems[productId] || 0;
-                            if (val + inCart < stockLimit) {
-                                val++;
-                                qtyValue.innerText = val;
-                                if (btnConfirm) btnConfirm.innerText = `ADD TO CART (${val})`;
-                                if (val + inCart === stockLimit) btnPlus.disabled = true;
-                            } else {
-                                alert('Sorry, item not enough in stock!');
-                            }
-                        });
-                    }
-
-                    if (btnMinus) {
-                        btnMinus.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            if (!qtyValue) return;
-                            let val = parseInt(qtyValue.innerText);
-                            if (val > 1) {
-                                val--;
-                                qtyValue.innerText = val;
-                                if (btnPlus) btnPlus.disabled = false;
-                                if (btnConfirm) btnConfirm.innerText = `ADD TO CART (${val})`;
-                            } else {
-                                card.classList.remove('active-qty');
-                                if (btnAdd) btnAdd.style.display = 'flex';
-                                qtyValue.innerText = '1';
-                                if (btnPlus) btnPlus.disabled = false;
-                            }
-                        });
-                    }
-
-                    if (btnConfirm) {
-                        btnConfirm.addEventListener('click', async (e) => {
-                            e.stopPropagation();
-                            if (!qtyValue) return;
-                            const val = parseInt(qtyValue.innerText);
-                            
-                            btnConfirm.disabled = true;
-                            btnConfirm.innerText = 'Processing...';
+                            const originalContent = btnAdd.innerHTML;
+                            btnAdd.disabled = true;
+                            btnAdd.innerHTML = '<span style="font-size:0.6rem">...</span>';
 
                             try {
                                 const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
@@ -1565,44 +1498,34 @@
                                     body: JSON.stringify({
                                         _token: csrfToken,
                                         product_id: productId,
-                                        quantity: val
+                                        quantity: 1
                                     })
                                 });
 
                                 const result = await response.json();
-                                
+
                                 if (result.success) {
-                                    if (window.flyToCart) window.flyToCart(btnConfirm, val, productId);
-                                    
-                                    // Update local stock dataset
+                                    if (window.flyToCart) window.flyToCart(btnAdd, 1, productId);
                                     card.dataset.stock = result.new_stock;
-                                    
-                                    btnConfirm.innerText = 'ADDED!';
-                                    btnConfirm.style.background = '#28a745';
+                                    btnAdd.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                                    btnAdd.style.background = '#28a745';
+                                    btnAdd.style.color = '#fff';
                                     
                                     setTimeout(() => {
-                                        card.classList.remove('active-qty');
-                                        if (btnAdd) btnAdd.style.display = 'flex';
-                                        qtyValue.innerText = '1';
-                                        if (btnPlus) btnPlus.disabled = false;
-                                        btnConfirm.disabled = false;
-                                        updateAddButtonState();
-                                        btnConfirm.innerText = `ADD TO CART (${val})`;
-                                        btnConfirm.style.background = '';
-                                        
-                                        if (result.new_stock <= 0) {
-                                            location.reload(); 
-                                        }
-                                    }, 800);
+                                        btnAdd.disabled = false;
+                                        btnAdd.innerHTML = originalContent;
+                                        btnAdd.style.background = '';
+                                        btnAdd.style.color = '';
+                                        if (result.new_stock <= 0) location.reload();
+                                    }, 1500);
                                 } else {
-                                    alert(result.message || 'Failed to add to cart.');
-                                    btnConfirm.disabled = false;
-                                    btnConfirm.innerText = `ADD TO CART (${val})`;
+                                    alert(result.message || 'Failed');
+                                    btnAdd.disabled = false;
+                                    btnAdd.innerHTML = originalContent;
                                 }
                             } catch (err) {
-                                console.error(err);
-                                alert('An error occurred.');
-                                btnConfirm.disabled = false;
+                                btnAdd.disabled = false;
+                                btnAdd.innerHTML = originalContent;
                             }
                         });
                     }
@@ -1610,6 +1533,18 @@
             };
 
             initProductCards();
+
+            // ========== PRODUCT CARD CLICK TO DETAIL ==========
+            document.querySelectorAll('.product-card').forEach(card => {
+                card.addEventListener('click', function (e) {
+                    // Don't navigate if clicking buttons or qty controls
+                    if (e.target.closest('.btn-add, .qty-selector, .qty-btn, .btn-confirm-add, .product-actions button')) return;
+                    const pid = this.dataset.productId;
+                    if (pid) {
+                        window.location.href = `{{ url('/product') }}/${pid}`;
+                    }
+                });
+            });
 
             // ========== MAGIC NAV ANIMATION ==========
             const magicNav = () => {

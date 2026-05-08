@@ -25,6 +25,14 @@
     .btn-return { background: #F44336; color: white; }
     .btn-cash { background: #FF9800; color: white; }
 
+    /* Upload Progress Ring */
+    .progress-ring-container { display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; position: relative; margin-right: 8px; }
+    .progress-ring { transform: rotate(-90deg); width: 100%; height: 100%; }
+    .progress-ring__circle { transition: stroke-dashoffset 0.1s linear; stroke: #ffffff; stroke-width: 4; fill: transparent; }
+    .progress-ring__circle--progress { stroke: #0033cc; stroke-dasharray: 62.8318; stroke-dashoffset: 62.8318; stroke-linecap: round; }
+    .progress-ring__circle--deliver { stroke: #1b5e20; }
+
+
     @media (max-width: 768px) {
         .work-header { flex-direction: column; align-items: flex-start; gap: 8px; }
         .work-footer { flex-direction: column; }
@@ -62,7 +70,7 @@
                         </div>
                     </div>
                     <div class="work-footer">
-                        <button class="btn-action btn-pickup" onclick="takeOrder({{ $order->id }})">
+                        <button class="btn-action btn-pickup" id="pickup-btn-{{ $order->id }}" onclick="takeOrder({{ $order->id }})">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>
                             TAKE JOB
                         </button>
@@ -119,7 +127,7 @@
                 </div>
                 <div class="work-footer">
                     @if($order->status == 'processing')
-                        <button class="btn-action btn-pickup" onclick="triggerPickup({{ $order->id }})">
+                        <button class="btn-action btn-pickup" id="pickup-btn-{{ $order->id }}" onclick="triggerPickup({{ $order->id }})">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
                             PICK UP (Take Photo)
                         </button>
@@ -127,7 +135,7 @@
                     @endif
 
                     @if($order->status == 'shipped')
-                        <button class="btn-action btn-deliver" onclick="triggerDelivery({{ $order->id }})">
+                        <button class="btn-action btn-deliver" id="deliver-btn-{{ $order->id }}" onclick="triggerDelivery({{ $order->id }})">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
                             DELIVER (Code & Photo)
                         </button>
@@ -147,39 +155,206 @@
             </div>
         @endforelse
     @endif
+
+    <!-- Secure Code Modal -->
+    <div id="secure-code-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+        <div style="background: white; padding: 30px; border-radius: 16px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+            <h3 style="margin: 0 0 15px; color: #1E293B; font-family: 'Poppins', sans-serif;">Verify Delivery</h3>
+            <p style="color: #64748B; font-size: 14px; margin-bottom: 20px;">Please enter the 6-digit Secret Code provided by the customer.</p>
+            
+            <input type="number" id="secure-code-input" pattern="\d*" inputmode="numeric" maxlength="6" 
+                   style="width: 100%; padding: 15px; font-size: 24px; text-align: center; letter-spacing: 5px; font-weight: 700; border: 2px solid #E2E8F0; border-radius: 10px; outline: none; margin-bottom: 20px; font-family: 'Poppins', sans-serif;"
+                   oninput="if(this.value.length > 6) this.value = this.value.slice(0, 6);"
+                   placeholder="000000">
+            
+            <div style="display: flex; gap: 15px;">
+                <button id="cancel-code-btn" style="flex: 1; padding: 12px; border-radius: 8px; border: none; background: #F1F5F9; color: #475569; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif;">Cancel</button>
+                <button id="submit-code-btn" style="flex: 1; padding: 12px; border-radius: 8px; border: none; background: #4CAF50; color: white; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif;">Verify & Deliver</button>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('scripts')
 <script>
+    function promptSecureCode() {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('secure-code-modal');
+            const codeInput = document.getElementById('secure-code-input');
+            const cancelBtn = document.getElementById('cancel-code-btn');
+            const submitBtn = document.getElementById('submit-code-btn');
+            
+            codeInput.value = '';
+            modal.style.display = 'flex';
+            setTimeout(() => codeInput.focus(), 100);
+
+            cancelBtn.onclick = () => {
+                modal.style.display = 'none';
+                resolve(null);
+            };
+
+            submitBtn.onclick = () => {
+                const code = codeInput.value;
+                if (!code || code.length !== 6 || isNaN(code)) {
+                    alert('The code must be exactly 6 numeric digits.');
+                    return;
+                }
+                modal.style.display = 'none';
+                resolve(code);
+            };
+        });
+    }
+
+    async function compressImage(file, maxWidth = 1920, quality = 0.8) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = event => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+                    
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    canvas.toBlob((blob) => {
+                        if (!blob) {
+                            reject(new Error('Canvas empty'));
+                            return;
+                        }
+                        resolve(new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                            type: 'image/jpeg',
+                            lastModified: Date.now()
+                        }));
+                    }, 'image/jpeg', quality);
+                };
+                img.onerror = error => reject(error);
+            };
+            reader.onerror = error => reject(error);
+        });
+    }
+
     function triggerPickup(orderId) {
         document.getElementById(`pickup-input-${orderId}`).click();
     }
 
     async function handlePickup(orderId, input) {
         if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
         
-        const formData = new FormData();
-        formData.append('pickup_image', input.files[0]);
-        formData.append('_token', '{{ csrf_token() }}');
+        if (file.size > 10 * 1024 * 1024) {
+            alert('File is too large! Please select an image under 10MB.');
+            input.value = '';
+            return;
+        }
+        
+        const btn = document.getElementById(`pickup-btn-${orderId}`);
+        const originalHtml = btn ? btn.innerHTML : 'PICK UP (Take Photo)';
+        
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = `
+                <div class="progress-ring-container">
+                    <svg class="progress-ring" viewBox="0 0 24 24">
+                        <circle class="progress-ring__circle" cx="12" cy="12" r="10"></circle>
+                        <circle class="progress-ring__circle progress-ring__circle--progress" cx="12" cy="12" r="10"></circle>
+                    </svg>
+                </div>
+                <span class="btn-text">UPLOADING...</span>
+            `;
+        }
 
         try {
-            const response = await fetch(`{{ url('delivery/take-order') }}/${orderId}`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Accept': 'application/json'
+            const compressedFile = await compressImage(file);
+            
+            const formData = new FormData();
+            formData.append('pickup_image', compressedFile);
+            formData.append('_token', '{{ csrf_token() }}');
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `{{ url('delivery/take-order') }}/${orderId}`, true);
+            xhr.setRequestHeader('Accept', 'application/json');
+
+        xhr.upload.onprogress = function(e) {
+            if (e.lengthComputable && btn) {
+                const percentComplete = Math.round((e.loaded / e.total) * 100);
+                const circle = btn.querySelector('.progress-ring__circle--progress');
+                const textSpan = btn.querySelector('.btn-text');
+                
+                if (circle) {
+                    const circumference = 62.8318; // 2 * pi * r (10)
+                    const offset = circumference - (percentComplete / 100) * circumference;
+                    circle.style.strokeDashoffset = offset;
                 }
-            });
-            const result = await response.json();
-            if (result.success) {
-                alert('Order picked up successfully! The customer has been notified and sent a secret code.');
-                location.reload();
-            } else {
-                alert(result.message);
+                
+                if (percentComplete === 100 && textSpan) {
+                    textSpan.innerText = 'PROCESSING...';
+                }
             }
-        } catch (error) {
-            console.error(error);
+        };
+
+        xhr.onload = function() {
+            if (btn) {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+            if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                    const result = JSON.parse(xhr.responseText);
+                    if (result.success) {
+                        alert('Order picked up successfully! The customer has been notified and sent a secret code.');
+                        location.reload();
+                    } else {
+                        alert(result.message);
+                    }
+                } catch(err) {
+                    alert('An error occurred. Invalid response format.');
+                }
+            } else if (xhr.status === 422) {
+                try {
+                    const errorResponse = JSON.parse(xhr.responseText);
+                    let errorMsg = errorResponse.message || 'Validation failed.';
+                    if (errorResponse.errors) {
+                        const firstErrorKey = Object.keys(errorResponse.errors)[0];
+                        errorMsg = errorResponse.errors[firstErrorKey][0];
+                    }
+                    alert('Error: ' + errorMsg);
+                } catch(err) {
+                    alert('Validation error occurred.');
+                }
+                input.value = ''; // Reset input so they can select a different file
+            } else {
+                alert('Upload failed. Server returned status: ' + xhr.status);
+                input.value = '';
+            }
+        };
+
+        xhr.onerror = function() {
+            if (btn) {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
             alert('An error occurred during pickup.');
+        };
+
+        xhr.send(formData);
+        } catch (error) {
+            if (btn) {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+            alert('Failed to compress image.');
+            input.value = '';
         }
     }
 
@@ -189,8 +364,15 @@
 
     async function handleDelivery(orderId, input) {
         if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
         
-        const code = prompt('Please enter the 6-digit Secret Code provided by the customer:');
+        if (file.size > 10 * 1024 * 1024) {
+            alert('File is too large! Please select an image under 10MB.');
+            input.value = '';
+            return;
+        }
+        
+        const code = await promptSecureCode();
         if (!code) {
             input.value = ''; // Reset input
             return;
@@ -201,30 +383,106 @@
             return;
         }
 
-        const formData = new FormData();
-        formData.append('delivery_image', input.files[0]);
-        formData.append('code', code);
-        formData.append('_token', '{{ csrf_token() }}');
+        const btn = document.getElementById(`deliver-btn-${orderId}`);
+        const originalHtml = btn ? btn.innerHTML : 'DELIVER (Code & Photo)';
+        
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = `
+                <div class="progress-ring-container">
+                    <svg class="progress-ring" viewBox="0 0 24 24">
+                        <circle class="progress-ring__circle" cx="12" cy="12" r="10"></circle>
+                        <circle class="progress-ring__circle progress-ring__circle--progress progress-ring__circle--deliver" cx="12" cy="12" r="10"></circle>
+                    </svg>
+                </div>
+                <span class="btn-text">UPLOADING...</span>
+            `;
+        }
 
         try {
-            const response = await fetch(`{{ url('delivery/verify-delivery') }}/${orderId}`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Accept': 'application/json'
+            const compressedFile = await compressImage(file);
+
+            const formData = new FormData();
+            formData.append('delivery_image', compressedFile);
+            formData.append('code', code);
+            formData.append('_token', '{{ csrf_token() }}');
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `{{ url('delivery/verify-delivery') }}/${orderId}`, true);
+            xhr.setRequestHeader('Accept', 'application/json');
+
+        xhr.upload.onprogress = function(e) {
+            if (e.lengthComputable && btn) {
+                const percentComplete = Math.round((e.loaded / e.total) * 100);
+                const circle = btn.querySelector('.progress-ring__circle--progress');
+                const textSpan = btn.querySelector('.btn-text');
+                
+                if (circle) {
+                    const circumference = 62.8318;
+                    const offset = circumference - (percentComplete / 100) * circumference;
+                    circle.style.strokeDashoffset = offset;
                 }
-            });
-            const result = await response.json();
-            if (result.success) {
-                alert(result.message);
-                location.reload();
+                
+                if (percentComplete === 100 && textSpan) {
+                    textSpan.innerText = 'PROCESSING...';
+                }
+            }
+        };
+
+        xhr.onload = function() {
+            if (btn) {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+            if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                    const result = JSON.parse(xhr.responseText);
+                    if (result.success) {
+                        alert(result.message);
+                        location.reload();
+                    } else {
+                        alert(result.message);
+                        input.value = '';
+                    }
+                } catch(err) {
+                    alert('An error occurred. Invalid response format.');
+                    input.value = '';
+                }
+            } else if (xhr.status === 422) {
+                try {
+                    const errorResponse = JSON.parse(xhr.responseText);
+                    let errorMsg = errorResponse.message || 'Validation failed.';
+                    if (errorResponse.errors) {
+                        const firstErrorKey = Object.keys(errorResponse.errors)[0];
+                        errorMsg = errorResponse.errors[firstErrorKey][0];
+                    }
+                    alert('Error: ' + errorMsg);
+                } catch(err) {
+                    alert('Validation error occurred.');
+                }
+                input.value = '';
             } else {
-                alert(result.message);
+                alert('Upload failed. Server returned status: ' + xhr.status);
                 input.value = '';
             }
-        } catch (error) {
-            console.error(error);
+        };
+
+        xhr.onerror = function() {
+            if (btn) {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
             alert('An error occurred during delivery verification.');
+            input.value = '';
+        };
+
+        xhr.send(formData);
+        } catch (error) {
+            if (btn) {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+            alert('Failed to compress image.');
             input.value = '';
         }
     }

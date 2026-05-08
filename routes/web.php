@@ -2,6 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 
+Route::get('/500', function () {
+    return view('errors.500');
+});
+
 Route::get('/', function () {
     $products = \App\Models\Product::with(['category', 'seller', 'admin'])->where('is_new', true)->latest()->take(4)->get();
     if($products->isEmpty()) {
@@ -29,6 +33,15 @@ Route::get('/offers', function () {
     $products = \App\Models\Product::with('category')->whereNotNull('discount_percentage')->where('discount_percentage', '>', 0)->latest()->get();
     return view('offers', compact('products'));
 })->name('offers');
+
+// Product Detail Page
+Route::get('/product/{id}', [\App\Http\Controllers\ProductController::class, 'show'])->name('product.show');
+
+// Product Reviews (authenticated users only)
+Route::middleware('auth')->group(function () {
+    Route::post('/product/{id}/review', [\App\Http\Controllers\ReviewController::class, 'store'])->name('product.review.store');
+    Route::delete('/review/{id}', [\App\Http\Controllers\ReviewController::class, 'destroy'])->name('product.review.delete');
+});
 
 use App\Http\Controllers\AuthController;
 

@@ -270,9 +270,12 @@
                         {{ $order->status === 'completed' ? 'payment complet' : ($order->status === 'refunded' ? 'Refund' : $order->status) }}
                     </span>
                 </td>
-                <td>
+                <td id="delivery-td-{{ $order->id }}">
                     @if($order->deliveryBoy)
-                        <div style="font-weight: 600; font-size: 13px; color: #1E40AF;">
+                        @php
+                            $deliveryColor = ($order->assignment_type === 'self') ? '#10B981' : '#1E40AF';
+                        @endphp
+                        <div style="font-weight: 600; font-size: 13px; color: {{ $deliveryColor }};">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 2px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                             ID #{{ $order->delivery_boy_id }} - {{ $order->deliveryBoy->name }}
                         </div>
@@ -598,8 +601,19 @@ async function updateOrderStatus(id, el) {
         if (data.orders && data.orders.all_statuses) {
             const serverIds = data.orders.all_statuses.map(o => o.id);
 
-            // 1. Update statuses
+            // 1. Update statuses and delivery info
             data.orders.all_statuses.forEach(o => {
+                // Update memory data for modal
+                const existingOrder = ordersData.find(order => order.id === o.id);
+                if (existingOrder) {
+                    existingOrder.status = o.status;
+                    existingOrder.delivery_boy_id = o.delivery_boy_id;
+                    existingOrder.delivery_boy_name = o.delivery_boy_name || 'Not Assigned';
+                    existingOrder.assignment_type = o.assignment_type;
+                    existingOrder.pickup_image = o.pickup_image;
+                    existingOrder.delivery_image = o.delivery_image;
+                }
+
                 const el = document.getElementById(`order-status-${o.id}`);
                 if (el) {
                     const newStatus = o.status;
@@ -607,6 +621,20 @@ async function updateOrderStatus(id, el) {
                     if (el.innerText.toLowerCase() !== displayText.toLowerCase()) {
                         el.innerText = displayText;
                         el.className = `status-badge status-${newStatus}`;
+                    }
+                }
+
+                const delTd = document.getElementById(`delivery-td-${o.id}`);
+                if (delTd) {
+                    if (o.delivery_boy_id) {
+                        const deliveryColor = (o.assignment_type === 'self') ? '#10B981' : '#1E40AF';
+                        delTd.innerHTML = `
+                        <div style="font-weight: 600; font-size: 13px; color: ${deliveryColor};">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 2px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            ID #${o.delivery_boy_id} - ${o.delivery_boy_name}
+                        </div>`;
+                    } else {
+                        delTd.innerHTML = `<span style="color: #94A3B8; font-size: 12px;">Unassigned</span>`;
                     }
                 }
             });

@@ -896,7 +896,7 @@
                                     <img id="preview-{{ $i }}">
                                     <button type="button" class="remove-img" id="remove-{{ $i }}"
                                         onclick="event.stopPropagation(); removeImage({{ $i }})">&times;</button>
-                                    <input type="file" name="images[]" id="img-input-{{ $i }}" accept=".jpg,.jpeg,.png"
+                                    <input type="file" name="images[]" id="img-input-{{ $i }}" accept=".jpg,.jpeg,.png,.webp"
                                         onchange="previewImage(this, {{ $i }})">
                                 </div>
                             @endfor
@@ -1271,35 +1271,109 @@
         function previewImage(input, index) {
             if (input.files && input.files[0]) {
                 const file = input.files[0];
-                const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
                 if (!allowedTypes.includes(file.type)) {
-                    alert('Invalid file type. Please upload JPG, JPEG, or PNG.');
+                    alert('Invalid file type. Please upload JPG, JPEG, PNG, or WebP.');
                     input.value = '';
                     return;
                 }
+
+                // 10MB Limit check
                 if (file.size > 10 * 1024 * 1024) {
                     alert('File is too large. Maximum size is 10MB.');
                     input.value = '';
                     return;
                 }
+                
+                // Show loading state
+                const slot = document.getElementById(`slot-${index}`);
+                if (slot) slot.style.opacity = '0.5';
 
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const preview = document.getElementById(`preview-${index}`);
-                    const plus = document.getElementById(`plus-${index}`);
-                    const removeBtn = document.getElementById(`remove-${index}`);
+                compressImageClientSide(file).then(compressedBlob => {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const preview = document.getElementById(`preview-${index}`);
+                        const plus = document.getElementById(`plus-${index}`);
+                        const removeBtn = document.getElementById(`remove-${index}`);
 
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                    plus.style.display = 'none';
-                    removeBtn.style.display = 'flex';
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                        plus.style.display = 'none';
+                        removeBtn.style.display = 'flex';
+                        if (slot) slot.style.opacity = '1';
 
-                    // Update tracking array
-                    imageFiles[index] = file;
-                    updateMainImageOptions();
-                }
-                reader.readAsDataURL(file);
+                        // Update tracking array with compressed file
+                        const compressedFile = new File([compressedBlob], file.name.split('.')[0] + '.webp', {
+                            type: 'image/webp'
+                        });
+                        imageFiles[index] = compressedFile;
+                        updateMainImageOptions();
+                    }
+                    reader.readAsDataURL(compressedBlob);
+                }).catch(err => {
+                    console.error('Compression error:', err);
+                    if (slot) slot.style.opacity = '1';
+                    // Fallback to original
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const preview = document.getElementById(`preview-${index}`);
+                        const plus = document.getElementById(`plus-${index}`);
+                        const removeBtn = document.getElementById(`remove-${index}`);
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                        plus.style.display = 'none';
+                        removeBtn.style.display = 'flex';
+                        imageFiles[index] = file;
+                        updateMainImageOptions();
+                    }
+                    reader.readAsDataURL(file);
+                });
             }
+        }
+
+        async function compressImageClientSide(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = event => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        const maxWidth = 1200;
+                        const maxHeight = 1200;
+
+                        if (width > height) {
+                            if (width > maxWidth) {
+                                height *= maxWidth / width;
+                                width = maxWidth;
+                            }
+                        } else {
+                            if (height > maxHeight) {
+                                width *= maxHeight / height;
+                                height = maxHeight;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        canvas.toBlob(blob => {
+                            if (blob) {
+                                resolve(blob);
+                            } else {
+                                reject(new Error('Canvas toBlob failed'));
+                            }
+                        }, 'image/webp', 0.8);
+                    };
+                    img.onerror = reject;
+                };
+                reader.onerror = reject;
+            });
         }
 
         function removeImage(index) {
@@ -1380,13 +1454,13 @@
                         }
                         combinedImages.push({ type: 'existing', data: imageFiles[i].url });
                     } else {
-                        const input = document.getElementById(`img-input-${i}`);
-                        if (input.files[0]) {
-                            formData.append('images[]', input.files[0]);
+                        // For new images, use the compressed file from imageFiles array
+                        if (imageFiles[i]) {
+                            formData.append('images[]', imageFiles[i]);
                             if (i === targetIndex) {
                                 actualMainIndex = combinedImages.length;
                             }
-                            combinedImages.push({ type: 'new', data: input.files[0] });
+                            combinedImages.push({ type: 'new', data: imageFiles[i] });
                         }
                     }
                 }

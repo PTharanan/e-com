@@ -221,7 +221,7 @@
                         <p>Click to upload image</p>
                         <span style="font-size: 11px; color: #9CA3AF;">Recommended: 1200x500px</span>
                     </div>
-                    <input type="file" name="image" id="banner_image" accept="image/*" onchange="previewFile()">
+                    <input type="file" name="image" id="banner_image" accept=".jpg,.jpeg,.png,.webp" onchange="previewFile()">
                 </div>
             </div>
 
@@ -300,20 +300,80 @@
         document.body.style.overflow = 'auto';
     };
 
+    let compressedImageBlob = null;
+
     const previewFile = () => {
-        const file = document.getElementById('banner_image').files[0];
-        const reader = new FileReader();
+        const fileInput = document.getElementById('banner_image');
+        const file = fileInput.files[0];
+        if (!file) return;
 
-        reader.onloadend = () => {
-            preview.src = reader.result;
-            preview.style.display = 'block';
-            placeholder.style.display = 'none';
+        // 10MB Limit
+        if (file.size > 10 * 1024 * 1024) {
+            alert('File is too large. Maximum size is 10MB.');
+            fileInput.value = '';
+            return;
         }
 
-        if (file) {
-            reader.readAsDataURL(file);
-        }
+        const wrapper = document.querySelector('.image-upload-wrapper');
+        wrapper.style.opacity = '0.5';
+
+        compressImageClientSide(file).then(blob => {
+            compressedImageBlob = blob;
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                preview.src = reader.result;
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+                wrapper.style.opacity = '1';
+            }
+            reader.readAsDataURL(blob);
+        }).catch(err => {
+            console.error(err);
+            wrapper.style.opacity = '1';
+        });
     };
+
+    async function compressImageClientSide(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = event => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const maxWidth = 1200; // Banners can be wide
+                    const maxHeight = 800;
+
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height *= maxWidth / width;
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width *= maxHeight / height;
+                            height = maxHeight;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob(blob => {
+                        if (blob) resolve(blob);
+                        else reject(new Error('Canvas toBlob failed'));
+                    }, 'image/webp', 0.8);
+                };
+                img.onerror = reject;
+            };
+            reader.onerror = reject;
+        });
+    }
 
     const editBanner = (banner) => {
         modalTitle.innerText = 'Edit Banner';
@@ -348,6 +408,11 @@
         saveBtn.innerText = 'Saving...';
 
         const formData = new FormData(form);
+        if (compressedImageBlob) {
+            const fileName = document.getElementById('banner_image').files[0].name.split('.')[0] + '.webp';
+            formData.set('image', compressedImageBlob, fileName);
+        }
+        
         const url = method === 'POST' ? '{{ route("admin.banners.store") }}' : `/admin/settings/banners/${bannerId}`;
 
         if (method === 'PUT') {

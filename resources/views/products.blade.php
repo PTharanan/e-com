@@ -333,7 +333,7 @@
                     </div>
 
                     <div class="product-image">
-                        <img src="{{ asset($product->main_image_url) }}" alt="{{ $product->name }}">
+                        <img src="{{ asset($product->main_image_url) }}" alt="{{ $product->name }}" loading="lazy">
                     </div>
                     <div class="product-info">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">

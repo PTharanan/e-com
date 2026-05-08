@@ -109,7 +109,7 @@
         <div class="category-grid">
             @forelse($categories as $category)
                 <a href="{{ route('products', ['category' => $category->id]) }}" class="category-card">
-                    <img class="category-image" src="{{ asset($category->dp_img_url) }}" alt="{{ $category->name }}">
+                    <img class="category-image" src="{{ asset($category->dp_img_url) }}" alt="{{ $category->name }}" loading="lazy">
                     <div class="category-content">
                         <h3 class="category-title">{{ $category->name }}</h3>
                         <span class="category-count">{{ $category->products_count }} {{ $category->products_count == 1 ? 'Item' : 'Items' }}</span>
