@@ -387,22 +387,76 @@
             const searchInput = form.querySelector('input[name="search"]');
             const otherInputs = form.querySelectorAll('select, input[type="number"]');
 
-            // Auto-submit when select or number inputs change
-            otherInputs.forEach(input => {
-                input.addEventListener('change', () => {
-                    form.submit();
-                });
+            async function performAjaxSearch(targetUrl = null) {
+                let url;
+                if (targetUrl) {
+                    url = targetUrl;
+                } else {
+                    const formData = new FormData(form);
+                    const params = new URLSearchParams(formData);
+                    url = `${window.location.pathname}?${params.toString()}`;
+                }
+
+                // Update URL in browser without reload
+                window.history.pushState({}, '', url);
+
+                // Show loading state
+                const grid = document.querySelector('.product-grid');
+                if (grid) grid.style.opacity = '0.5';
+
+                try {
+                    const response = await fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    const html = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newGrid = doc.querySelector('.product-grid');
+                    const currentGrid = document.querySelector('.product-grid');
+
+                    if (newGrid && currentGrid) {
+                        currentGrid.innerHTML = newGrid.innerHTML;
+                        currentGrid.style.opacity = '1';
+                    }
+                    
+                    // Scroll to top of grid
+                    if (targetUrl) {
+                        window.scrollTo({ top: document.querySelector('.section-header').offsetTop - 100, behavior: 'smooth' });
+                    }
+                } catch (error) {
+                    console.error('Search failed:', error);
+                    if (!targetUrl) form.submit();
+                    else window.location.href = targetUrl;
+                }
+            }
+
+            // Intercept pagination clicks
+            document.addEventListener('click', (e) => {
+                const link = e.target.closest('.pagination a, .pagination-link');
+                if (link && link.href && !link.classList.contains('disabled')) {
+                    e.preventDefault();
+                    performAjaxSearch(link.href);
+                }
             });
 
-            // Debounce function for text search so it doesn't submit on every single keystroke
+            // Auto-submit when select or number inputs change
+            otherInputs.forEach(input => {
+                input.addEventListener('change', () => performAjaxSearch());
+            });
+
+            // Debounce function for text search
             let timeout = null;
             searchInput.addEventListener('input', () => {
                 clearTimeout(timeout);
-                timeout = setTimeout(() => {
-                    // Remember focus so we can restore it after page reload
-                    sessionStorage.setItem('search_focused', 'true');
-                    form.submit();
-                }, 600); // Wait 600ms after user stops typing
+                timeout = setTimeout(performAjaxSearch, 500);
+            });
+
+            // Prevent default form submit
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                performAjaxSearch();
             });
 
             // Focus logic

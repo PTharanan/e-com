@@ -428,7 +428,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
             cursor: pointer;
             position: relative;
             color: var(--admin-text-gray);
@@ -463,7 +463,7 @@
             width: 320px;
             background: white;
             border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
             opacity: 0;
             visibility: hidden;
             transform: translateY(10px);
@@ -565,13 +565,15 @@
             stroke: var(--admin-primary);
             stroke-width: 2.5;
             fill: transparent;
-            stroke-dasharray: 113.1; /* 2 * PI * 18 */
+            stroke-dasharray: 113.1;
+            /* 2 * PI * 18 */
             stroke-dashoffset: 113.1;
             transition: none;
         }
 
         .notif-icon-wrapper.pressing .progress-ring__circle {
-            transition: stroke-dashoffset 3s linear; /* Hold for 3 seconds */
+            transition: stroke-dashoffset 3s linear;
+            /* Hold for 3 seconds */
             stroke-dashoffset: 0;
         }
 
@@ -702,7 +704,8 @@
                     class="nav-link {{ request()->routeIs('seller.delivery') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
-                        <path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>
+                        <path d="M5 12h14"></path>
+                        <path d="m12 5 7 7-7 7"></path>
                     </svg>
                     <span>Delivery Partners</span>
                 </a>
@@ -727,11 +730,13 @@
                 <ul class="dropdown-menu" id="settings-dropdown">
                     <li class="dropdown-item">
                         <a href="{{ route('seller.settings.auto-delete') }}"
-                            class="dropdown-link {{ request()->routeIs('seller.settings.auto-delete') ? 'active' : '' }}">Auto Delete Data</a>
+                            class="dropdown-link {{ request()->routeIs('seller.settings.auto-delete') ? 'active' : '' }}">Auto
+                            Delete Data</a>
                     </li>
                     <li class="dropdown-item">
                         <a href="{{ route('seller.settings') }}"
-                            class="dropdown-link {{ request()->routeIs('seller.settings') ? 'active' : '' }}">General Settings</a>
+                            class="dropdown-link {{ request()->routeIs('seller.settings') ? 'active' : '' }}">General
+                            Settings</a>
                     </li>
                 </ul>
             </li>
@@ -769,9 +774,9 @@
                     if (Auth::check()) {
                         $sellerId = Auth::id();
                         $user = Auth::user();
-                        
+
                         $sellerOrdersQuery = \App\Models\Order::with('user')
-                            ->whereJsonContains('items_json', ['seller_id' => (int)$sellerId]);
+                            ->whereJsonContains('items_json', ['seller_id' => (int) $sellerId]);
 
                         if ($user->admin_id) {
                             $sellerOrdersQuery->where('admin_id', $user->admin_id);
@@ -788,32 +793,47 @@
                         // Fetch unread delivery applications
                         $deliveryNotifications = $user->unreadNotifications()->where('type', 'like', '%DeliveryApplicationNotification')->take(5)->get();
                         $deliveryNotifCount = $user->unreadNotifications()->where('type', 'like', '%DeliveryApplicationNotification')->count();
+
+                        // Fetch unread stock notifications
+                        $stockNotifications = $user->unreadNotifications()->where('type', 'like', '%ProductOutOfStockNotification')->take(5)->get();
+                        $stockNotifCount = $user->unreadNotifications()->where('type', 'like', '%ProductOutOfStockNotification')->count();
                     }
                 @endphp
                 <div style="display: flex; gap: 15px;">
                     {{-- Cancellation Notification --}}
                     <div class="notification-dropdown">
                         <button class="bell-btn" id="cancelNotifToggle" title="Cancelled Orders">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF4444"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <line x1="15" y1="9" x2="9" y2="15"></line>
                                 <line x1="9" y1="9" x2="15" y2="15"></line>
                             </svg>
-                            <span class="bell-badge" id="cancelBadge" style="background: #EF4444; {{ $cancelledCount > 0 ? '' : 'display: none;' }}">{{ $cancelledCount }}</span>
+                            <span class="bell-badge" id="cancelBadge"
+                                style="background: #EF4444; {{ $cancelledCount > 0 ? '' : 'display: none;' }}">{{ $cancelledCount }}</span>
                         </button>
                         <div class="bell-menu" id="cancelNotifMenu">
                             <div class="bell-menu-header">
                                 <h4 style="color: #EF4444;">Cancelled Orders</h4>
-                                <span id="cancelHeaderCount" style="background: rgba(239, 68, 68, 0.1); color: #EF4444;">{{ $cancelledCount }} New</span>
+                                <span id="cancelHeaderCount"
+                                    style="background: rgba(239, 68, 68, 0.1); color: #EF4444;">{{ $cancelledCount }}
+                                    New</span>
                             </div>
                             <div class="bell-menu-body" id="cancelNotifList">
                                 @forelse($cancelledOrders as $order)
                                     <a href="{{ route('seller.orders') }}" class="notification-item">
                                         <div class="notif-icon" style="background: #FEE2E2; color: #EF4444;">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                                            </svg>
                                         </div>
                                         <div class="notif-content">
-                                            <p>Order <strong>#{{ $order->id }}</strong> cancelled by {{ $order->user->name ?? 'Guest' }}.</p>
+                                            <p>Order <strong>#{{ $order->id }}</strong> cancelled by
+                                                {{ $order->user->name ?? 'Guest' }}.
+                                            </p>
                                             <span>{{ $order->updated_at->diffForHumans() }}</span>
                                         </div>
                                     </a>
@@ -821,7 +841,9 @@
                                     <div class="no-notif">No new cancellations.</div>
                                 @endforelse
                                 @if($cancelledCount > 0)
-                                    <a href="{{ route('seller.orders') }}" class="view-all-link" style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #EF4444; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View All Cancellations</a>
+                                    <a href="{{ route('seller.orders') }}" class="view-all-link"
+                                        style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #EF4444; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View
+                                        All Cancellations</a>
                                 @endif
                             </div>
                         </div>
@@ -830,42 +852,58 @@
                     {{-- Delivery Partner Notification --}}
                     <div class="notification-dropdown">
                         <button class="bell-btn" id="deliveryNotifToggle" title="Delivery Applications">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <rect x="1" y="3" width="15" height="13"></rect>
                                 <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
                                 <circle cx="5.5" cy="18.5" r="2.5"></circle>
                                 <circle cx="18.5" cy="18.5" r="2.5"></circle>
                             </svg>
                             @if($deliveryNotifCount > 0)
-                                <span class="bell-badge" id="deliveryBadge" style="background: var(--admin-primary);">{{ $deliveryNotifCount }}</span>
+                                <span class="bell-badge" id="deliveryBadge"
+                                    style="background: var(--admin-primary);">{{ $deliveryNotifCount }}</span>
                             @else
-                                <span class="bell-badge" id="deliveryBadge" style="background: var(--admin-primary); display: none;">0</span>
+                                <span class="bell-badge" id="deliveryBadge"
+                                    style="background: var(--admin-primary); display: none;">0</span>
                             @endif
                         </button>
                         <div class="bell-menu" id="deliveryNotifMenu">
                             <div class="bell-menu-header">
                                 <h4>Partner Applications</h4>
-                                <span id="deliveryHeaderCount" style="background: rgba(242, 92, 59, 0.1); color: var(--admin-primary);">{{ $deliveryNotifCount }} New</span>
+                                <span id="deliveryHeaderCount"
+                                    style="background: rgba(242, 92, 59, 0.1); color: var(--admin-primary);">{{ $deliveryNotifCount }}
+                                    New</span>
                             </div>
                             <div class="bell-menu-body" id="deliveryNotifList">
                                 @forelse($deliveryNotifications as $notif)
                                     <div class="notification-item" id="notif-{{ $notif->id }}">
-                                        <div class="notif-icon-wrapper" 
-                                             onmousedown="startNotifDismiss(event, '{{ $notif->id }}')" 
-                                             onmouseup="stopNotifDismiss()" 
-                                             onmouseleave="stopNotifDismiss()"
-                                             ontouchstart="startNotifDismiss(event, '{{ $notif->id }}')"
-                                             ontouchend="stopNotifDismiss()">
+                                        <div class="notif-icon-wrapper"
+                                            onmousedown="startNotifDismiss(event, '{{ $notif->id }}')"
+                                            onmouseup="stopNotifDismiss()" onmouseleave="stopNotifDismiss()"
+                                            ontouchstart="startNotifDismiss(event, '{{ $notif->id }}')"
+                                            ontouchend="stopNotifDismiss()">
                                             <svg class="progress-ring">
-                                                <circle class="progress-ring__circle" r="18" cx="20" cy="20"/>
+                                                <circle class="progress-ring__circle" r="18" cx="20" cy="20" />
                                             </svg>
                                             <div class="notif-icon" style="background: #FDEEE4; color: #F25C3B;">
-                                                <svg class="icon-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
-                                                <svg class="icon-close" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                                <svg class="icon-arrow" width="18" height="18" viewBox="0 0 24 24"
+                                                    fill="none" stroke="currentColor" stroke-width="2.5"
+                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M5 12h14"></path>
+                                                    <path d="m12 5 7 7-7 7"></path>
+                                                </svg>
+                                                <svg class="icon-close" width="18" height="18" viewBox="0 0 24 24"
+                                                    fill="none" stroke="currentColor" stroke-width="2.5"
+                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                </svg>
                                             </div>
                                         </div>
-                                        <a href="{{ route('seller.delivery') }}" class="notif-content" style="text-decoration: none; flex: 1;">
-                                            <p><strong>{{ $notif->data['delivery_boy_name'] }}</strong> applied as a partner.</p>
+                                        <a href="{{ route('seller.delivery') }}" class="notif-content"
+                                            style="text-decoration: none; flex: 1;">
+                                            <p><strong>{{ $notif->data['delivery_boy_name'] }}</strong> applied as a
+                                                partner.</p>
                                             <span>{{ $notif->created_at->diffForHumans() }}</span>
                                         </a>
                                     </div>
@@ -873,7 +911,74 @@
                                     <div class="no-notif">No new applications.</div>
                                 @endforelse
                                 @if($deliveryNotifCount > 0)
-                                    <a href="{{ route('seller.delivery') }}" class="view-all-link" style="display: block; text-align: center; padding: 10px; font-size: 12px; color: var(--admin-primary); text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View All Applications</a>
+                                    <a href="{{ route('seller.delivery') }}" class="view-all-link"
+                                        style="display: block; text-align: center; padding: 10px; font-size: 12px; color: var(--admin-primary); text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View
+                                        All Applications</a>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Out of Stock Notification --}}
+                    <div class="notification-dropdown">
+                        <button class="bell-btn" id="stockNotifToggle" title="Out of Stock Products">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F59E0B"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                                </path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                            <span class="bell-badge" id="stockBadge"
+                                style="background: #F59E0B; {{ $stockNotifCount > 0 ? '' : 'display: none;' }}">{{ $stockNotifCount }}</span>
+                        </button>
+                        <div class="bell-menu" id="stockNotifMenu">
+                            <div class="bell-menu-header">
+                                <h4 style="color: #F59E0B;">Out of Stock</h4>
+                                <span id="stockHeaderCount"
+                                    style="background: rgba(245, 158, 11, 0.1); color: #F59E0B;">{{ $stockNotifCount }}
+                                    New</span>
+                            </div>
+                            <div class="bell-menu-body" id="stockNotifList">
+                                @forelse($stockNotifications as $notif)
+                                    <div class="notification-item" id="notif-{{ $notif->id }}">
+                                        <div class="notif-icon-wrapper"
+                                            onmousedown="startNotifDismiss(event, '{{ $notif->id }}')"
+                                            onmouseup="stopNotifDismiss()" onmouseleave="stopNotifDismiss()"
+                                            ontouchstart="startNotifDismiss(event, '{{ $notif->id }}')"
+                                            ontouchend="stopNotifDismiss()">
+                                            <svg class="progress-ring">
+                                                <circle class="progress-ring__circle" r="18" cx="20" cy="20" />
+                                            </svg>
+                                            <div class="notif-icon" style="background: #FFFBEB; color: #F59E0B;">
+                                                <svg class="icon-arrow" width="18" height="18" viewBox="0 0 24 24"
+                                                    fill="none" stroke="currentColor" stroke-width="2.5"
+                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M5 12h14"></path>
+                                                    <path d="m12 5 7 7-7 7"></path>
+                                                </svg>
+                                                <svg class="icon-close" width="18" height="18" viewBox="0 0 24 24"
+                                                    fill="none" stroke="currentColor" stroke-width="2.5"
+                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <a href="{{ route('seller.products') }}" class="notif-content"
+                                            style="text-decoration: none; flex: 1;">
+                                            <p><strong>{{ $notif->data['product_name'] }}</strong> is out of stock.</p>
+                                            <span>{{ $notif->created_at->diffForHumans() }}</span>
+                                        </a>
+                                    </div>
+                                @empty
+                                    <div class="no-notif">No out of stock alerts.</div>
+                                @endforelse
+                                @if($stockNotifCount > 0)
+                                    <a href="{{ route('seller.products') }}" class="view-all-link"
+                                        style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #F59E0B; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View
+                                        All Products</a>
                                 @endif
                             </div>
                         </div>
@@ -882,7 +987,11 @@
                     {{-- Order Notification (Bell) --}}
                     <div class="notification-dropdown">
                         <button class="bell-btn" id="bellToggle" title="Payment Notifications">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                            </svg>
                             @if($newOrdersCount > 0)
                                 <span class="bell-badge" id="orderBadge">{{ $newOrdersCount }}</span>
                             @else
@@ -898,10 +1007,16 @@
                                 @forelse($newOrders as $order)
                                     <a href="{{ route('seller.orders') }}" class="notification-item">
                                         <div class="notif-icon">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
                                         </div>
                                         <div class="notif-content">
-                                            <p>Order <strong>#{{ $order->id }}</strong> paid by {{ $order->user->name ?? 'Guest' }}.</p>
+                                            <p>Order <strong>#{{ $order->id }}</strong> paid by
+                                                {{ $order->user->name ?? 'Guest' }}.
+                                            </p>
                                             <span>{{ $order->created_at->diffForHumans() }}</span>
                                         </div>
                                     </a>
@@ -909,7 +1024,9 @@
                                     <div class="no-notif">No new payments.</div>
                                 @endforelse
                                 @if($newOrdersCount > 0)
-                                    <a href="{{ route('seller.orders') }}" class="view-all-link" style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #4CAF50; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View All Orders</a>
+                                    <a href="{{ route('seller.orders') }}" class="view-all-link"
+                                        style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #4CAF50; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View
+                                        All Orders</a>
                                 @endif
                             </div>
                         </div>
@@ -1130,11 +1247,14 @@
         const deliveryMenu = document.getElementById('deliveryNotifMenu');
         const cancelToggle = document.getElementById('cancelNotifToggle');
         const cancelMenu = document.getElementById('cancelNotifMenu');
+        const stockToggle = document.getElementById('stockNotifToggle');
+        const stockMenu = document.getElementById('stockNotifMenu');
 
         const closeAllMenus = () => {
             if (bellMenu) bellMenu.classList.remove('active');
             if (deliveryMenu) deliveryMenu.classList.remove('active');
             if (cancelMenu) cancelMenu.classList.remove('active');
+            if (stockMenu) stockMenu.classList.remove('active');
         };
 
         const setupToggle = (toggle, menu) => {
@@ -1151,11 +1271,13 @@
         setupToggle(bellToggle, bellMenu);
         setupToggle(deliveryToggle, deliveryMenu);
         setupToggle(cancelToggle, cancelMenu);
+        setupToggle(stockToggle, stockMenu);
 
         document.addEventListener('click', (e) => {
             if (bellToggle && !bellToggle.contains(e.target) && bellMenu && !bellMenu.contains(e.target) &&
                 deliveryToggle && !deliveryToggle.contains(e.target) && deliveryMenu && !deliveryMenu.contains(e.target) &&
-                cancelToggle && !cancelToggle.contains(e.target) && cancelMenu && !cancelMenu.contains(e.target)) {
+                cancelToggle && !cancelToggle.contains(e.target) && cancelMenu && !cancelMenu.contains(e.target) &&
+                stockToggle && !stockToggle.contains(e.target) && stockMenu && !stockMenu.contains(e.target)) {
                 closeAllMenus();
             }
         });
@@ -1169,7 +1291,7 @@
             currentDismissId = id;
             const wrapper = e.currentTarget;
             wrapper.classList.add('pressing');
-            
+
             dismissTimer = setTimeout(() => {
                 executeDismiss(id, wrapper);
             }, 2800); // Trigger slightly before 3s to ensure it fires before release
@@ -1206,19 +1328,37 @@
                         item.style.paddingBottom = '0';
                         item.style.borderBottom = '0';
                         item.style.margin = '0';
-                        
+
                         setTimeout(() => {
                             item.remove();
                             // Update counts
-                            const badge = document.getElementById('deliveryBadge');
-                            const count = parseInt(badge.innerText) - 1;
-                            if (count > 0) {
-                                badge.innerText = count;
-                                document.getElementById('deliveryHeaderCount').innerText = count + ' New';
-                            } else {
-                                badge.style.display = 'none';
-                                document.getElementById('deliveryHeaderCount').innerText = '0 New';
-                                document.getElementById('deliveryNotifList').innerHTML = '<div class="no-notif">No new applications.</div>';
+                            const delBadge = document.getElementById('deliveryBadge');
+                            const stockBadge = document.getElementById('stockBadge');
+
+                            // Check which list the item belongs to
+                            const isDelivery = wrapper.closest('#deliveryNotifList');
+                            const isStock = wrapper.closest('#stockNotifList');
+
+                            if (isDelivery) {
+                                const count = parseInt(delBadge.innerText) - 1;
+                                if (count > 0) {
+                                    delBadge.innerText = count;
+                                    document.getElementById('deliveryHeaderCount').innerText = count + ' New';
+                                } else {
+                                    delBadge.style.display = 'none';
+                                    document.getElementById('deliveryHeaderCount').innerText = '0 New';
+                                    document.getElementById('deliveryNotifList').innerHTML = '<div class="no-notif">No new applications.</div>';
+                                }
+                            } else if (isStock) {
+                                const count = parseInt(stockBadge.innerText) - 1;
+                                if (count > 0) {
+                                    stockBadge.innerText = count;
+                                    document.getElementById('stockHeaderCount').innerText = count + ' New';
+                                } else {
+                                    stockBadge.style.display = 'none';
+                                    document.getElementById('stockHeaderCount').innerText = '0 New';
+                                    document.getElementById('stockNotifList').innerHTML = '<div class="no-notif">No out of stock alerts.</div>';
+                                }
                             }
                         }, 300);
                     }
@@ -1230,15 +1370,15 @@
 
         function startNotificationStreaming() {
             const eventSource = new EventSource("{{ route('sse.stream') }}");
-            
+
             eventSource.addEventListener('update', (event) => {
                 const data = JSON.parse(event.data);
-                
+
                 // 1. Update Order Notifications
                 const orderBadge = document.getElementById('orderBadge');
                 const orderHeaderCount = document.getElementById('orderHeaderCount');
                 const orderNotifList = document.getElementById('orderNotifList');
-                
+
                 if (data.orders && data.orders.count !== undefined) {
                     if (data.orders.count > 0) {
                         orderBadge.innerText = data.orders.count;
@@ -1248,7 +1388,7 @@
                         orderBadge.style.display = 'none';
                         orderHeaderCount.innerText = '0 Successful';
                     }
-                    
+
                     if (data.orders.items && data.orders.items.length > 0) {
                         let html = '';
                         data.orders.items.forEach(order => {
@@ -1274,7 +1414,7 @@
                     const cancelBadge = document.getElementById('cancelBadge');
                     const cancelHeaderCount = document.getElementById('cancelHeaderCount');
                     const cancelNotifList = document.getElementById('cancelNotifList');
-                    
+
                     if (data.orders.cancelled_count !== undefined) {
                         if (data.orders.cancelled_count > 0) {
                             cancelBadge.innerText = data.orders.cancelled_count;
@@ -1307,12 +1447,12 @@
                         cancelNotifList.innerHTML = '<div class="no-notif">No new cancellations.</div>';
                     }
                 }
-                
+
                 // 2. Update Delivery Partner Notifications
                 const deliveryBadge = document.getElementById('deliveryBadge');
                 const deliveryHeaderCount = document.getElementById('deliveryHeaderCount');
                 const deliveryNotifList = document.getElementById('deliveryNotifList');
-                
+
                 if (data.delivery && data.delivery.count !== undefined) {
                     if (data.delivery.count > 0) {
                         deliveryBadge.innerText = data.delivery.count;
@@ -1322,7 +1462,7 @@
                         deliveryBadge.style.display = 'none';
                         deliveryHeaderCount.innerText = '0 New';
                     }
-                    
+
                     if (data.delivery.items && data.delivery.items.length > 0) {
                         let html = '';
                         data.delivery.items.forEach(notif => {
@@ -1355,6 +1495,54 @@
                         deliveryNotifList.innerHTML = '<div class="no-notif">No new applications.</div>';
                     }
                 }
+
+                // 3. Update Stock Notifications
+                const stockBadge = document.getElementById('stockBadge');
+                const stockHeaderCount = document.getElementById('stockHeaderCount');
+                const stockNotifList = document.getElementById('stockNotifList');
+
+                if (data.stock && data.stock.count !== undefined) {
+                    if (data.stock.count > 0) {
+                        stockBadge.innerText = data.stock.count;
+                        stockBadge.style.display = 'flex';
+                        stockHeaderCount.innerText = data.stock.count + ' New';
+                    } else {
+                        stockBadge.style.display = 'none';
+                        stockHeaderCount.innerText = '0 New';
+                    }
+
+                    if (data.stock.items && data.stock.items.length > 0) {
+                        let html = '';
+                        data.stock.items.forEach(notif => {
+                            html += `
+                                <div class="notification-item" id="notif-${notif.id}">
+                                    <div class="notif-icon-wrapper" 
+                                         onmousedown="startNotifDismiss(event, '${notif.id}')" 
+                                         onmouseup="stopNotifDismiss()" 
+                                         onmouseleave="stopNotifDismiss()"
+                                         ontouchstart="startNotifDismiss(event, '${notif.id}')"
+                                         ontouchend="stopNotifDismiss()">
+                                        <svg class="progress-ring">
+                                            <circle class="progress-ring__circle" r="18" cx="20" cy="20"/>
+                                        </svg>
+                                        <div class="notif-icon" style="background: #FFFBEB; color: #F59E0B;">
+                                            <svg class="icon-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                                            <svg class="icon-close" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                        </div>
+                                    </div>
+                                    <a href="{{ route('seller.products') }}?search=${notif.product_name}" class="notif-content" style="text-decoration: none; flex: 1;">
+                                        <p><strong>${notif.product_name}</strong> is out of stock.</p>
+                                        <span>${notif.time}</span>
+                                    </a>
+                                </div>
+                            `;
+                        });
+                        html += `<a href="{{ route('seller.products') }}" class="view-all-link" style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #F59E0B; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View All Products</a>`;
+                        stockNotifList.innerHTML = html;
+                    } else {
+                        stockNotifList.innerHTML = '<div class="no-notif">No out of stock alerts.</div>';
+                    }
+                }
             });
 
             eventSource.onerror = (err) => {
@@ -1364,7 +1552,7 @@
                 setTimeout(startNotificationStreaming, 10000);
             };
         }
-        
+
         startNotificationStreaming();
     </script>
 

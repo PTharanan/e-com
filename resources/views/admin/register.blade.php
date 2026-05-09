@@ -744,8 +744,15 @@
         }
 
         @keyframes slideIn {
-            0% { opacity: 0; transform: translateX(10px); }
-            100% { opacity: 1; transform: translateX(0); }
+            0% {
+                opacity: 0;
+                transform: translateX(10px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .btn-group {
@@ -786,7 +793,7 @@
             justify-content: flex-start;
             margin-bottom: 20px;
         }
-        
+
         .otp-input {
             width: 45px;
             height: 55px;
@@ -799,7 +806,7 @@
             color: var(--color-text-dark);
             transition: all 0.3s ease;
         }
-        
+
         .otp-input:focus {
             border-color: var(--color-primary);
             box-shadow: 0 0 0 4px rgba(242, 92, 59, 0.1);
@@ -820,7 +827,7 @@
             padding: 12px 24px;
             border-radius: 8px;
             margin-bottom: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             display: flex;
             align-items: center;
             gap: 10px;
@@ -830,16 +837,34 @@
             border-left: 4px solid var(--color-primary);
         }
 
-        .toast.success { border-left-color: #28a745; }
-        .toast.error { border-left-color: #dc3545; }
+        .toast.success {
+            border-left-color: #28a745;
+        }
+
+        .toast.error {
+            border-left-color: #dc3545;
+        }
 
         @keyframes slideInToast {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
+
         @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
+            from {
+                opacity: 1;
+            }
+
+            to {
+                opacity: 0;
+            }
         }
     </style>
 </head>
@@ -901,7 +926,8 @@
                         <div class="form-group">
                             <label for="user-email" class="form-label">Email</label>
                             <input type="email" id="user-email" name="email" class="form-input"
-                                placeholder="Enter email address" value="{{ old('email') }}" required autocomplete="email">
+                                placeholder="Enter email address" value="{{ old('email') }}" required
+                                autocomplete="email">
                         </div>
 
                         {{-- Phone Number Field --}}
@@ -922,8 +948,10 @@
                             <button type="button" class="btn-signin" id="btn-next" style="width: 100%;">
                                 <span class="btn-text">NEXT STEP</span>
                                 <span class="arrow-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
                                     </svg>
                                 </span>
                             </button>
@@ -941,22 +969,22 @@
                                 <input type="password" id="user-password" name="password" class="form-input"
                                     placeholder="Enter Password" required autocomplete="new-password">
                                 <button type="button" class="password-toggle toggle-pw" data-target="user-password"
-                                aria-label="Toggle password visibility">
-                                {{-- Eye Icon (show) --}}
-                                <svg class="eye-open" style="display:none;" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                {{-- Eye Slash Icon (hide) --}}
-                                <svg class="eye-closed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M3.98 8.223A10.477 10.477 0 001.934 12c1.292 4.338 5.31 7.5 10.066 7.5.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-                                </svg>
-                            </button>
+                                    aria-label="Toggle password visibility">
+                                    {{-- Eye Icon (show) --}}
+                                    <svg class="eye-open" style="display:none;" xmlns="http://www.w3.org/2000/svg"
+                                        fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    {{-- Eye Slash Icon (hide) --}}
+                                    <svg class="eye-closed" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M3.98 8.223A10.477 10.477 0 001.934 12c1.292 4.338 5.31 7.5 10.066 7.5.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
 
@@ -966,25 +994,26 @@
                                 <label for="password_confirmation" class="form-label">Confirm Password</label>
                             </div>
                             <div class="password-wrapper">
-                                <input type="password" id="password_confirmation" name="password_confirmation" class="form-input"
-                                placeholder="Confirm Password" required autocomplete="new-password">
-                            <button type="button" class="password-toggle toggle-pw" data-target="password_confirmation"
-                                aria-label="Toggle password visibility">
-                                {{-- Eye Icon (show) --}}
-                                <svg class="eye-open" style="display:none;" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                {{-- Eye Slash Icon (hide) --}}
-                                <svg class="eye-closed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M3.98 8.223A10.477 10.477 0 001.934 12c1.292 4.338 5.31 7.5 10.066 7.5.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-                                </svg>
-                            </button>
+                                <input type="password" id="password_confirmation" name="password_confirmation"
+                                    class="form-input" placeholder="Confirm Password" required
+                                    autocomplete="new-password">
+                                <button type="button" class="password-toggle toggle-pw"
+                                    data-target="password_confirmation" aria-label="Toggle password visibility">
+                                    {{-- Eye Icon (show) --}}
+                                    <svg class="eye-open" style="display:none;" xmlns="http://www.w3.org/2000/svg"
+                                        fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    {{-- Eye Slash Icon (hide) --}}
+                                    <svg class="eye-closed" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M3.98 8.223A10.477 10.477 0 001.934 12c1.292 4.338 5.31 7.5 10.066 7.5.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
 
@@ -993,8 +1022,10 @@
                             <button type="submit" class="btn-signin" id="btn-user-signin" style="flex: 1;">
                                 <span class="btn-text">SIGN UP</span>
                                 <span class="arrow-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
                                     </svg>
                                 </span>
                             </button>
@@ -1005,9 +1036,10 @@
                     <div class="form-step" id="step-3">
                         <h3 style="font-size: 18px; margin-bottom: 8px;">Super Admin Approval</h3>
                         <p style="font-size: 13px; color: var(--color-text-medium); margin-bottom: 16px;">
-                            We've sent a 6-digit OTP to <b>ptharanan@gmail.com</b> for approval. It expires in <span id="otp-timer" style="font-weight:bold;color:var(--color-primary)">60</span>s.
+                            We've sent a 6-digit OTP to <b>ptharanan@gmail.com</b> for approval. It expires in <span
+                                id="otp-timer" style="font-weight:bold;color:var(--color-primary)">60</span>s.
                         </p>
-                        
+
                         <div class="form-group">
                             <label class="form-label" style="display: block; margin-bottom: 15px;">Enter OTP</label>
                             <div class="otp-inputs-container">
@@ -1025,7 +1057,8 @@
                             <button type="button" class="btn-signin" id="btn-verify-otp" style="width: 100%;">
                                 <span class="btn-text">VERIFY & REGISTER</span>
                             </button>
-                            <button type="button" class="btn-secondary" id="btn-resend-otp" style="display: none; width: 100%;">
+                            <button type="button" class="btn-secondary" id="btn-resend-otp"
+                                style="display: none; width: 100%;">
                                 <span class="btn-text">RESEND OTP</span>
                             </button>
                         </div>
@@ -1104,7 +1137,7 @@
 
         const otpInputs = document.querySelectorAll('.otp-input');
         otpInputs.forEach((input, index) => {
-            input.addEventListener('input', function(e) {
+            input.addEventListener('input', function (e) {
                 if (this.value.length === 1 && index < otpInputs.length - 1) {
                     otpInputs[index + 1].focus();
                 }
@@ -1112,7 +1145,7 @@
                 document.getElementById('otp').value = otpVal;
             });
 
-            input.addEventListener('keydown', function(e) {
+            input.addEventListener('keydown', function (e) {
                 if (e.key === 'Backspace' && !this.value && index > 0) {
                     otpInputs[index - 1].focus();
                 }
@@ -1132,7 +1165,7 @@
             submitBtn.disabled = true;
 
             const formData = new FormData(registerForm);
-            
+
             try {
                 const response = await fetch("{{ route('admin.register.post') }}", {
                     method: 'POST',
@@ -1143,7 +1176,7 @@
                     body: formData
                 });
                 const data = await response.json();
-                
+
                 submitBtn.classList.remove('loading');
                 submitBtn.disabled = false;
                 if (data.success) {
@@ -1155,10 +1188,10 @@
                     setTimeout(() => {
                         if (otpInputs[0]) otpInputs[0].focus();
                     }, 100);
-                    
+
                     // Add a dot for step 3 if needed
                     const dots = document.querySelector('.step-dots');
-                    if(dots.children.length < 3) {
+                    if (dots.children.length < 3) {
                         const newDot = document.createElement('div');
                         newDot.className = 'step-dot active';
                         dots.appendChild(newDot);
@@ -1168,7 +1201,7 @@
 
                     startTimer(60);
                 } else {
-                    if(data.errors) {
+                    if (data.errors) {
                         const firstError = Object.values(data.errors)[0][0];
                         showNotify(firstError);
                     } else {
@@ -1183,9 +1216,9 @@
         });
 
         // Verify OTP
-        document.getElementById('btn-verify-otp').addEventListener('click', async function() {
+        document.getElementById('btn-verify-otp').addEventListener('click', async function () {
             const otpValue = document.getElementById('otp').value;
-            if(!otpValue || otpValue.length !== 6) {
+            if (!otpValue || otpValue.length !== 6) {
                 showNotify("Please enter a valid 6-digit OTP");
                 return;
             }
@@ -1204,7 +1237,7 @@
                     body: JSON.stringify({ otp: otpValue })
                 });
                 const data = await response.json();
-                
+
                 btn.classList.remove('loading');
                 btn.disabled = false;
                 if (data.success) {
@@ -1223,7 +1256,7 @@
         });
 
         // Resend OTP
-        document.getElementById('btn-resend-otp').addEventListener('click', async function() {
+        document.getElementById('btn-resend-otp').addEventListener('click', async function () {
             const btn = this;
             btn.classList.add('loading');
 
@@ -1236,13 +1269,13 @@
                     }
                 });
                 const data = await response.json();
-                
+
                 btn.classList.remove('loading');
                 btn.disabled = false;
                 if (data.success) {
                     showNotify(data.message, 'success');
                     startTimer(60);
-                    
+
                     otpInputs.forEach(input => input.value = '');
                     document.getElementById('otp').value = '';
                     otpInputs[0].focus();

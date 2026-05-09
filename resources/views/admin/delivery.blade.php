@@ -315,7 +315,7 @@
         <h2 class="modal-title" id="modalTitle">Confirm Action</h2>
         <p class="modal-desc" id="modalDesc">Are you sure you want to proceed with this action?</p>
         <div class="salary-group" id="salaryGroup">
-            <label class="modal-field-label">Salary per delivery ($)</label>
+            <label class="modal-field-label">Salary per delivery ({{ currency_symbol() }})</label>
             <input type="number" class="salary-input" id="salaryInput" step="0.01" min="0" placeholder="e.g. 5.00">
         </div>
         <div class="reason-group" id="reasonGroup">

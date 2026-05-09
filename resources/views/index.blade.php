@@ -297,7 +297,7 @@
                         <div class="ad-content">
                             <div class="ad-badge">Special Promo</div>
                             <h1 class="ad-title">Upgrade Your Lifestyle</h1>
-                            <p class="ad-subtitle">Discover our exclusive collection of premium gadgets. Unbeatable prices, stunning quality, and free shipping on all orders over $50.</p>
+                            <p class="ad-subtitle">Discover our exclusive collection of premium gadgets. Unbeatable prices, stunning quality, and free shipping on all orders over {{ currency_symbol() }}50.</p>
                             <a href="#" class="btn-primary-custom" style="display: inline-flex; align-items: center; justify-content: center; padding: 14px 32px; font-size: 1.05rem; background: var(--color-primary); color: white; border-radius: 50px; text-decoration: none; font-weight: 600; box-shadow: 0 4px 15px rgba(242, 92, 59, 0.3); transition: 0.3s;">
                                 Shop Now
                                 <svg style="margin-left: 8px;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>

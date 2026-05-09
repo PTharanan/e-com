@@ -702,10 +702,14 @@
             transition: var(--transition-fast);
         }
 
-        .btn-add:hover:not(.max-reached) {
+        .btn-add:hover:not(.max-reached):not(.is-success) {
             background: var(--color-primary);
             color: var(--color-white);
             transform: scale(1.1) rotate(90deg);
+        }
+
+        .btn-add.is-success:hover {
+            transform: scale(1.1);
         }
 
         .btn-add.max-reached {
@@ -1464,86 +1468,87 @@
                 }, 850);
             };
 
-            // ========== GLOBAL PRODUCT CARD INTERACTION ==========
-            const initProductCards = () => {
-                document.querySelectorAll('.product-card').forEach(card => {
-                    const btnAdd = card.querySelector('.btn-add');
+            // ========== GLOBAL PRODUCT CARD INTERACTION (Event Delegation) ==========
+            document.addEventListener('click', async (e) => {
+                // 1. Add to Cart Button
+                const btnAdd = e.target.closest('.btn-add');
+                if (btnAdd) {
+                    e.stopPropagation();
+                    const card = btnAdd.closest('.product-card');
+                    if (!card) return;
+                    
                     const productId = card.dataset.productId;
                     const stockLimit = parseInt(card.dataset.stock || 0);
 
-                    if (btnAdd) {
-                        btnAdd.addEventListener('click', async (e) => {
-                            e.stopPropagation();
-                            if (!isAuthenticated) { window.location.href = "{{ route('sign-in') }}"; return; }
+                    if (!isAuthenticated) { window.location.href = "{{ route('sign-in') }}"; return; }
 
-                            const inCart = window.cartItems[productId] ? window.cartItems[productId].qty : 0;
-                            if (inCart >= stockLimit) {
-                                alert('Sorry, out of stock!');
-                                return;
-                            }
-
-                            const originalContent = btnAdd.innerHTML;
-                            btnAdd.disabled = true;
-                            btnAdd.innerHTML = '<span style="font-size:0.6rem">...</span>';
-
-                            try {
-                                const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-                                const response = await fetch('{{ route("products.add-to-cart") }}', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': csrfToken,
-                                        'Accept': 'application/json'
-                                    },
-                                    body: JSON.stringify({
-                                        _token: csrfToken,
-                                        product_id: productId,
-                                        quantity: 1
-                                    })
-                                });
-
-                                const result = await response.json();
-
-                                if (result.success) {
-                                    if (window.flyToCart) window.flyToCart(btnAdd, 1, productId);
-                                    card.dataset.stock = result.new_stock;
-                                    btnAdd.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-                                    btnAdd.style.background = '#28a745';
-                                    btnAdd.style.color = '#fff';
-                                    
-                                    setTimeout(() => {
-                                        btnAdd.disabled = false;
-                                        btnAdd.innerHTML = originalContent;
-                                        btnAdd.style.background = '';
-                                        btnAdd.style.color = '';
-                                        if (result.new_stock <= 0) location.reload();
-                                    }, 1500);
-                                } else {
-                                    alert(result.message || 'Failed');
-                                    btnAdd.disabled = false;
-                                    btnAdd.innerHTML = originalContent;
-                                }
-                            } catch (err) {
-                                btnAdd.disabled = false;
-                                btnAdd.innerHTML = originalContent;
-                            }
-                        });
+                    const inCart = window.cartItems[productId] ? window.cartItems[productId].qty : 0;
+                    if (inCart >= stockLimit) {
+                        alert('Sorry, out of stock!');
+                        return;
                     }
-                });
-            };
 
-            initProductCards();
+                    const originalContent = btnAdd.innerHTML;
+                    btnAdd.disabled = true;
+                    btnAdd.innerHTML = '<span style="font-size:0.6rem">...</span>';
 
-            // ========== PRODUCT CARD CLICK TO DETAIL ==========
-            document.querySelectorAll('.product-card').forEach(card => {
-                card.addEventListener('click', function (e) {
+                    try {
+                        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+                        const response = await fetch('{{ route("products.add-to-cart") }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken,
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                _token: csrfToken,
+                                product_id: productId,
+                                quantity: 1
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            if (window.flyToCart) window.flyToCart(btnAdd, 1, productId);
+                            card.dataset.stock = result.new_stock;
+                            btnAdd.classList.add('is-success');
+                            btnAdd.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                            btnAdd.style.background = '#28a745';
+                            btnAdd.style.color = '#fff';
+                            
+                            setTimeout(() => {
+                                btnAdd.disabled = false;
+                                btnAdd.classList.remove('is-success');
+                                btnAdd.innerHTML = originalContent;
+                                btnAdd.style.background = '';
+                                btnAdd.style.color = '';
+                                if (result.new_stock <= 0) location.reload();
+                            }, 1500);
+                        } else {
+                            alert(result.message || 'Failed');
+                            btnAdd.disabled = false;
+                            btnAdd.innerHTML = originalContent;
+                        }
+                    } catch (err) {
+                        btnAdd.disabled = false;
+                        btnAdd.innerHTML = originalContent;
+                    }
+                    return;
+                }
+
+                // 2. Product Card Click (Navigate to detail)
+                const card = e.target.closest('.product-card');
+                if (card) {
                     // Don't navigate if clicking buttons or qty controls
                     if (e.target.closest('.btn-add, .qty-selector, .qty-btn, .btn-confirm-add, .product-actions button')) return;
-                    const pid = this.dataset.productId;
+                    
+                    const pid = card.dataset.productId;
                     if (pid) {
                         window.location.href = `{{ url('/product') }}/${pid}`;
                     }
-                });
+                }
             });
 
             // ========== MAGIC NAV ANIMATION ==========

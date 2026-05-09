@@ -795,7 +795,7 @@
                             </svg>
                         </span>
                     </button>
-                    
+
                     <p class="signup-text" style="margin-top: 15px;">
                         Don't have an account? <a href="{{ url('/admin/sign-up') }}" class="signup-link">Sign up</a>
                     </p>

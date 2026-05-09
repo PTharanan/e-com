@@ -191,8 +191,15 @@
         }
 
         @keyframes popIn {
-            from { transform: translateX(-50%) translateY(-5px); opacity: 0; }
-            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+            from {
+                transform: translateX(-50%) translateY(-5px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
         }
 
         .discount-popover.active {
@@ -548,15 +555,17 @@
             border-radius: 12px;
             padding: 4px 15px;
             border: 1px solid #E2E8F0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
             width: 300px;
             transition: all 0.3s ease;
         }
+
         .search-container:focus-within {
             border-color: var(--admin-primary);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
             width: 350px;
         }
+
         .search-input {
             border: none;
             padding: 8px 10px;
@@ -566,6 +575,7 @@
             width: 100%;
             color: #1E293B;
         }
+
         .search-icon {
             color: #94A3B8;
             flex-shrink: 0;
@@ -579,16 +589,19 @@
             margin-top: 25px;
             padding: 0 10px;
         }
+
         .pagination-info {
             font-size: 14px;
             color: #64748B;
             font-weight: 500;
         }
+
         .pagination-nav {
             display: flex;
             gap: 10px;
             align-items: center;
         }
+
         .pagination-link {
             display: flex;
             align-items: center;
@@ -602,19 +615,22 @@
             text-decoration: none;
             transition: all 0.2s ease;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
         }
+
         .pagination-link:hover:not(.disabled) {
             border-color: var(--admin-primary);
             color: var(--admin-primary);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
+
         .pagination-link.disabled {
             opacity: 0.5;
             cursor: not-allowed;
             background: #F8FAFC;
         }
+
         .pagination-link svg {
             width: 20px;
             height: 20px;
@@ -631,11 +647,13 @@
         <div style="display: flex; gap: 15px; align-items: center;">
             <form action="{{ route('seller.products') }}" method="GET" id="searchForm">
                 <div class="search-container">
-                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5">
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
-                    <input type="text" name="search" id="sellerSearchInput" class="search-input" placeholder="Search name or category..." value="{{ request('search') }}" oninput="debounceSearch()">
+                    <input type="text" name="search" id="sellerSearchInput" class="search-input"
+                        placeholder="Search name or category..." value="{{ request('search') }}" oninput="debounceSearch()">
                 </div>
             </form>
             @if($hasAssignment)
@@ -689,19 +707,18 @@
                             <div class="discount-edit-wrapper">
                                 <div class="discount-badge" onclick="toggleDiscountPopover({{ $product->id }})">
                                     {{ $product->discount_percentage ?: 0 }}%
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                                        <path d="M6 9l6 6 6-6"/>
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="3">
+                                        <path d="M6 9l6 6 6-6" />
                                     </svg>
                                 </div>
                                 <div class="discount-popover" id="popover-{{ $product->id }}">
-                                    <input type="number" 
-                                        id="input-{{ $product->id }}"
-                                        value="{{ $product->discount_percentage }}" 
-                                        class="form-input" 
-                                        style="width: 70px; padding: 6px 10px;"
-                                        min="0" max="100">
+                                    <input type="number" id="input-{{ $product->id }}"
+                                        value="{{ $product->discount_percentage }}" class="form-input"
+                                        style="width: 70px; padding: 6px 10px;" min="0" max="100">
                                     <button class="tick-btn" onclick="saveQuickDiscount({{ $product->id }})">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="3">
                                             <polyline points="20 6 9 17 4 12"></polyline>
                                         </svg>
                                     </button>
@@ -716,12 +733,12 @@
                         </td>
                         <td>
                             <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                                <input type="checkbox" 
-                                    {{ $product->is_new ? 'checked' : '' }} 
+                                <input type="checkbox" {{ $product->is_new ? 'checked' : '' }}
                                     style="width: 18px; height: 18px; accent-color: var(--admin-primary);"
                                     onchange="quickUpdateProduct({{ $product->id }}, 'is_new', this.checked ? 1 : 0)">
                                 @if($product->is_new)
-                                    <span style="background: #E0E7FF; color: #4338CA; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">NEW</span>
+                                    <span
+                                        style="background: #E0E7FF; color: #4338CA; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">NEW</span>
                                 @else
                                     <span style="color: #9CA3AF; font-size: 11px;">Mark New</span>
                                 @endif
@@ -763,36 +780,50 @@
     </div>
 
     @if($products->hasPages())
-    <div class="pagination-container">
-        <div class="pagination-info">
-            Showing <b>{{ $products->firstItem() }}</b> to <b>{{ $products->lastItem() }}</b> of <b>{{ $products->total() }}</b> products
-        </div>
-        <div class="pagination-nav">
-            @if($products->onFirstPage())
-                <span class="pagination-link disabled">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                </span>
-            @else
-                <a href="{{ $products->appends(request()->query())->previousPageUrl() }}" class="pagination-link" title="Previous Page">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                </a>
-            @endif
-
-            <div style="font-weight: 700; color: #1E293B; margin: 0 10px;">
-                Page {{ $products->currentPage() }}
+        <div class="pagination-container">
+            <div class="pagination-info">
+                Showing <b>{{ $products->firstItem() }}</b> to <b>{{ $products->lastItem() }}</b> of
+                <b>{{ $products->total() }}</b> products
             </div>
+            <div class="pagination-nav">
+                @if($products->onFirstPage())
+                    <span class="pagination-link disabled">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </span>
+                @else
+                    <a href="{{ $products->appends(request()->query())->previousPageUrl() }}" class="pagination-link"
+                        title="Previous Page">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </a>
+                @endif
 
-            @if($products->hasMorePages())
-                <a href="{{ $products->appends(request()->query())->nextPageUrl() }}" class="pagination-link" title="Next Page">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                </a>
-            @else
-                <span class="pagination-link disabled">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                </span>
-            @endif
+                <div style="font-weight: 700; color: #1E293B; margin: 0 10px;">
+                    Page {{ $products->currentPage() }}
+                </div>
+
+                @if($products->hasMorePages())
+                    <a href="{{ $products->appends(request()->query())->nextPageUrl() }}" class="pagination-link" title="Next Page">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </a>
+                @else
+                    <span class="pagination-link disabled">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </span>
+                @endif
+            </div>
         </div>
-    </div>
     @endif
 
     <!-- Add Product Modal -->
@@ -838,12 +869,14 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Regular Price ($)</label>
+                            <label class="form-label">Regular Price ({{ currency_symbol() }})</label>
                             <input type="number" name="price" step="0.01" class="form-input" placeholder="0.00" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Discount Percentage (%) <small style="color: #9CA3AF;">(Optional)</small></label>
-                            <input type="number" name="discount_percentage" class="form-input" placeholder="0-100" min="0" max="100">
+                            <label class="form-label">Discount Percentage (%) <small
+                                    style="color: #9CA3AF;">(Optional)</small></label>
+                            <input type="number" name="discount_percentage" class="form-input" placeholder="0-100" min="0"
+                                max="100">
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -865,12 +898,14 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Stock Quantity</label>
-                            <input type="number" name="stock_quantity" id="p_quantity" class="form-input" placeholder="0" min="0" required oninput="updateStatusFromQty(this.value)">
+                            <input type="number" name="stock_quantity" id="p_quantity" class="form-input" placeholder="0"
+                                min="0" required oninput="updateStatusFromQty(this.value)">
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="form-label" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                            <input type="checkbox" name="is_new" value="1" style="width: 18px; height: 18px; accent-color: var(--admin-primary);">
+                            <input type="checkbox" name="is_new" value="1"
+                                style="width: 18px; height: 18px; accent-color: var(--admin-primary);">
                             <span>Mark as "NEW" Product</span>
                         </label>
                     </div>
@@ -931,7 +966,8 @@
                 </svg>
             </div>
             <h3>Delete Product?</h3>
-            <p>Are you sure you want to delete this product? This action cannot be undone and will remove all product images from the server.</p>
+            <p>Are you sure you want to delete this product? This action cannot be undone and will remove all product images
+                from the server.</p>
             <div class="delete-modal-actions">
                 <button class="delete-btn-cancel" onclick="closeDeleteModal()">Cancel</button>
                 <button class="delete-btn-confirm" id="confirmDeleteBtn">Yes, Delete</button>
@@ -943,8 +979,14 @@
     <div class="modal-overlay" id="joinStoreModal">
         <div class="modal-content" style="max-width: 450px;">
             <div class="modal-header" style="text-align: center; margin-bottom: 25px;">
-                <div style="width: 60px; height: 60px; background: #FFF1EE; color: var(--admin-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
-                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="17" y1="11" x2="23" y2="11"></line></svg>
+                <div
+                    style="width: 60px; height: 60px; background: #FFF1EE; color: var(--admin-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                        <line x1="20" y1="8" x2="20" y2="14"></line>
+                        <line x1="17" y1="11" x2="23" y2="11"></line>
+                    </svg>
                 </div>
                 <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 5px;">Join a Store</h2>
                 <p style="color: #666; font-size: 14px;">Select an Admin account to associate your seller account with.</p>
@@ -1019,16 +1061,82 @@
                 }
             };
         }
-        
-        // Live Search Logic
+
+        // Live AJAX Search Logic
         let searchTimeout = null;
+        async function performAjaxSearch(targetUrl = null) {
+            let url;
+            if (targetUrl) {
+                url = targetUrl;
+            } else {
+                const form = document.getElementById('searchForm');
+                const formData = new FormData(form);
+                const params = new URLSearchParams(formData);
+                url = `${window.location.pathname}?${params.toString()}`;
+            }
+
+            // Update URL in browser
+            window.history.pushState({}, '', url);
+
+            // Show loading state
+            const table = document.querySelector('table');
+            if (table) table.style.opacity = '0.5';
+
+            try {
+                const response = await fetch(url, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                // Replace table body
+                const newTable = doc.querySelector('table tbody');
+                const currentTable = document.querySelector('table tbody');
+                if (newTable && currentTable) {
+                    currentTable.innerHTML = newTable.innerHTML;
+                }
+
+                // Replace pagination
+                const newPagination = doc.querySelector('.pagination-container');
+                const currentPagination = document.querySelector('.pagination-container');
+                const dataCard = document.querySelector('.data-card');
+
+                if (newPagination) {
+                    if (currentPagination) {
+                        currentPagination.innerHTML = newPagination.innerHTML;
+                    } else if (dataCard) {
+                        dataCard.insertAdjacentHTML('afterend', newPagination.outerHTML);
+                    }
+                } else if (currentPagination) {
+                    currentPagination.remove();
+                }
+
+                if (table) table.style.opacity = '1';
+
+                if (targetUrl) {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            } catch (error) {
+                console.error('Search failed:', error);
+                if (!targetUrl) document.getElementById('searchForm').submit();
+                else window.location.href = targetUrl;
+            }
+        }
+
         function debounceSearch() {
             clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                sessionStorage.setItem('seller_search_focused', 'true');
-                document.getElementById('searchForm').submit();
-            }, 600);
+            searchTimeout = setTimeout(() => performAjaxSearch(), 500);
         }
+
+        // Intercept pagination clicks
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('.pagination-link');
+            if (link && link.href && !link.classList.contains('disabled')) {
+                e.preventDefault();
+                performAjaxSearch(link.href);
+            }
+        });
 
         // Restore focus on reload
         document.addEventListener('DOMContentLoaded', () => {
@@ -1126,7 +1234,7 @@
 
         document.getElementById('confirmDeleteBtn').onclick = async () => {
             if (!productToDelete) return;
-            
+
             const btn = document.getElementById('confirmDeleteBtn');
             btn.disabled = true;
             btn.innerText = 'Deleting...';
@@ -1201,12 +1309,12 @@
         function toggleDiscountPopover(id) {
             // Close all other popovers first
             document.querySelectorAll('.discount-popover').forEach(pop => {
-                if(pop.id !== `popover-${id}`) pop.classList.remove('active');
+                if (pop.id !== `popover-${id}`) pop.classList.remove('active');
             });
-            
+
             const popover = document.getElementById(`popover-${id}`);
             popover.classList.toggle('active');
-            if(popover.classList.contains('active')) {
+            if (popover.classList.contains('active')) {
                 document.getElementById(`input-${id}`).focus();
             }
         }
@@ -1215,8 +1323,8 @@
             const input = document.getElementById(`input-${id}`);
             const newValue = input.value;
             const success = await quickUpdateProduct(id, 'discount_percentage', newValue);
-            
-            if(success) {
+
+            if (success) {
                 // Update the badge text
                 const badge = input.closest('.discount-edit-wrapper').querySelector('.discount-badge');
                 badge.innerHTML = `${newValue || 0}% <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>`;
@@ -1284,7 +1392,7 @@
                     input.value = '';
                     return;
                 }
-                
+
                 // Show loading state
                 const slot = document.getElementById(`slot-${index}`);
                 if (slot) slot.style.opacity = '0.5';
@@ -1465,7 +1573,7 @@
                     }
                 }
             }
-            
+
             formData.set('main_image_index', actualMainIndex);
 
             const url = productId ? `{{ url('seller/products') }}/${productId}` : '{{ route("seller.products.store") }}';
