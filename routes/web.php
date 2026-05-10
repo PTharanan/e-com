@@ -8,7 +8,7 @@ Route::get('/500', function () {
 
 Route::get('/', function () {
     $products = \App\Models\Product::with(['category', 'seller', 'admin'])->where('is_new', true)->latest()->take(4)->get();
-    if($products->isEmpty()) {
+    if ($products->isEmpty()) {
         $products = \App\Models\Product::with(['category', 'seller', 'admin'])->latest()->take(4)->get();
     }
     $banners = \App\Models\Banner::where('is_active', true)->orderBy('order')->get();
@@ -18,9 +18,9 @@ Route::get('/', function () {
 Route::get('/products', [\App\Http\Controllers\ProductController::class, 'publicIndex'])->name('products');
 Route::post('/products/add-to-cart', [\App\Http\Controllers\ProductController::class, 'deductStock'])->name('products.add-to-cart');
 Route::post('/products/remove-from-cart', [\App\Http\Controllers\ProductController::class, 'returnStock'])->name('products.remove-from-cart');
-Route::get('/cart', function () { 
+Route::get('/cart', function () {
     $products = \App\Models\Product::with('category')->get();
-    return view('cart', compact('products')); 
+    return view('cart', compact('products'));
 })->name('cart');
 
 Route::post('/checkout', [\App\Http\Controllers\StripeController::class, 'checkout'])->name('checkout');
@@ -119,7 +119,7 @@ Route::prefix('delivery')->name('delivery.')->group(function () {
     Route::post('/verify-otp', [\App\Http\Controllers\AuthController::class, 'deliveryVerifyOtp'])->name('verify-otp.post');
     Route::post('/resend-otp', [\App\Http\Controllers\AuthController::class, 'deliveryResendOtp'])->name('resend-otp.post');
 
-    Route::middleware('auth')->group(function () {
+    Route::middleware('delivery')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\DeliveryController::class, 'dashboard'])->name('dashboard');
         Route::get('/work', [\App\Http\Controllers\DeliveryController::class, 'work'])->name('work');
         Route::get('/stores', [\App\Http\Controllers\DeliveryController::class, 'stores'])->name('stores');
@@ -149,7 +149,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/sign-up', function () {
         return view('admin.register');
     })->name('register');
-    
+
     Route::post('/sign-up', [\App\Http\Controllers\AuthController::class, 'adminRegister'])->name('register.post');
     Route::post('/verify-otp', [\App\Http\Controllers\AuthController::class, 'adminVerifyOtp'])->name('verify-otp.post');
     Route::post('/resend-otp', [\App\Http\Controllers\AuthController::class, 'adminResendOtp'])->name('resend-otp.post');
@@ -158,17 +158,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware(['admin'])->group(function () {
         Route::get('/settings/sellers', [\App\Http\Controllers\AdminSellerController::class, 'index'])->name('sellers');
         Route::patch('/settings/sellers/{id}/toggle-block', [\App\Http\Controllers\AdminSellerController::class, 'toggleBlock'])->name('sellers.toggle-block');
-        Route::get('/dashboard', function () {
-            $adminId = auth()->id();
-            $totalOrders = \App\Models\Order::where('admin_id', $adminId)->where('status', '!=', 'cancelled')->count();
-            $totalUsers = \App\Models\User::where('role', 'client')->count(); // Users are shared for now
-            // Revenue only from successful/shipped/delivered orders
-            $totalRevenue = \App\Models\Order::where('admin_id', $adminId)->whereIn('status', ['completed', 'processing', 'shipped', 'delivered'])->sum('total_price');
-            $totalProducts = \App\Models\Product::where('admin_id', $adminId)->count();
-            $totalRefunds = \App\Models\Order::where('admin_id', $adminId)->where('status', 'refunded')->count();
-            
-            return view('admin.dashboard', compact('totalOrders', 'totalUsers', 'totalRevenue', 'totalProducts', 'totalRefunds'));
-        })->name('dashboard');
+        Route::get('/dashboard', [\App\Http\Controllers\AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/analytics', [\App\Http\Controllers\AdminDashboardController::class, 'getAnalytics'])->name('dashboard.analytics');
 
         Route::get('/products', [\App\Http\Controllers\ProductController::class, 'index'])->name('products');
         Route::post('/products', [\App\Http\Controllers\ProductController::class, 'store'])->name('products.store');
@@ -240,19 +231,8 @@ Route::prefix('seller')->name('seller.')->group(function () {
     Route::post('/resend-otp', [\App\Http\Controllers\AuthController::class, 'sellerResendOtp'])->name('resend-otp.post');
 
     Route::middleware(['seller'])->group(function () {
-        Route::get('/dashboard', function () {
-            $sellerId = auth()->id();
-            
-            $sellerOrdersQuery = \App\Models\Order::whereJsonContains('items_json', ['seller_id' => (int)$sellerId]);
-            
-            $totalOrders = (clone $sellerOrdersQuery)->where('status', '!=', 'cancelled')->count();
-            $totalUsers = \App\Models\User::where('role', 'client')->count(); // Users are shared
-            $totalRevenue = (clone $sellerOrdersQuery)->whereIn('status', ['completed', 'processing', 'shipped', 'delivered'])->sum('total_price');
-            $totalProducts = \App\Models\Product::where('seller_id', $sellerId)->count();
-            $totalRefunds = (clone $sellerOrdersQuery)->where('status', 'refunded')->count();
-            
-            return view('seller.dashboard', compact('totalOrders', 'totalUsers', 'totalRevenue', 'totalProducts', 'totalRefunds'));
-        })->name('dashboard');
+        Route::get('/dashboard', [\App\Http\Controllers\SellerDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/analytics', [\App\Http\Controllers\SellerDashboardController::class, 'getAnalytics'])->name('dashboard.analytics');
 
         Route::get('/products', [\App\Http\Controllers\ProductController::class, 'index'])->name('products');
         Route::post('/join-store', [\App\Http\Controllers\ProductController::class, 'joinStore'])->name('join-store');
@@ -274,7 +254,7 @@ Route::prefix('seller')->name('seller.')->group(function () {
 
         Route::get('/notifications/poll', [\App\Http\Controllers\NotificationController::class, 'poll'])->name('notifications.poll');
         Route::patch('/notifications/{id}/dismiss', [\App\Http\Controllers\NotificationController::class, 'dismiss'])->name('notifications.dismiss');
-        
+
         Route::get('/customers', [\App\Http\Controllers\CustomerController::class, 'index'])->name('customers');
 
         Route::get('/settings', function () {

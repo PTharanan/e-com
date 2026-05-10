@@ -316,7 +316,7 @@
         .main-content {
             flex: 1;
             margin-left: var(--sidebar-width-expanded);
-            padding: 40px;
+            padding: 125px 40px 40px 40px;
             transition: var(--transition);
         }
 
@@ -409,10 +409,24 @@
 
         /* Admin Topbar */
         .admin-topbar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: var(--sidebar-width-expanded);
+            height: 85px;
+            background: rgba(248, 249, 250, 0.9);
+            backdrop-filter: blur(10px);
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            padding: 0 40px;
+            z-index: 900;
+            transition: var(--transition);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar.collapsed+.main-content .admin-topbar {
+            left: var(--sidebar-width-collapsed);
         }
 
         .notification-dropdown {
@@ -620,6 +634,20 @@
 
             .main-content {
                 margin-left: 0 !important;
+                padding: 105px 20px 20px 20px;
+            }
+
+            .admin-topbar {
+                left: 0;
+                padding: 0 20px;
+            }
+
+            .topbar-subtitle {
+                display: none;
+            }
+
+            .admin-badge {
+                display: none;
             }
         }
     </style>
@@ -762,7 +790,17 @@
     <main class="main-content">
         <!-- Top Navbar -->
         <div class="admin-topbar">
-            <div class="topbar-right">
+            <div class="topbar-left">
+                <div class="welcome-text">
+                    <h1 style="font-size: clamp(14px, 2vw, 18px); font-weight: 700; color: #1a1a1a; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Welcome back, {{ Auth::user()->name }}! 👋</h1>
+                    <p class="topbar-subtitle" style="font-size: 11px; color: #666; margin: 0;">Here's what's happening with your store today.</p>
+                </div>
+            </div>
+            <div class="topbar-right" style="display: flex; align-items: center; gap: 20px;">
+                <div class="admin-badge" style="background: var(--admin-primary); color: white; padding: 6px 15px; border-radius: 50px; font-weight: 600; font-size: 12px; white-space: nowrap;">
+                    Seller
+                </div>
+                <div class="notif-section">
                 @php
                     $cancelledCount = 0;
                     $cancelledOrders = collect();
@@ -1031,6 +1069,7 @@
                             </div>
                         </div>
                     </div>
+                </div>
                 </div>
             </div>
         </div>
