@@ -21,7 +21,7 @@
         :root {
             --admin-primary: #F25C3B;
             --admin-primary-hover: #E04A2A;
-            --admin-bg: #F8F9FA;
+            --admin-bg: #fefcf7ff;
             --admin-dark: #1A1A1A;
             --admin-dark-accent: #2D2D2D;
             --admin-text-gray: #A0AEC0;
@@ -414,8 +414,9 @@
             right: 0;
             left: var(--sidebar-width-expanded);
             height: 85px;
-            background: rgba(248, 249, 250, 0.9);
+            background: #fdf9f1ff;
             backdrop-filter: blur(10px);
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.06);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -1226,6 +1227,25 @@
             const isCollapsed = sidebar.classList.contains('collapsed');
             updateToggleIcon(isCollapsed);
             localStorage.setItem('admin_sidebar_collapsed', isCollapsed);
+
+            // Explicitly resize all charts during the transition
+            let startTime = Date.now();
+            const resizeTimer = setInterval(() => {
+                if (window.myCharts && Array.isArray(window.myCharts)) {
+                    window.myCharts.forEach(chart => {
+                        if (typeof chart.resize === 'function') {
+                            chart.resize();
+                            chart.update('none');
+                        }
+                    });
+                }
+                window.dispatchEvent(new Event('resize'));
+                
+                // Stop after transition (300ms + buffer)
+                if (Date.now() - startTime > 400) {
+                    clearInterval(resizeTimer);
+                }
+            }, 16); // ~60fps
         });
 
         // Restore state on load

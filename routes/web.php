@@ -94,6 +94,7 @@ Route::post('/forgot-password/resend-otp', [AuthController::class, 'resendResetO
 
 Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard')->middleware('auth');
 Route::post('/dashboard/orders/{id}/cancel', [\App\Http\Controllers\DashboardController::class, 'cancelOrder'])->name('orders.cancel')->middleware('auth');
+Route::post('/dashboard/orders/{id}/return', [\App\Http\Controllers\DashboardController::class, 'returnOrder'])->name('orders.return')->middleware('auth');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/sse/stream', [\App\Http\Controllers\SSEController::class, 'stream'])->name('sse.stream')->middleware('auth');
 

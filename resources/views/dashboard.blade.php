@@ -155,6 +155,7 @@
     .status-completed { background: #DCFCE7; color: #10B981; }
     .status-shipped { background: #DBEAFE; color: #1E40AF; }
     .status-delivered { background: #E0E7FF; color: #4338CA; }
+    .status-returning { background: #F3E8FF; color: #7E22CE; }
     .status-processing { background: #FEF3C7; color: #92400E; }
     .status-cancelled { background: #FEE2E2; color: #EF4444; }
 
@@ -184,6 +185,26 @@
         color: white;
     }
 
+    .btn-return {
+        background: #E0E7FF;
+        color: #4338CA;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-return:hover {
+        background: #4338CA;
+        color: white;
+    }
+
     .alert {
         padding: 15px 20px;
         border-radius: 12px;
@@ -192,6 +213,174 @@
     }
     .alert-success { background: #DCFCE7; color: #10B981; border: 1px solid #10B981; }
     .alert-error { background: #FEE2E2; color: #EF4444; border: 1px solid #EF4444; }
+
+    /* MODAL STYLES */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        backdrop-filter: blur(5px);
+    }
+
+    .modal-content.order-modal {
+        background: var(--color-white);
+        width: 90%;
+        max-width: 600px;
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        animation: modalSlideUp 0.3s ease-out;
+    }
+
+    @keyframes modalSlideUp {
+        from { transform: translateY(30px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-header {
+        padding: 20px 30px;
+        border-bottom: 1px solid var(--color-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #F8F9FA;
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        font-size: 1.3rem;
+        color: var(--color-text-dark);
+    }
+
+    .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.8rem;
+        cursor: pointer;
+        color: var(--color-text-light);
+    }
+
+    .modal-body {
+        padding: 30px;
+    }
+
+    .order-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .info-item label {
+        display: block;
+        font-size: 0.8rem;
+        color: var(--color-text-light);
+        text-transform: uppercase;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .info-item p {
+        font-weight: 600;
+        color: var(--color-text-dark);
+    }
+
+    .items-list-container h4 {
+        margin-bottom: 15px;
+        font-size: 1rem;
+        color: var(--color-text-dark);
+        border-bottom: 2px solid var(--color-bg-light);
+        padding-bottom: 10px;
+    }
+
+    .modal-items-list {
+        max-height: 250px;
+        overflow-y: auto;
+        margin-bottom: 20px;
+    }
+
+    .modal-item-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #F1F5F9;
+    }
+
+    .modal-item-row:last-child {
+        border-bottom: none;
+    }
+
+    .item-main {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .item-img {
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    .item-details h5 {
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .item-details span {
+        font-size: 0.85rem;
+        color: var(--color-text-medium);
+    }
+
+    .item-price-info {
+        text-align: right;
+    }
+
+    .item-total {
+        font-weight: 700;
+        color: var(--color-text-dark);
+    }
+
+    .order-summary-footer {
+        border-top: 2px solid #F8F9FA;
+        padding-top: 20px;
+    }
+
+    .summary-row.total {
+        display: flex;
+        justify-content: space-between;
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: var(--color-primary);
+    }
+
+    .btn-view-details {
+        background: #F1F5F9;
+        color: #475569;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        transition: 0.2s;
+    }
+
+    .btn-view-details:hover {
+        background: #E2E8F0;
+        color: var(--color-text-dark);
+    }
 
     /* MOBILE RESPONSIVE OVERRIDES */
     @media (max-width: 768px) {
@@ -393,17 +582,33 @@
                                 @endif
                             </td>
                             <td data-label="Action" id="action-container-{{ $order->id }}">
-                                @if($order->status == 'completed')
-                                    <button type="button" class="btn-cancel" onclick="cancelOrder({{ $order->id }})">
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <button type="button" class="btn-view-details" onclick="showOrderDetails({{ json_encode($order) }})">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                            <circle cx="12" cy="12" r="3"></circle>
                                         </svg>
-                                        Cancel
+                                        Details
                                     </button>
-                                @else
-                                    <span style="color: #94A3B8; font-size: 0.85rem;">No actions</span>
-                                @endif
+
+                                    @if($order->status == 'completed')
+                                        <button type="button" class="btn-cancel" onclick="cancelOrder({{ $order->id }})">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                                            </svg>
+                                            Cancel
+                                        </button>
+                                    @elseif($order->status == 'delivered' && ($order->delivered_at ?? $order->updated_at)->diffInDays(now()) <= 14)
+                                        <button type="button" class="btn-return" onclick="returnOrder({{ $order->id }})">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                <path d="M15 10l-5 5 5 5"></path>
+                                                <path d="M4 4v7a4 4 0 0 0 4 4h12"></path>
+                                            </svg>
+                                            Return
+                                        </button>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                         @endforeach
@@ -414,6 +619,50 @@
                     <p>You haven't placed any orders yet. Start shopping to see your history here!</p>
                 </div>
             @endif
+        </div>
+    </div>
+</div>
+
+<!-- ORDER DETAILS MODAL -->
+<div id="order-details-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content order-modal">
+        <div class="modal-header">
+            <h3 id="modal-order-id">Order Details</h3>
+            <button class="close-modal" onclick="closeOrderModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="order-info-grid">
+                <div class="info-item">
+                    <label>Order Date</label>
+                    <p id="modal-date"></p>
+                </div>
+                <div class="info-item">
+                    <label>Order Status</label>
+                    <p id="modal-status"></p>
+                </div>
+                <div class="info-item">
+                    <label>Items Count</label>
+                    <p id="modal-total-items"></p>
+                </div>
+                <div class="info-item">
+                    <label>Total Price</label>
+                    <p id="modal-total-amount-info" style="color: var(--color-primary); font-weight: 800;"></p>
+                </div>
+            </div>
+
+            <div class="items-list-container">
+                <h4>Purchased Items</h4>
+                <div id="modal-items-list" class="modal-items-list">
+                    <!-- Items injected via JS -->
+                </div>
+            </div>
+
+            <div class="order-summary-footer">
+                <div class="summary-row total">
+                    <span>Grand Total</span>
+                    <span id="modal-total-amount-footer"></span>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -445,9 +694,19 @@
                         console.log(`Updating order ${order.id} status to ${order.display_status}`);
                         statusContainer.innerHTML = `<span id="badge-${order.id}" class="status-badge status-${order.status}">${order.display_status}</span>`;
                         
-                        // Update Action column: Hide cancel button if no longer 'completed'
+                        // Update Action column: Handle Cancel and Return buttons
                         if (actionContainer) {
-                            if (order.status !== 'completed') {
+                            if (order.status === 'delivered') {
+                                actionContainer.innerHTML = `
+                                    <button type="button" class="btn-return" onclick="returnOrder(${order.id})">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                            <path d="M15 10l-5 5 5 5"></path>
+                                            <path d="M4 4v7a4 4 0 0 0 4 4h12"></path>
+                                        </svg>
+                                        Return
+                                    </button>
+                                `;
+                            } else if (order.status !== 'completed') {
                                 actionContainer.innerHTML = '<span style="color: #94A3B8; font-size: 0.85rem;">No actions</span>';
                             }
                         }
@@ -504,6 +763,105 @@
             alert('An error occurred.');
         }
     }
+
+    async function returnOrder(orderId) {
+        const reason = prompt('Why do you want to return this product?');
+        if (!reason) return;
+
+        try {
+            const response = await fetch(`{{ url('dashboard/orders') }}/${orderId}/return`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ reason: reason })
+            });
+            const result = await response.json();
+            if (result.success) {
+                // Update UI immediately
+                const statusContainer = document.getElementById(`status-container-${orderId}`);
+                if (statusContainer) {
+                    statusContainer.innerHTML = '<span class="status-badge status-returning">returning</span>';
+                }
+                const actionContainer = document.getElementById(`action-container-${orderId}`);
+                if (actionContainer) {
+                    actionContainer.innerHTML = '<span style="color: #94A3B8; font-size: 0.85rem;">No actions</span>';
+                }
+                alert(result.message);
+            } else {
+                alert(result.message || 'Return request failed');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('An error occurred.');
+        }
+    }
+
+    function showOrderDetails(order) {
+        console.log("Showing details for order:", order);
+        
+        // Basic Info
+        document.getElementById('modal-order-id').textContent = `Order #ORD-${order.id.toString().padStart(5, '0')}`;
+        document.getElementById('modal-date').textContent = new Date(order.created_at).toLocaleDateString('en-US', { 
+            month: 'long', 
+            day: 'numeric', 
+            year: 'numeric' 
+        });
+        document.getElementById('modal-status').textContent = order.status.toUpperCase();
+        document.getElementById('modal-total-items').textContent = `${order.total_items} Items`;
+        
+        const currencySymbol = "{{ currency_symbol() }}";
+        const formattedTotal = currencySymbol + parseFloat(order.total_price).toLocaleString(undefined, {minimumFractionDigits: 2});
+        document.getElementById('modal-total-amount-info').textContent = formattedTotal;
+        document.getElementById('modal-total-amount-footer').textContent = formattedTotal;
+
+        // Items List
+        const itemsList = document.getElementById('modal-items-list');
+        itemsList.innerHTML = '';
+        
+        const items = Array.isArray(order.items_json) ? order.items_json : JSON.parse(order.items_json);
+        
+        items.forEach(item => {
+            const itemRow = document.createElement('div');
+            itemRow.className = 'modal-item-row';
+            
+            // Handle image path correctly
+            const imgPath = item.image ? (item.image.startsWith('http') ? item.image : `/${item.image}`) : '/placeholder-product.png';
+            
+            itemRow.innerHTML = `
+                <div class="item-main">
+                    <img src="${imgPath}" class="item-img" onerror="this.src='https://via.placeholder.com/50x50?text=Product'">
+                    <div class="item-details">
+                        <h5 style="margin-bottom: 2px;">${item.name}</h5>
+                        <div style="display: flex; flex-direction: column; gap: 2px;">
+                            <span style="color: var(--color-primary); font-size: 0.75rem; font-weight: 700;">Store: ${item.store_name || 'E-Shop'}</span>
+                            <span>${item.qty} x ${currencySymbol}${parseFloat(item.price).toFixed(2)}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="item-price-info">
+                    <span class="item-total">${currencySymbol}${parseFloat(item.price * item.qty).toFixed(2)}</span>
+                </div>
+            `;
+            itemsList.appendChild(itemRow);
+        });
+
+        // Show Modal
+        document.getElementById('order-details-modal').style.display = 'flex';
+        document.body.classList.add('modal-open');
+    }
+
+    function closeOrderModal() {
+        document.getElementById('order-details-modal').style.display = 'none';
+        document.body.classList.remove('modal-open');
+    }
+
+    // Close on overlay click
+    document.getElementById('order-details-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeOrderModal();
+    });
 </script>
 @endsection
 @endsection

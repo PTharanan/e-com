@@ -208,7 +208,7 @@
                 <button class="time-btn">1Y</button>
             </div>
         </div>
-        <div style="height: 350px;">
+        <div style="position: relative; height: 350px; width: 100%;">
             <canvas id="revenueChart"></canvas>
         </div>
     </div>
@@ -217,7 +217,7 @@
         <div class="chart-header">
             <h2>Top Product Sales</h2>
         </div>
-        <div style="position: relative; height: 350px;">
+        <div style="position: relative; height: 350px; width: 100%;">
             <canvas id="productSalesChart"></canvas>
         </div>
     </div>
@@ -229,6 +229,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // --- Revenue Line Chart (Light Theme) ---
+        window.myCharts = window.myCharts || [];
         const revenueCtx = document.getElementById('revenueChart').getContext('2d');
         let days = {!! json_encode($days) !!};
         let revenueData = {!! json_encode($revenueData) !!};
@@ -329,6 +330,7 @@
 
         // Initialize with default data
         initRevenueChart(days, revenueData);
+        window.myCharts.push(revenueChart);
 
         // Handle Time Range Clicks
         document.querySelectorAll('.time-btn').forEach(btn => {
@@ -352,7 +354,7 @@
         const productLabels = {!! json_encode($productLabels) !!};
         const productCounts = {!! json_encode($productCounts) !!};
 
-        new Chart(productCtx, {
+        const productChart = new Chart(productCtx, {
             type: 'doughnut',
             data: {
                 labels: productLabels,
@@ -386,6 +388,22 @@
                 },
                 cutout: '70%'
             }
+        });
+        window.myCharts.push(productChart);
+
+        // --- NEW: ResizeObserver for foolproof responsiveness ---
+        const resizeObserver = new ResizeObserver(() => {
+            if (window.myCharts) {
+                window.myCharts.forEach(chart => {
+                    chart.resize();
+                    chart.update('none'); // Force immediate update without animation
+                });
+            }
+        });
+
+        // Observe both chart containers
+        document.querySelectorAll('.chart-container').forEach(container => {
+            resizeObserver.observe(container);
         });
     });
 </script>
