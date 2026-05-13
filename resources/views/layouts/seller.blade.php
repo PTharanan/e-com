@@ -19,14 +19,14 @@
 
     <style>
         :root {
-            --admin-primary: #F25C3B;
+           --admin-primary: #F25C3B;
             --admin-primary-hover: #E04A2A;
-            --admin-bg: #fefcf7ff;
-            --admin-dark: #1A1A1A;
-            --admin-dark-accent: #2D2D2D;
+            --admin-bg: rgb(255, 247, 230);
+            --admin-dark: #000000;
+            --admin-dark-accent: #434242;
             --admin-text-gray: #A0AEC0;
             --admin-white: #FFFFFF;
-            --admin-border-dark: rgba(255, 255, 255, 0.08);
+            --admin-border-dark: rgba(88, 84, 84, 0.79);
             --sidebar-width-expanded: 280px;
             --sidebar-width-collapsed: 85px;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -256,7 +256,7 @@
 
         .nav-link:hover {
             color: var(--admin-white);
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(45, 44, 44, 0.68);
         }
 
         .nav-link.active {
@@ -414,7 +414,7 @@
             right: 0;
             left: var(--sidebar-width-expanded);
             height: 85px;
-            background: #fdf9f1ff;
+            background: rgba(255, 255, 255, 0.71);
             backdrop-filter: blur(10px);
             box-shadow: 0 4px 25px rgba(0, 0, 0, 0.06);
             display: flex;
