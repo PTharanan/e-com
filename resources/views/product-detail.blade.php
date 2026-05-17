@@ -188,6 +188,21 @@
 }
 .lb-prev { left: 15px; }
 .lb-next { right: 15px; }
+
+/* Variant Selectors */
+.pd-variants{margin:8px 0}
+.pd-variant-label{font-size:.8rem;font-weight:700;color:var(--color-text-medium);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.pd-variant-label span{font-weight:500;color:var(--color-text-dark);text-transform:none;font-size:.9rem}
+.pd-color-swatches{display:flex;gap:10px;flex-wrap:wrap}
+.pd-color-swatch{width:36px;height:36px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .25s ease;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.pd-color-swatch:hover{transform:scale(1.15)}
+.pd-color-swatch.active{border-color:var(--color-primary);box-shadow:0 0 0 2px var(--color-primary)}
+.pd-color-swatch.active::after{content:'✓';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-weight:700;font-size:.7rem;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.pd-size-options{display:flex;gap:8px;flex-wrap:wrap}
+.pd-size-btn{padding:8px 18px;border:2px solid #E2E8F0;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;font-size:.85rem;color:var(--color-text-dark);transition:all .2s}
+.pd-size-btn:hover{border-color:var(--color-primary);color:var(--color-primary)}
+.pd-size-btn.active{background:var(--color-primary);color:#fff;border-color:var(--color-primary)}
+.pd-size-btn.out-of-stock{opacity:.4;cursor:not-allowed;text-decoration:line-through}
 </style>
 @endsection
 
@@ -237,6 +252,46 @@
             @else
             <span class="pd-stock out">✕ Out of Stock</span>
             @endif
+
+            {{-- Color Variants --}}
+            @php
+                $colorVariants = $product->variants->where('variant_type', 'color');
+                $sizeVariants = $product->variants->where('variant_type', 'size');
+            @endphp
+            @if($colorVariants->count() > 0)
+            <div class="pd-variants">
+                <div class="pd-variant-label">Color: <span id="selectedColorName">{{ $colorVariants->first()->value }}</span></div>
+                <div class="pd-color-swatches">
+                    @foreach($colorVariants as $i => $color)
+                    <div class="pd-color-swatch {{ $i === 0 ? 'active' : '' }}"
+                         style="background: {{ $color->hex_code ?? '#ccc' }}"
+                         title="{{ $color->value }}"
+                         data-color-name="{{ $color->value }}"
+                         data-color-image="{{ $color->image_url ? asset($color->image_url) : '' }}"
+                         data-color-stock="{{ $color->stock_quantity }}"
+                         onclick="selectColor(this)"></div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+            {{-- Size Variants --}}
+            @if($sizeVariants->count() > 0)
+            <div class="pd-variants">
+                <div class="pd-variant-label">Size: <span id="selectedSizeName">Select</span></div>
+                <div class="pd-size-options">
+                    @foreach($sizeVariants as $size)
+                    <button type="button" class="pd-size-btn {{ $size->stock_quantity <= 0 ? 'out-of-stock' : '' }}"
+                            data-size-name="{{ $size->value }}"
+                            data-size-price="{{ $size->price_adjustment }}"
+                            data-size-stock="{{ $size->stock_quantity }}"
+                            onclick="selectSize(this)"
+                            {{ $size->stock_quantity <= 0 ? 'disabled' : '' }}>{{ $size->value }}</button>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
             <div class="pd-actions">
                 @if($product->stock_quantity > 0)
                 <div class="pd-qty">
@@ -411,6 +466,41 @@ function zoomMove(e){
     result.style.backgroundSize=bgW+'px '+bgH+'px'; result.style.backgroundPosition=posX+'px '+posY+'px';
 }
 function zoomOut(){}
+
+// Variant selection
+let selectedColor = null;
+let selectedSize = null;
+const basePrice = {{ $product->final_price }};
+
+function selectColor(el) {
+    document.querySelectorAll('.pd-color-swatch').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+    selectedColor = el.dataset.colorName;
+    const nameEl = document.getElementById('selectedColorName');
+    if (nameEl) nameEl.textContent = selectedColor;
+
+    // Swap main image if color has an image
+    const colorImg = el.dataset.colorImage;
+    if (colorImg) {
+        document.getElementById('mainImg').src = colorImg;
+    }
+}
+
+function selectSize(el) {
+    document.querySelectorAll('.pd-size-btn').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+    selectedSize = el.dataset.sizeName;
+    const nameEl = document.getElementById('selectedSizeName');
+    if (nameEl) nameEl.textContent = selectedSize;
+
+    // Update price if adjustment exists
+    const adj = parseFloat(el.dataset.sizePrice) || 0;
+    const newPrice = basePrice + adj;
+    const priceEl = document.querySelector('.pd-final');
+    if (priceEl) {
+        priceEl.textContent = '{{ currency_symbol() }}' + newPrice.toFixed(2);
+    }
+}
 function changeQty(d){
     const el = document.getElementById('pdQty');
     let v = parseInt(el.textContent) + d;
@@ -425,16 +515,37 @@ function showToast(msg, err){
 async function addToCartDetail(){
     const isAuth = {{ Auth::check() ? 'true' : 'false' }};
     if(!isAuth){window.location.href="{{ route('sign-in') }}";return;}
+
+    // Check if color is selected
+    const activeColor = document.querySelector('.pd-color-swatch.active');
+    const colorVal = activeColor ? activeColor.dataset.colorName : null;
+
+    // Check if size is selected
+    const hasSizes = document.querySelectorAll('.pd-size-btn').length > 0;
+    const activeSize = document.querySelector('.pd-size-btn.active');
+    if (hasSizes && !activeSize) {
+        showToast('Please select a size', true);
+        return;
+    }
+    const sizeVal = activeSize ? activeSize.dataset.sizeName : null;
+
     const qty = parseInt(document.getElementById('pdQty').textContent), btn = document.getElementById('pdBuyBtn');
     btn.disabled = true; btn.innerHTML = 'Adding...';
     try{
+        const payload = {
+            product_id: productId,
+            quantity: qty,
+            color: colorVal,
+            size: sizeVal
+        };
+
         const r = await fetch('{{ route("products.add-to-cart") }}',{
             method:'POST', headers:{'Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'},
-            body:JSON.stringify({product_id:productId,quantity:qty})
+            body:JSON.stringify(payload)
         });
         const d = await r.json();
         if(d.success){
-            if(window.flyToCart) window.flyToCart(btn, qty, String(productId));
+            if(window.flyToCart) window.flyToCart(btn, qty, String(productId), { color: colorVal, size: sizeVal });
             showToast('Added to cart!');
             btn.innerHTML='✓ Added!'; setTimeout(()=>{btn.disabled=false;btn.innerHTML='ADD TO CART';},1500);
         } else { showToast(d.message||'Failed',true); btn.disabled=false; btn.innerHTML='ADD TO CART'; }

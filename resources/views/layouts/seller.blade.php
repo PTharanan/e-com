@@ -715,6 +715,17 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a href="{{ route('seller.returns') }}" title="Returns"
+                    class="nav-link {{ request()->routeIs('seller.returns') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M9 14L4 9l5-5"></path>
+                        <path d="M4 9h11a4 4 0 0 1 0 8h-1"></path>
+                    </svg>
+                    <span>Returns</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="{{ route('seller.customers') }}" title="Customers"
                     class="nav-link {{ request()->routeIs('seller.customers') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -836,6 +847,10 @@
                         // Fetch unread stock notifications
                         $stockNotifications = $user->unreadNotifications()->where('type', 'like', '%ProductOutOfStockNotification')->take(5)->get();
                         $stockNotifCount = $user->unreadNotifications()->where('type', 'like', '%ProductOutOfStockNotification')->count();
+                        
+                        // Fetch unread return notifications
+                        $returnNotifications = $user->unreadNotifications()->where('type', 'like', '%OrderReturnNotification')->take(5)->get();
+                        $returnNotifCount = $user->unreadNotifications()->where('type', 'like', '%OrderReturnNotification')->count();
                     }
                 @endphp
                 <div style="display: flex; gap: 15px;">
@@ -1018,6 +1033,68 @@
                                     <a href="{{ route('seller.products') }}" class="view-all-link"
                                         style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #F59E0B; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View
                                         All Products</a>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Return Notification --}}
+                    <div class="notification-dropdown">
+                        <button class="bell-btn" id="returnNotifToggle" title="Return Requests">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6366F1"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 14L4 9l5-5"></path>
+                                <path d="M4 9h11a4 4 0 0 1 0 8h-1"></path>
+                            </svg>
+                            <span class="bell-badge" id="returnBadge"
+                                style="background: #6366F1; {{ $returnNotifCount > 0 ? '' : 'display: none;' }}">{{ $returnNotifCount }}</span>
+                        </button>
+                        <div class="bell-menu" id="returnNotifMenu">
+                            <div class="bell-menu-header">
+                                <h4 style="color: #6366F1;">Return Requests</h4>
+                                <span id="returnHeaderCount"
+                                    style="background: rgba(99, 102, 241, 0.1); color: #6366F1;">{{ $returnNotifCount }}
+                                    New</span>
+                            </div>
+                            <div class="bell-menu-body" id="returnNotifList">
+                                @forelse($returnNotifications as $notif)
+                                    <div class="notification-item" id="notif-{{ $notif->id }}">
+                                        <div class="notif-icon-wrapper"
+                                            onmousedown="startNotifDismiss(event, '{{ $notif->id }}')"
+                                            onmouseup="stopNotifDismiss()" onmouseleave="stopNotifDismiss()"
+                                            ontouchstart="startNotifDismiss(event, '{{ $notif->id }}')"
+                                            ontouchend="stopNotifDismiss()">
+                                            <svg class="progress-ring">
+                                                <circle class="progress-ring__circle" r="18" cx="20" cy="20" />
+                                            </svg>
+                                            <div class="notif-icon" style="background: #EEF2FF; color: #6366F1;">
+                                                <svg class="icon-arrow" width="18" height="18" viewBox="0 0 24 24"
+                                                    fill="none" stroke="currentColor" stroke-width="2.5"
+                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M5 12h14"></path>
+                                                    <path d="m12 5 7 7-7 7"></path>
+                                                </svg>
+                                                <svg class="icon-close" width="18" height="18" viewBox="0 0 24 24"
+                                                    fill="none" stroke="currentColor" stroke-width="2.5"
+                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <a href="{{ route('seller.returns') }}" class="notif-content"
+                                            style="text-decoration: none; flex: 1;">
+                                            <p><strong>#{{ $notif->data['order_id'] }}</strong>: Return request from <strong>{{ $notif->data['customer_name'] }}</strong>.</p>
+                                            <span>{{ $notif->created_at->diffForHumans() }}</span>
+                                        </a>
+                                    </div>
+                                @empty
+                                    <div class="no-notif">No new return requests.</div>
+                                @endforelse
+                                @if($returnNotifCount > 0)
+                                    <a href="{{ route('seller.returns') }}" class="view-all-link"
+                                        style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #6366F1; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View
+                                        All Returns</a>
                                 @endif
                             </div>
                         </div>
@@ -1308,12 +1385,15 @@
         const cancelMenu = document.getElementById('cancelNotifMenu');
         const stockToggle = document.getElementById('stockNotifToggle');
         const stockMenu = document.getElementById('stockNotifMenu');
+        const returnToggle = document.getElementById('returnNotifToggle');
+        const returnMenu = document.getElementById('returnNotifMenu');
 
         const closeAllMenus = () => {
             if (bellMenu) bellMenu.classList.remove('active');
             if (deliveryMenu) deliveryMenu.classList.remove('active');
             if (cancelMenu) cancelMenu.classList.remove('active');
             if (stockMenu) stockMenu.classList.remove('active');
+            if (returnMenu) returnMenu.classList.remove('active');
         };
 
         const setupToggle = (toggle, menu) => {
@@ -1331,12 +1411,14 @@
         setupToggle(deliveryToggle, deliveryMenu);
         setupToggle(cancelToggle, cancelMenu);
         setupToggle(stockToggle, stockMenu);
+        setupToggle(returnToggle, returnMenu);
 
         document.addEventListener('click', (e) => {
             if (bellToggle && !bellToggle.contains(e.target) && bellMenu && !bellMenu.contains(e.target) &&
                 deliveryToggle && !deliveryToggle.contains(e.target) && deliveryMenu && !deliveryMenu.contains(e.target) &&
                 cancelToggle && !cancelToggle.contains(e.target) && cancelMenu && !cancelMenu.contains(e.target) &&
-                stockToggle && !stockToggle.contains(e.target) && stockMenu && !stockMenu.contains(e.target)) {
+                stockToggle && !stockToggle.contains(e.target) && stockMenu && !stockMenu.contains(e.target) &&
+                returnToggle && !returnToggle.contains(e.target) && returnMenu && !returnMenu.contains(e.target)) {
                 closeAllMenus();
             }
         });
@@ -1417,6 +1499,17 @@
                                     stockBadge.style.display = 'none';
                                     document.getElementById('stockHeaderCount').innerText = '0 New';
                                     document.getElementById('stockNotifList').innerHTML = '<div class="no-notif">No out of stock alerts.</div>';
+                                }
+                            } else if (wrapper.closest('#returnNotifList')) {
+                                const returnBadge = document.getElementById('returnBadge');
+                                const count = parseInt(returnBadge.innerText) - 1;
+                                if (count > 0) {
+                                    returnBadge.innerText = count;
+                                    document.getElementById('returnHeaderCount').innerText = count + ' New';
+                                } else {
+                                    returnBadge.style.display = 'none';
+                                    document.getElementById('returnHeaderCount').innerText = '0 New';
+                                    document.getElementById('returnNotifList').innerHTML = '<div class="no-notif">No new return requests.</div>';
                                 }
                             }
                         }, 300);
@@ -1600,6 +1693,54 @@
                         stockNotifList.innerHTML = html;
                     } else {
                         stockNotifList.innerHTML = '<div class="no-notif">No out of stock alerts.</div>';
+                    }
+                }
+
+                // 4. Update Return Notifications
+                const returnBadge = document.getElementById('returnBadge');
+                const returnHeaderCount = document.getElementById('returnHeaderCount');
+                const returnNotifList = document.getElementById('returnNotifList');
+
+                if (data.returns && data.returns.count !== undefined) {
+                    if (data.returns.count > 0) {
+                        returnBadge.innerText = data.returns.count;
+                        returnBadge.style.display = 'flex';
+                        returnHeaderCount.innerText = data.returns.count + ' New';
+                    } else {
+                        returnBadge.style.display = 'none';
+                        returnHeaderCount.innerText = '0 New';
+                    }
+
+                    if (data.returns.items && data.returns.items.length > 0) {
+                        let html = '';
+                        data.returns.items.forEach(notif => {
+                            html += `
+                                <div class="notification-item" id="notif-${notif.id}">
+                                    <div class="notif-icon-wrapper" 
+                                         onmousedown="startNotifDismiss(event, '${notif.id}')" 
+                                         onmouseup="stopNotifDismiss()" 
+                                         onmouseleave="stopNotifDismiss()"
+                                         ontouchstart="startNotifDismiss(event, '${notif.id}')"
+                                         ontouchend="stopNotifDismiss()">
+                                        <svg class="progress-ring">
+                                            <circle class="progress-ring__circle" r="18" cx="20" cy="20"/>
+                                        </svg>
+                                        <div class="notif-icon" style="background: #EEF2FF; color: #6366F1;">
+                                            <svg class="icon-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                                            <svg class="icon-close" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                        </div>
+                                    </div>
+                                    <a href="{{ route('seller.returns') }}" class="notif-content" style="text-decoration: none; flex: 1;">
+                                        <p><strong>#${notif.order_id}</strong>: Return request from <strong>${notif.customer}</strong>.</p>
+                                        <span>${notif.time}</span>
+                                    </a>
+                                </div>
+                            `;
+                        });
+                        html += `<a href="{{ route('seller.returns') }}" class="view-all-link" style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #6366F1; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View All Returns</a>`;
+                        returnNotifList.innerHTML = html;
+                    } else {
+                        returnNotifList.innerHTML = '<div class="no-notif">No new return requests.</div>';
                     }
                 }
             });

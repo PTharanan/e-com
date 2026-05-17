@@ -128,6 +128,9 @@ Route::prefix('delivery')->name('delivery.')->group(function () {
         Route::post('/apply/{storeOwnerId}', [\App\Http\Controllers\DeliveryController::class, 'apply'])->name('apply');
         Route::post('/take-order/{id}', [\App\Http\Controllers\DeliveryController::class, 'takeOrder'])->name('take-order');
         Route::post('/verify-delivery/{id}', [\App\Http\Controllers\DeliveryController::class, 'verifyDelivery'])->name('verify-delivery');
+        Route::post('/accept-return/{id}', [\App\Http\Controllers\DeliveryController::class, 'acceptReturn'])->name('accept-return');
+        Route::post('/pickup-return/{id}', [\App\Http\Controllers\DeliveryController::class, 'pickupReturn'])->name('pickup-return');
+        Route::post('/dropoff-return/{id}', [\App\Http\Controllers\DeliveryController::class, 'dropoffReturn'])->name('dropoff-return');
         Route::get('/notifications/poll', [\App\Http\Controllers\NotificationController::class, 'poll'])->name('notifications.poll');
     });
 });
@@ -172,6 +175,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/orders/{id}/status', [\App\Http\Controllers\OrderController::class, 'updateStatus'])->name('orders.status');
         Route::post('/orders/{id}/assign', [\App\Http\Controllers\OrderController::class, 'assignPartner'])->name('orders.assign');
         Route::post('/orders/{id}/refund', [\App\Http\Controllers\OrderController::class, 'refundOrder'])->name('orders.refund');
+
+        Route::get('/returns', [\App\Http\Controllers\ReturnRequestController::class, 'index'])->name('returns');
+        Route::patch('/returns/{id}/status', [\App\Http\Controllers\ReturnRequestController::class, 'updateStatus'])->name('returns.status');
+        Route::post('/returns/{id}/assign', [\App\Http\Controllers\ReturnRequestController::class, 'assignPartner'])->name('returns.assign');
 
         Route::get('/customers', [\App\Http\Controllers\CustomerController::class, 'index'])->name('customers');
 
@@ -246,6 +253,10 @@ Route::prefix('seller')->name('seller.')->group(function () {
         Route::patch('/orders/{id}/status', [\App\Http\Controllers\OrderController::class, 'updateStatus'])->name('orders.status');
         Route::post('/orders/{id}/assign', [\App\Http\Controllers\OrderController::class, 'assignPartner'])->name('orders.assign');
         Route::post('/orders/{id}/refund', [\App\Http\Controllers\OrderController::class, 'refundOrder'])->name('orders.refund');
+
+        Route::get('/returns', [\App\Http\Controllers\ReturnRequestController::class, 'index'])->name('returns');
+        Route::patch('/returns/{id}/status', [\App\Http\Controllers\ReturnRequestController::class, 'updateStatus'])->name('returns.status');
+        Route::post('/returns/{id}/assign', [\App\Http\Controllers\ReturnRequestController::class, 'assignPartner'])->name('returns.assign');
 
         Route::get('/delivery-partners', [\App\Http\Controllers\AdminDeliveryController::class, 'index'])->name('delivery');
         Route::patch('/delivery-partners/{id}/status', [\App\Http\Controllers\AdminDeliveryController::class, 'updateStatus'])->name('delivery.status');

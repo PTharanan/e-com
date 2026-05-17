@@ -894,12 +894,44 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="modal-btn btn-cancel" onclick="nextProductStep(1)">Back</button>
-                        <button type="button" class="modal-btn btn-save" onclick="nextProductStep(3)">Next: Images</button>
+                        <button type="button" class="modal-btn btn-save" onclick="nextProductStep(3)">Next: Variants</button>
                     </div>
                 </div>
 
-                <!-- Step 3: Images -->
+                <!-- Step 3: Color & Size Variants -->
                 <div class="step" id="p-step3">
+                    <!-- Colors Section -->
+                    <div class="form-group">
+                        <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+                            Color Variants <small style="color: #9CA3AF;">(Optional)</small>
+                            <button type="button" onclick="addColorRow()" style="background: var(--admin-primary); color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                Add Color
+                            </button>
+                        </label>
+                        <div id="colorVariantsContainer" style="margin-top: 10px; display: flex; flex-direction: column; gap: 12px;"></div>
+                    </div>
+
+                    <!-- Sizes Section -->
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+                            Size Variants <small style="color: #9CA3AF;">(Optional)</small>
+                            <button type="button" onclick="addSizeRow()" style="background: var(--admin-primary); color: #fff; border: none; border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                Add Size
+                            </button>
+                        </label>
+                        <div id="sizeVariantsContainer" style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px;"></div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="modal-btn btn-cancel" onclick="nextProductStep(2)">Back</button>
+                        <button type="button" class="modal-btn btn-save" onclick="nextProductStep(4)">Next: Images</button>
+                    </div>
+                </div>
+
+                <!-- Step 4: Images -->
+                <div class="step" id="p-step4">
                     <div class="form-group">
                         <label class="form-label">Product Images (Max 5)</label>
                         <div class="image-upload-grid">
@@ -925,7 +957,7 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="modal-btn btn-cancel" onclick="nextProductStep(2)">Back</button>
+                        <button type="button" class="modal-btn btn-cancel" onclick="nextProductStep(3)">Back</button>
                         <button type="submit" class="modal-btn btn-save" id="saveProductBtn">Save</button>
                     </div>
                 </div>
@@ -1108,6 +1140,18 @@
                 updateMainImageOptions();
             }
 
+            // Populate variants
+            clearVariantRows();
+            if (product.variants && product.variants.length > 0) {
+                product.variants.forEach(v => {
+                    if (v.variant_type === 'color') {
+                        addColorRow(v);
+                    } else if (v.variant_type === 'size') {
+                        addSizeRow(v);
+                    }
+                });
+            }
+
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
@@ -1248,6 +1292,7 @@
             }
             imageFiles.fill(null);
             updateMainImageOptions();
+            clearVariantRows();
         }
 
         function nextProductStep(step) {
@@ -1263,7 +1308,8 @@
             const descriptions = [
                 'Step 1: Basic Product Details',
                 'Step 2: Description & Stock',
-                'Step 3: Upload Product Images'
+                'Step 3: Color & Size Variants',
+                'Step 4: Upload Product Images'
             ];
             productStepDesc.innerText = descriptions[step - 1];
         }
@@ -1429,19 +1475,15 @@
             saveBtn.disabled = true;
             saveBtn.innerText = productId ? 'Updating...' : 'Saving...';
 
-            const formData = new FormData();
-            formData.append('name', form.name.value);
-            formData.append('category_id', form.category_id.value);
-            formData.append('price', form.price.value);
-            formData.append('discount_percentage', form.discount_percentage.value || 0);
-            formData.append('is_new', form.is_new.checked ? 1 : 0);
-            formData.append('stock_status', form.stock_status.value);
-            formData.append('stock_quantity', form.stock_quantity.value);
-            formData.append('description', form.description.value);
-            formData.append('_method', document.getElementById('form_method').value);
-            formData.append('_token', '{{ csrf_token() }}');
+            const formData = new FormData(form);
+            formData.delete('images[]'); // We will handle images manually
+            formData.delete('existing_images[]');
 
-            // Collect images
+            formData.set('_method', document.getElementById('form_method').value);
+            formData.set('_token', '{{ csrf_token() }}');
+            formData.set('is_new', form.is_new.checked ? 1 : 0);
+
+            // Collect main images
             let combinedImages = [];
             let actualMainIndex = 0;
             let targetIndex = parseInt(document.getElementById('main_image_index').value);
@@ -1506,6 +1548,54 @@
                     opt.classList.remove('selected');
                 }
             });
+        }
+        // ===== VARIANT FUNCTIONS =====
+        let colorRowCount = 0;
+        let sizeRowCount = 0;
+
+        function addColorRow(data = {}) {
+            const container = document.getElementById('colorVariantsContainer');
+            const idx = colorRowCount++;
+            const div = document.createElement('div');
+            div.style.cssText = 'background: #F8FAFC; border-radius: 12px; padding: 14px; border: 1px solid #E2E8F0;';
+            div.innerHTML = `
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <input type="color" name="color_hexes[]" value="${data.hex_code || '#000000'}" style="width: 40px; height: 36px; border: none; border-radius: 8px; cursor: pointer; background: none;">
+                    <input type="text" name="color_values[]" placeholder="Color name" value="${data.value || ''}" class="form-input" style="flex: 1; min-width: 100px; padding: 8px 12px;">
+                    <input type="number" name="color_stocks[]" placeholder="Stock" value="${data.stock_quantity || 0}" class="form-input" style="width: 80px; padding: 8px 12px;" min="0">
+                    <label style="display: flex; align-items: center; gap: 6px; background: #fff; padding: 6px 12px; border-radius: 8px; border: 1px dashed #CBD5E1; cursor: pointer; font-size: 12px; color: #64748B; white-space: nowrap;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                        <span class="color-img-label">${data.image_url ? 'Image set' : 'Image'}</span>
+                        <input type="file" name="color_images[${idx}]" accept=".jpg,.jpeg,.png,.webp" style="display: none;" onchange="this.previousElementSibling.textContent = this.files[0] ? this.files[0].name.substring(0,12) : 'Image'">
+                        ${data.image_url ? '<input type="hidden" name="color_existing_images[' + idx + ']" value="' + data.image_url + '">' : ''}
+                    </label>
+                    <button type="button" onclick="this.closest('div').closest('div').remove()" style="background: #FEE2E2; color: #EF4444; border: none; border-radius: 8px; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addSizeRow(data = {}) {
+            const container = document.getElementById('sizeVariantsContainer');
+            const div = document.createElement('div');
+            div.style.cssText = 'background: #F8FAFC; border-radius: 12px; padding: 14px; border: 1px solid #E2E8F0;';
+            div.innerHTML = `
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <input type="text" name="size_values[]" placeholder="Size (e.g. XL)" value="${data.value || ''}" class="form-input" style="flex: 1; min-width: 80px; padding: 8px 12px;">
+                    <input type="number" name="size_stocks[]" placeholder="Stock" value="${data.stock_quantity || 0}" class="form-input" style="width: 80px; padding: 8px 12px;" min="0">
+                    <input type="number" name="size_prices[]" placeholder="+/- Price" value="${data.price_adjustment || 0}" class="form-input" style="width: 100px; padding: 8px 12px;" step="0.01">
+                    <button type="button" onclick="this.closest('div').closest('div').remove()" style="background: #FEE2E2; color: #EF4444; border: none; border-radius: 8px; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+                </div>
+            `;
+            container.appendChild(div);
+            sizeRowCount++;
+        }
+
+        function clearVariantRows() {
+            document.getElementById('colorVariantsContainer').innerHTML = '';
+            document.getElementById('sizeVariantsContainer').innerHTML = '';
+            colorRowCount = 0;
+            sizeRowCount = 0;
         }
 
     </script>

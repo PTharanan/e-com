@@ -534,12 +534,22 @@
             let total = 0;
 
             productIds.forEach(id => {
-                const product = productsData.find(p => p.id == id);
+                const item = items[id];
+                const realProductId = typeof item === 'object' && item.productId ? item.productId : id;
+                const product = productsData.find(p => p.id == realProductId);
                 if (!product) return;
 
-                const qty = items[id].qty;
+                const qty = typeof item === 'object' ? item.qty : item;
+                const color = typeof item === 'object' && item.color ? item.color : null;
+                const size = typeof item === 'object' && item.size ? item.size : null;
+
                 const itemTotal = product.final_price * qty;
                 total += itemTotal;
+
+                const variantsHtml = (color || size) ? `<div style="font-size: 0.85rem; color: #64748B; margin-top: 5px;">
+                    ${color ? `<span style="margin-right: 10px;">Color: <strong style="color: #1E293B;">${color}</strong></span>` : ''}
+                    ${size ? `<span>Size: <strong style="color: #1E293B;">${size}</strong></span>` : ''}
+                </div>` : '';
 
                 const itemHtml = `
                     <div class="cart-item" data-id="${id}">
@@ -548,8 +558,9 @@
                         </div>
                         <div class="item-details">
                             <span class="item-category">${product.category.name}</span>
-                            <h3>${product.name}</h3>
-                            <div class="item-price">
+                            <h3 style="margin-bottom: 2px;">${product.name}</h3>
+                            ${variantsHtml}
+                            <div class="item-price" style="margin-top: 8px;">
                                 ${product.discount_percentage ? `
                                     <span style="text-decoration: line-through; font-size: 0.8rem; color: #9CA3AF; margin-right: 8px;">${currencySymbol}${parseFloat(product.price).toFixed(2)}</span>
                                     <span style="color: #10B981;">${currencySymbol}${parseFloat(product.final_price).toFixed(2)}</span>

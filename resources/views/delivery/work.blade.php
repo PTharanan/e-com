@@ -45,8 +45,24 @@
 @endsection
 
 @section('content')
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+        <div onclick="document.getElementById('available-section')?.scrollIntoView({behavior: 'smooth'})" style="background: white; padding: 20px; border-radius: 12px; border-left: 4px solid #FF9800; box-shadow: var(--shadow); cursor: pointer;">
+            <p style="margin: 0; font-size: 13px; color: #666; font-weight: 600;">AVAILABLE PICKUPS</p>
+            <h2 style="margin: 5px 0 0; color: var(--partner-dark);">{{ $availableOrders->count() }} Tasks</h2>
+        </div>
+        <div onclick="document.getElementById('returns-section')?.scrollIntoView({behavior: 'smooth'})" style="background: white; padding: 20px; border-radius: 12px; border-left: 4px solid #6366F1; box-shadow: var(--shadow); cursor: pointer;">
+            <p style="margin: 0; font-size: 13px; color: #666; font-weight: 600;">NEW RETURNS</p>
+            <h2 style="margin: 5px 0 0; color: var(--partner-dark);">{{ $availableReturns->count() }} Tasks</h2>
+        </div>
+        <div onclick="document.getElementById('active-section')?.scrollIntoView({behavior: 'smooth'})" style="background: white; padding: 20px; border-radius: 12px; border-left: 4px solid var(--partner-primary); box-shadow: var(--shadow); cursor: pointer;">
+            <p style="margin: 0; font-size: 13px; color: #666; font-weight: 600;">MY ACTIVE TASKS</p>
+            <h2 style="margin: 5px 0 0; color: var(--partner-dark);">{{ $activeOrders->count() + $acceptedReturns->count() }} Tasks</h2>
+        </div>
+    </div>
+
+    {{-- 1st: Available for Pickup --}}
     @if($isJoined && $availableOrders->count() > 0)
-        <h3 style="margin: 30px 0 20px; color: var(--partner-dark); display: flex; align-items: center; gap: 10px;">
+        <h3 id="available-section" style="margin: 30px 0 20px; color: var(--partner-dark); display: flex; align-items: center; gap: 10px;">
             <span style="width: 10px; height: 10px; background: #FF9800; border-radius: 50%;"></span>
             Available for Pickup ({{ $availableOrders->count() }})
         </h3>
@@ -80,80 +96,165 @@
         </div>
     @endif
 
-    <div class="header-flex" style="display: flex; justify-content: space-between; align-items: center; margin: 40px 0 25px;">
-        <h2 style="margin: 0; color: var(--partner-dark); display: flex; align-items: center; gap: 10px;">
-            <span style="width: 10px; height: 10px; background: #4CAF50; border-radius: 50%;"></span>
-            My Active Tasks
-        </h2>
-        @if($storeName)
-            <div style="background: #E0E7FF; color: #4338CA; padding: 6px 15px; border-radius: 50px; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                STORE: {{ strtoupper($storeName) }}
-            </div>
-        @endif
-    </div>
+    @if($isJoined)
+        {{-- 2nd: Return Work Section (ONLY PENDING) --}}
+        <h3 id="returns-section" style="margin: 40px 0 20px; color: #6366F1; display: flex; align-items: center; gap: 10px;">
+            <span style="width: 10px; height: 10px; background: #6366F1; border-radius: 50%;"></span>
+            New Return Tasks ({{ $availableReturns->count() }})
+        </h3>
 
-    @if(!$isJoined)
-        <div style="text-align: center; padding: 60px 20px; background: white; border-radius: 16px; border: 1px dashed #ccc; display: flex; flex-direction: column; align-items: center; gap: 15px;">
-            <div style="width: 60px; height: 60px; background: #FFF3E0; color: #FF9800; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-            </div>
-            <div>
-                <h3 style="margin: 0 0 10px; color: var(--partner-dark);">No Active Job</h3>
-                <p style="color: #666; margin: 0;">You have not joined any store yet. Please apply for a job to start receiving tasks.</p>
-            </div>
-            <a href="{{ route('delivery.stores') }}" class="btn-action btn-pickup" style="max-width: 200px; text-decoration: none;">Explore Stores</a>
-        </div>
-    @else
-        @forelse($activeOrders as $order)
-            <div class="work-card">
+        @forelse($availableReturns as $return)
+            <div class="work-card" style="border-left: 4px solid #6366F1;">
                 <div class="work-header">
-                    <span class="order-id">#ORD-{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}</span>
-                    <span class="order-status status-{{ strtolower($order->status) }}">{{ $order->status }}</span>
+                    <span class="order-id">#RET-{{ str_pad($return->id, 5, '0', STR_PAD_LEFT) }}</span>
+                    <span class="order-status" style="background: #EEF2FF; color: #6366F1;">PENDING</span>
                 </div>
                 <div class="work-body">
                     <div class="customer-info">
-                        <div class="avatar">{{ substr($order->user->name ?? 'G', 0, 1) }}</div>
+                        <div class="avatar" style="background: #EEF2FF; color: #6366F1;">{{ substr($return->user->name ?? 'G', 0, 1) }}</div>
                         <div class="details">
-                            <h4>{{ $order->user->name ?? 'Guest Customer' }}</h4>
-                            <p><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> {{ $order->address ?? 'No address provided' }}</p>
+                            <h4>{{ $return->user->name ?? 'Guest Customer' }}</h4>
+                            <p><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> {{ $return->user->info->address ?? 'No address provided' }}</p>
                         </div>
                     </div>
                     
-                    <div style="background: #f9f9f9; padding: 15px; border-radius: 10px; border-left: 4px solid var(--partner-primary);">
-                        <p style="margin: 0; font-size: 14px; font-weight: 600;">Payment: <span style="color: {{ ($order->payment_method ?? '') == 'COD' ? '#FF9800' : '#4CAF50' }}">{{ $order->payment_method ?? 'Prepaid' }}</span></p>
-                        <p style="margin: 5px 0 0; font-size: 14px;">Total Amount: <strong>{{ currency_symbol() }}{{ number_format($order->total_price, 2) }}</strong></p>
+                    <div style="background: #f9f9f9; padding: 15px; border-radius: 10px; border-left: 4px solid #6366F1;">
+                        <p style="margin: 0; font-size: 14px; font-weight: 600;">Reason: <span style="font-weight: 400; color: #475569;">{{ $return->reason }}</span></p>
+                        <p style="margin: 5px 0 0; font-size: 13px; color: #64748B;">Order: <strong>#ORD-{{ str_pad($return->order_id, 5, '0', STR_PAD_LEFT) }}</strong></p>
                     </div>
                 </div>
                 <div class="work-footer">
-                    @if($order->status == 'processing')
-                        <button class="btn-action btn-pickup" id="pickup-btn-{{ $order->id }}" onclick="triggerPickup({{ $order->id }})">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-                            PICK UP (Take Photo)
-                        </button>
-                        <input type="file" id="pickup-input-{{ $order->id }}" style="display: none;" accept="image/*" onchange="handlePickup({{ $order->id }}, this)">
-                    @endif
-
-                    @if($order->status == 'shipped')
-                        <button class="btn-action btn-deliver" id="deliver-btn-{{ $order->id }}" onclick="triggerDelivery({{ $order->id }})">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            DELIVER (Code & Photo)
-                        </button>
-                        <input type="file" id="delivery-input-{{ $order->id }}" style="display: none;" accept="image/*" onchange="handleDelivery({{ $order->id }}, this)">
-                        @if(($order->payment_method ?? '') == 'COD')
-                            <button class="btn-action btn-cash">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                                GET CASH
-                            </button>
-                        @endif
-                    @endif
+                    <button class="btn-action" style="background: #FF9800; color: white;" onclick="acceptReturn({{ $return->id }})">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>
+                        TAKE RETURN
+                    </button>
                 </div>
             </div>
         @empty
-            <div style="text-align: center; padding: 60px 20px; background: white; border-radius: 16px; border: 1px dashed #ccc;">
-                <p style="color: #999;">No active tasks assigned to you.</p>
+            <div style="text-align: center; padding: 40px 20px; background: white; border-radius: 16px; border: 1px dashed #ccc;">
+                <p style="color: #999;">No new return tasks available.</p>
             </div>
         @endforelse
+
+        {{-- 3rd: My Active Deliveries + Accepted Returns --}}
+        <div class="header-flex" style="display: flex; justify-content: space-between; align-items: center; margin: 40px 0 25px;">
+            <h2 id="active-section" style="margin: 0; color: var(--partner-dark); display: flex; align-items: center; gap: 10px;">
+                <span style="width: 10px; height: 10px; background: #4CAF50; border-radius: 50%;"></span>
+                My Active Tasks ({{ $activeOrders->count() + $acceptedReturns->count() }})
+            </h2>
+            @if($storeName)
+                <div style="background: #E0E7FF; color: #4338CA; padding: 6px 15px; border-radius: 50px; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    STORE: {{ strtoupper($storeName) }}
+                </div>
+            @endif
+        </div>
+
+        @if(!$isJoined)
+            <div style="text-align: center; padding: 60px 20px; background: white; border-radius: 16px; border: 1px dashed #ccc; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                <div style="width: 60px; height: 60px; background: #FFF3E0; color: #FF9800; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                </div>
+                <div>
+                    <h3 style="margin: 0 0 10px; color: var(--partner-dark);">No Active Job</h3>
+                    <p style="color: #666; margin: 0;">You have not joined any store yet. Please apply for a job to start receiving tasks.</p>
+                </div>
+                <a href="{{ route('delivery.stores') }}" class="btn-action btn-pickup" style="max-width: 200px; text-decoration: none;">Explore Stores</a>
+            </div>
+        @else
+            {{-- Show Active Orders --}}
+            @foreach($activeOrders as $order)
+                <div class="work-card">
+                    <div class="work-header">
+                        <span class="order-id">#ORD-{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}</span>
+                        <span class="order-status status-{{ strtolower($order->status) }}">{{ $order->status }}</span>
+                    </div>
+                    <div class="work-body">
+                        <div class="customer-info">
+                            <div class="avatar">{{ substr($order->user->name ?? 'G', 0, 1) }}</div>
+                            <div class="details">
+                                <h4>{{ $order->user->name ?? 'Guest Customer' }}</h4>
+                                <p><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> {{ $order->address ?? 'No address provided' }}</p>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #f9f9f9; padding: 15px; border-radius: 10px; border-left: 4px solid var(--partner-primary);">
+                            <p style="margin: 0; font-size: 14px; font-weight: 600;">Payment: <span style="color: {{ ($order->payment_method ?? '') == 'COD' ? '#FF9800' : '#4CAF50' }}">{{ $order->payment_method ?? 'Prepaid' }}</span></p>
+                            <p style="margin: 5px 0 0; font-size: 14px;">Total Amount: <strong>{{ currency_symbol() }}{{ number_format($order->total_price, 2) }}</strong></p>
+                        </div>
+                    </div>
+                    <div class="work-footer">
+                        @if($order->status == 'processing')
+                            <button class="btn-action btn-pickup" id="pickup-btn-{{ $order->id }}" onclick="triggerPickup({{ $order->id }})">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                                PICK UP (Take Photo)
+                            </button>
+                            <input type="file" id="pickup-input-{{ $order->id }}" style="display: none;" accept="image/*" onchange="handlePickup({{ $order->id }}, this)">
+                        @endif
+
+                        @if($order->status == 'shipped')
+                            <button class="btn-action btn-deliver" id="deliver-btn-{{ $order->id }}" onclick="triggerDelivery({{ $order->id }})">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                DELIVER (Code & Photo)
+                            </button>
+                            <input type="file" id="delivery-input-{{ $order->id }}" style="display: none;" accept="image/*" onchange="handleDelivery({{ $order->id }}, this)">
+                            @if(($order->payment_method ?? '') == 'COD')
+                                <button class="btn-action btn-cash">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                    GET CASH
+                                </button>
+                            @endif
+                        @endif
+                    </div>
+                </div>
+            @endforeach
+
+            {{-- Show Accepted Returns --}}
+            @foreach($acceptedReturns as $return)
+                <div class="work-card" style="border-left: 4px solid #6366F1;">
+                    <div class="work-header">
+                        <span class="order-id">#RET-{{ str_pad($return->id, 5, '0', STR_PAD_LEFT) }}</span>
+                        <span class="order-status" style="background: {{ $return->status == 'accepted' ? '#FEF3C7' : '#D1FAE5' }}; color: {{ $return->status == 'accepted' ? '#92400E' : '#065F46' }};">
+                            {{ $return->status == 'accepted' ? 'IN TRANSIT' : 'PICKED UP' }}
+                        </span>
+                    </div>
+                    <div class="work-body">
+                        <div class="customer-info">
+                            <div class="avatar" style="background: #EEF2FF; color: #6366F1;">{{ substr($return->user->name ?? 'G', 0, 1) }}</div>
+                            <div class="details">
+                                <h4>{{ $return->user->name ?? 'Guest Customer' }}</h4>
+                                <p><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> {{ $return->user->info->address ?? 'No address provided' }}</p>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #f9f9f9; padding: 15px; border-radius: 10px; border-left: 4px solid #6366F1;">
+                            <p style="margin: 0; font-size: 14px; font-weight: 600;">Action: <span style="font-weight: 400; color: #475569;">{{ $return->status == 'accepted' ? 'Go to buyer to pick up product' : 'Deliver product back to store' }}</span></p>
+                        </div>
+                    </div>
+                    <div class="work-footer">
+                        @if($return->status == 'accepted')
+                            <button class="btn-action" style="background: #6366F1; color: white;" onclick="document.getElementById('return-pickup-input-{{ $return->id }}').click()">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                                PICK UP (Take Pic)
+                            </button>
+                            <input type="file" id="return-pickup-input-{{ $return->id }}" style="display: none;" accept="image/*" onchange="handleReturnPickup({{ $return->id }}, this)">
+                        @elseif($return->status == 'picked_up')
+                            <button class="btn-action" style="background: #10B981; color: white;" onclick="document.getElementById('return-store-input-{{ $return->id }}').click()">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                DROP OFF (Store Pic)
+                            </button>
+                            <input type="file" id="return-store-input-{{ $return->id }}" style="display: none;" accept="image/*" onchange="handleReturnStore({{ $return->id }}, this)">
+                        @endif
+                    </div>
+                </div>
+            @endforeach
+
+            @if($activeOrders->isEmpty() && $acceptedReturns->isEmpty())
+                <div style="text-align: center; padding: 60px 20px; background: white; border-radius: 16px; border: 1px dashed #ccc;">
+                    <p style="color: #999;">No active tasks assigned to you.</p>
+                </div>
+            @endif
+        @endif
     @endif
 
     <!-- Secure Code Modal -->
@@ -484,6 +585,90 @@
             }
             alert('Failed to compress image.');
             input.value = '';
+        }
+    }
+
+    async function acceptReturn(id) {
+        if (!confirm('Start this return task?')) return;
+
+        try {
+            const response = await fetch(`{{ url('delivery/accept-return') }}/${id}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                alert(result.message);
+                location.reload();
+            } else {
+                alert(result.message || 'Failed to accept return');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('An error occurred');
+        }
+    }
+
+    async function handleReturnPickup(id, input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        
+        try {
+            const compressedFile = await compressImage(file);
+            const formData = new FormData();
+            formData.append('pickup_image', compressedFile);
+            formData.append('_token', '{{ csrf_token() }}');
+
+            const response = await fetch(`{{ url('delivery/pickup-return') }}/${id}`, {
+                method: 'POST',
+                body: formData,
+                headers: { 'Accept': 'application/json' }
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                alert(result.message);
+                location.reload();
+            } else {
+                alert(result.message || 'Failed to pick up return');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('An error occurred during pickup');
+        }
+    }
+
+    async function handleReturnStore(id, input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        
+        try {
+            const compressedFile = await compressImage(file);
+            const formData = new FormData();
+            formData.append('store_image', compressedFile);
+            formData.append('_token', '{{ csrf_token() }}');
+
+            const response = await fetch(`{{ url('delivery/dropoff-return') }}/${id}`, {
+                method: 'POST',
+                body: formData,
+                headers: { 'Accept': 'application/json' }
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                alert(result.message);
+                location.reload();
+            } else {
+                alert(result.message || 'Failed to drop off return');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('An error occurred during drop off');
         }
     }
 

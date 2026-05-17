@@ -5,8 +5,8 @@
 @section('styles')
 <style>
     .dashboard-container {
-        padding: 60px 5%;
-        max-width: 1200px;
+        padding: 50px 5% 60px;
+        max-width: 1300px;
         margin: 0 auto;
     }
 
@@ -15,10 +15,10 @@
     }
 
     .welcome-text {
-        font-size: 2.5rem;
+        font-size: 2.2rem;
         font-weight: 800;
         color: var(--color-text-dark);
-        margin-bottom: 10px;
+        margin-bottom: 8px;
     }
 
     .welcome-text span {
@@ -27,53 +27,57 @@
 
     .dashboard-subtitle {
         color: var(--color-text-medium);
-        font-size: 1.1rem;
+        font-size: 1rem;
+        font-weight: 500;
     }
 
     /* STATS GRID */
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 30px;
-        margin-bottom: 50px;
+        gap: 24px;
+        margin: -45px auto 40px;
+        position: relative;
+        z-index: 2;
     }
 
     @media (max-width: 768px) {
         .stats-grid {
             grid-template-columns: 1fr;
+            margin-top: -30px;
         }
     }
 
     .stat-card {
         background: var(--color-white);
-        padding: 35px;
-        border-radius: var(--radius-lg);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        border: 1px solid var(--color-border);
+        padding: 28px;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+        border: 1px solid rgba(0,0,0,0.04);
         display: flex;
         align-items: center;
-        gap: 25px;
-        transition: transform 0.3s ease;
+        gap: 20px;
+        transition: all 0.3s ease;
     }
 
     .stat-card:hover {
-        transform: translateY(-5px);
-        border-color: var(--color-primary);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(0,0,0,0.1);
     }
 
     .stat-icon {
-        width: 70px;
-        height: 70px;
-        border-radius: 20px;
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
     }
 
-    .icon-products { background: #EEF2FF; color: #4F46E5; }
-    .icon-cash { background: #ECFDF5; color: #10B981; }
-    .icon-items { background: #FFF7ED; color: #F59E0B; }
+    .icon-products { background: linear-gradient(135deg, #EEF2FF, #E0E7FF); color: #4F46E5; }
+    .icon-cash { background: linear-gradient(135deg, #ECFDF5, #D1FAE5); color: #059669; }
+    .icon-items { background: linear-gradient(135deg, #FFF7ED, #FFEDD5); color: #EA580C; }
 
     .stat-info {
         display: flex;
@@ -81,36 +85,36 @@
     }
 
     .stat-value {
-        font-size: 1.8rem;
+        font-size: 1.6rem;
         font-weight: 800;
         color: var(--color-text-dark);
         line-height: 1.2;
     }
 
     .stat-label {
-        font-size: 0.95rem;
+        font-size: 0.85rem;
         color: var(--color-text-medium);
         font-weight: 500;
-        margin-top: 5px;
+        margin-top: 4px;
     }
 
     /* RECENT ORDERS TABLE */
     .orders-section {
         background: var(--color-white);
-        border-radius: var(--radius-lg);
-        padding: 40px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        border: 1px solid var(--color-border);
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+        border: 1px solid rgba(0,0,0,0.04);
     }
 
     .section-title {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
         font-weight: 700;
-        margin-bottom: 30px;
+        margin-bottom: 24px;
         color: var(--color-text-dark);
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
     }
 
     .order-table-wrapper {
@@ -119,100 +123,120 @@
 
     .order-table {
         width: 100%;
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 0;
     }
 
     .order-table th {
         text-align: left;
-        padding: 15px 20px;
-        background: #F8F9FA;
-        color: var(--color-text-medium);
+        padding: 12px 16px;
+        background: #F8FAFC;
+        color: #64748B;
         font-weight: 600;
-        font-size: 0.9rem;
+        font-size: 0.75rem;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.8px;
+        border-bottom: 1px solid #E2E8F0;
     }
 
+    .order-table th:first-child { border-radius: 10px 0 0 0; }
+    .order-table th:last-child { border-radius: 0 10px 0 0; }
+
     .order-table td {
-        padding: 20px;
+        padding: 16px;
         border-bottom: 1px solid #F1F5F9;
         color: var(--color-text-dark);
         font-weight: 500;
+        font-size: 0.9rem;
     }
 
     .order-table tr:last-child td {
         border-bottom: none;
     }
 
-    .status-badge {
-        padding: 6px 14px;
-        border-radius: 10px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        text-transform: uppercase;
+    .order-table tbody tr {
+        transition: background 0.2s ease;
     }
 
-    .status-completed { background: #DCFCE7; color: #10B981; }
-    .status-shipped { background: #DBEAFE; color: #1E40AF; }
+    .order-table tbody tr:hover {
+        background: #FAFBFD;
+    }
+
+    .status-badge {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+    }
+
+    .status-completed { background: #DCFCE7; color: #16A34A; }
+    .status-shipped { background: #DBEAFE; color: #2563EB; }
     .status-delivered { background: #E0E7FF; color: #4338CA; }
     .status-returning { background: #F3E8FF; color: #7E22CE; }
-    .status-processing { background: #FEF3C7; color: #92400E; }
-    .status-cancelled { background: #FEE2E2; color: #EF4444; }
+    .status-processing { background: #FEF3C7; color: #B45309; }
+    .status-cancelled { background: #FEE2E2; color: #DC2626; }
+    .status-refunded { background: #F0FDF4; color: #15803D; }
 
     .empty-state {
         text-align: center;
-        padding: 40px 0;
+        padding: 60px 0;
         color: var(--color-text-medium);
     }
 
     .btn-cancel {
-        background: #FEE2E2;
-        color: #EF4444;
-        border: none;
-        padding: 8px 15px;
+        background: #FEF2F2;
+        color: #DC2626;
+        border: 1px solid #FECACA;
+        padding: 7px 14px;
         border-radius: 8px;
-        font-size: 0.85rem;
-        font-weight: 700;
+        font-size: 0.78rem;
+        font-weight: 600;
         cursor: pointer;
         transition: 0.2s;
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 5px;
     }
 
     .btn-cancel:hover {
-        background: #EF4444;
+        background: #DC2626;
         color: white;
+        border-color: #DC2626;
     }
 
     .btn-return {
-        background: #E0E7FF;
+        background: #EEF2FF;
         color: #4338CA;
-        border: none;
-        padding: 8px 15px;
+        border: 1px solid #C7D2FE;
+        padding: 7px 14px;
         border-radius: 8px;
-        font-size: 0.85rem;
-        font-weight: 700;
+        font-size: 0.78rem;
+        font-weight: 600;
         cursor: pointer;
         transition: 0.2s;
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 5px;
     }
 
     .btn-return:hover {
         background: #4338CA;
         color: white;
+        border-color: #4338CA;
     }
 
     .alert {
-        padding: 15px 20px;
+        padding: 14px 20px;
         border-radius: 12px;
-        margin-bottom: 30px;
+        margin-bottom: 24px;
         font-weight: 600;
+        font-size: 0.9rem;
     }
-    .alert-success { background: #DCFCE7; color: #10B981; border: 1px solid #10B981; }
-    .alert-error { background: #FEE2E2; color: #EF4444; border: 1px solid #EF4444; }
+    .alert-success { background: #F0FDF4; color: #16A34A; border: 1px solid #BBF7D0; }
+    .alert-error { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
 
     /* MODAL STYLES */
     .modal-overlay {
@@ -222,7 +246,7 @@
         width: 100%;
         height: 100%;
         background: rgba(0, 0, 0, 0.5);
-        display: flex;
+        display: none;
         align-items: center;
         justify-content: center;
         z-index: 9999;
@@ -233,8 +257,10 @@
         background: var(--color-white);
         width: 90%;
         max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
         border-radius: var(--radius-lg);
-        overflow: hidden;
+        overflow-x: hidden;
         animation: modalSlideUp 0.3s ease-out;
     }
 
@@ -363,96 +389,267 @@
     }
 
     .btn-view-details {
-        background: #F1F5F9;
-        color: #475569;
-        border: none;
-        padding: 8px 12px;
+        background: transparent;
+        color: #64748B;
+        border: 1px solid #E2E8F0;
+        padding: 7px 14px;
         border-radius: 8px;
-        font-size: 0.8rem;
-        font-weight: 700;
+        font-size: 0.78rem;
+        font-weight: 600;
         cursor: pointer;
-        display: flex;
+        display: inline-flex;
         align-items: center;
         gap: 5px;
         transition: 0.2s;
     }
 
     .btn-view-details:hover {
-        background: #E2E8F0;
-        color: var(--color-text-dark);
+        background: #1E293B;
+        color: #fff;
+        border-color: #1E293B;
     }
 
     /* MOBILE RESPONSIVE OVERRIDES */
     @media (max-width: 768px) {
         .dashboard-container {
-            padding: 30px 15px;
+            padding: 30px 15px 40px;
+        }
+
+        .dashboard-header {
+            margin-bottom: 30px;
         }
 
         .welcome-text {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
         }
 
         .dashboard-subtitle {
-            font-size: 1rem;
+            font-size: 0.85rem;
         }
 
         .stat-card {
             padding: 20px;
-            gap: 15px;
+            gap: 14px;
         }
 
         .stat-icon {
-            width: 50px;
-            height: 50px;
+            width: 44px;
+            height: 44px;
         }
 
         .stat-icon svg {
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
         }
 
         .stat-value {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
         }
 
         .orders-section {
-            padding: 20px;
+            padding: 20px 16px;
+            border-radius: 16px;
         }
 
-        /* Responsive Table to Cards */
         .order-table thead {
             display: none;
         }
 
         .order-table tr {
             display: block;
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #F1F5F9;
+            margin-bottom: 16px;
+            padding: 16px;
+            background: #FAFBFD;
+            border-radius: 12px;
+            border: 1px solid #F1F5F9;
         }
 
         .order-table td {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
+            padding: 8px 0;
             border: none;
             text-align: right;
+            font-size: 0.85rem;
         }
 
         .order-table td::before {
             content: attr(data-label);
-            font-weight: 700;
-            color: var(--color-text-medium);
-            font-size: 0.85rem;
+            font-weight: 600;
+            color: #64748B;
+            font-size: 0.75rem;
             text-transform: uppercase;
             text-align: left;
+            letter-spacing: 0.3px;
         }
 
         .order-table td:last-child {
             justify-content: center;
-            padding-top: 15px;
+            padding-top: 12px;
+            margin-top: 4px;
+            border-top: 1px solid #E2E8F0;
         }
+    }
+    /* HORIZONTAL TIMELINE */
+    .tracking-section {
+        margin-top: 25px;
+        padding-top: 25px;
+        border-top: 2px solid #F1F5F9;
+    }
+
+    .tracking-section h4 {
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin-bottom: 25px;
+        color: var(--color-text-dark);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .timeline {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        position: relative;
+        padding: 0;
+        margin: 0 10px;
+    }
+
+    .timeline-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        flex: 1;
+        z-index: 1;
+    }
+
+    .timeline-step:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        top: 17px;
+        left: 50%;
+        width: 100%;
+        height: 3px;
+        background: #E2E8F0;
+        z-index: 0;
+        transition: background 0.6s ease;
+    }
+
+    .timeline-step.completed:not(:last-child)::after {
+        background: var(--color-primary, #F25C3B);
+    }
+
+    .timeline-step.active:not(:last-child)::after {
+        background: linear-gradient(90deg, var(--color-primary, #F25C3B) 0%, #E2E8F0 100%);
+        background-size: 200% 100%;
+        animation: lineFlow 1.2s ease-in-out infinite alternate;
+    }
+
+    @keyframes lineFlow {
+        0% { background-position: 0% 0; }
+        100% { background-position: 100% 0; }
+    }
+
+    .step-circle {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        background: #F1F5F9;
+        border: 3px solid #E2E8F0;
+        transition: all 0.5s ease;
+        z-index: 2;
+        position: relative;
+        color: #94A3B8;
+    }
+
+    .timeline-step.completed .step-circle {
+        background: var(--color-primary, #F25C3B);
+        border-color: var(--color-primary, #F25C3B);
+        color: #fff;
+        animation: stepPop 0.4s ease;
+    }
+
+    .timeline-step.active .step-circle {
+        background: var(--color-primary, #F25C3B);
+        border-color: var(--color-primary, #F25C3B);
+        color: #fff;
+        box-shadow: 0 0 0 5px rgba(242, 92, 59, 0.15);
+        animation: stepPulse 2s ease-in-out infinite;
+    }
+
+    .timeline-step.rejected .step-circle {
+        background: #EF4444;
+        border-color: #EF4444;
+        color: #fff;
+    }
+
+    .timeline-step.pending .step-circle {
+        background: #F8FAFC;
+        border-color: #CBD5E1;
+        color: #CBD5E1;
+    }
+
+    @keyframes stepPop {
+        0% { transform: scale(0.6); }
+        60% { transform: scale(1.15); }
+        100% { transform: scale(1); }
+    }
+
+    @keyframes stepPulse {
+        0%, 100% { box-shadow: 0 0 0 5px rgba(242, 92, 59, 0.15); }
+        50% { box-shadow: 0 0 0 10px rgba(242, 92, 59, 0.05); }
+    }
+
+    .step-label {
+        margin-top: 10px;
+        text-align: center;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #1E293B;
+        line-height: 1.3;
+        max-width: 80px;
+    }
+
+    .timeline-step.completed .step-label { color: var(--color-primary, #F25C3B); }
+    .timeline-step.active .step-label { color: var(--color-primary, #F25C3B); }
+    .timeline-step.pending .step-label { color: #94A3B8; }
+    .timeline-step.rejected .step-label { color: #EF4444; }
+
+    .timeline-divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 28px 0 20px;
+    }
+
+    .timeline-divider span {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #7E22CE;
+        white-space: nowrap;
+    }
+
+    .timeline-divider::before,
+    .timeline-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(to right, transparent, #DDD6FE, transparent);
+    }
+
+    @media (max-width: 480px) {
+        .step-circle { width: 28px; height: 28px; }
+        .timeline-step:not(:last-child)::after { top: 14px; height: 2px; }
+        .step-label { font-size: 0.6rem; max-width: 55px; }
     }
 </style>
 @endsection
@@ -559,8 +756,20 @@
                             <td data-label="Items">{{ $order->total_items }} Items</td>
                             <td data-label="Total Amount" style="font-weight: 700;">{{ currency_symbol() }}{{ number_format($order->total_price, 2) }}</td>
                             <td data-label="Status" id="status-container-{{ $order->id }}">
-                                <span id="badge-{{ $order->id }}" class="status-badge status-{{ $order->status }}">
-                                     {{ $order->status == 'completed' ? 'payment complet' : ($order->status == 'refunded' ? 'Refund' : $order->status) }}
+                                @php
+                                    $displayStatus = $order->status == 'completed' ? 'payment complet' : ($order->status == 'refunded' ? 'Refund' : $order->status);
+                                    $badgeClass = $order->status;
+                                    
+                                    if ($order->status == 'returning') {
+                                        $latestReturn = $order->returns->sortByDesc('created_at')->first();
+                                        if ($latestReturn) {
+                                            $displayStatus = 'Return: ' . ucfirst(str_replace('_', ' ', $latestReturn->status));
+                                            $badgeClass = 'returning return-' . $latestReturn->status;
+                                        }
+                                    }
+                                @endphp
+                                <span id="badge-{{ $order->id }}" class="status-badge status-{{ $badgeClass }}">
+                                     {{ $displayStatus }}
                                 </span>
                             </td>
                             <td data-label="Secret Code" id="code-container-{{ $order->id }}">
@@ -573,7 +782,27 @@
                                 @endif
                             </td>
                             <td data-label="Proof">
-                                @if($order->delivery?->delivery_image)
+                                @if($order->status == 'returning')
+                                    @php
+                                        $latestReturn = $order->returns->sortByDesc('created_at')->first();
+                                    @endphp
+                                    @if($latestReturn && ($latestReturn->pickup_image || $latestReturn->store_image))
+                                        <div style="display: flex; gap: 4px;">
+                                            @if($latestReturn->pickup_image)
+                                                <a href="{{ asset($latestReturn->pickup_image) }}" target="_blank" title="Pickup Proof">
+                                                    <img src="{{ asset($latestReturn->pickup_image) }}" style="width: 30px; height: 30px; border-radius: 4px; object-fit: cover; border: 1px solid #eee;">
+                                                </a>
+                                            @endif
+                                            @if($latestReturn->store_image)
+                                                <a href="{{ asset($latestReturn->store_image) }}" target="_blank" title="Store Return Proof">
+                                                    <img src="{{ asset($latestReturn->store_image) }}" style="width: 30px; height: 30px; border-radius: 4px; object-fit: cover; border: 1px solid #eee;">
+                                                </a>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <span style="color: #94A3B8; font-size: 0.85rem;">---</span>
+                                    @endif
+                                @elseif($order->delivery?->delivery_image)
                                     <a href="{{ asset($order->delivery->delivery_image) }}" target="_blank">
                                         <img src="{{ asset($order->delivery->delivery_image) }}" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid #eee;">
                                     </a>
@@ -663,11 +892,131 @@
                     <span id="modal-total-amount-footer"></span>
                 </div>
             </div>
+
+            <!-- ORDER TRACKING TIMELINE -->
+            <div class="tracking-section" id="modal-tracking-section">
+                <h4>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    Order Tracking
+                </h4>
+                <div id="order-timeline" class="timeline">
+                    <!-- Rendered via JS -->
+                </div>
+
+                <!-- Return timeline divider (shown only when returning) -->
+                <div id="return-timeline-container" style="display: none;">
+                    <div class="timeline-divider">
+                        <span>Return Tracking</span>
+                    </div>
+                    <div id="return-timeline" class="timeline">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 @section('scripts')
 <script>
+    // Track currently open modal order for live timeline updates
+    let currentModalOrderId = null;
+    let currentModalOrderData = null;
+
+    // SVG icons for timeline steps
+    const icons = {
+        check: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+        cart: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>',
+        gear: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>',
+        truck: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>',
+        home: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>',
+        x: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
+        returnIcon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l-5 5 5 5"></path><path d="M4 4v7a4 4 0 0 0 4 4h12"></path></svg>',
+        pickup: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>',
+        store: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>'
+    };
+
+    function getOrderStepState(stepKey, orderStatus) {
+        const flow = ['completed', 'processing', 'shipped', 'delivered'];
+        const stepIndex = flow.indexOf(stepKey);
+        const currentIndex = flow.indexOf(orderStatus);
+        if (orderStatus === 'cancelled' || orderStatus === 'refunded') {
+            if (stepKey === 'completed') return 'completed';
+            return 'pending';
+        }
+        if (orderStatus === 'returning') {
+            return 'completed'; // all order steps done
+        }
+        if (currentIndex === -1) return 'pending';
+        if (stepIndex < currentIndex) return 'completed';
+        if (stepIndex === currentIndex) {
+            // If it's the final step (delivered), mark as completed instead of active
+            return (stepIndex === flow.length - 1) ? 'completed' : 'active';
+        }
+        return 'pending';
+    }
+
+    function getReturnStepState(stepKey, returnStatus) {
+        if (!returnStatus) return 'pending';
+        if (returnStatus === 'rejected') {
+            if (stepKey === 'pending') return 'completed';
+            if (stepKey === 'rejected') return 'rejected';
+            return 'pending';
+        }
+        const flow = ['pending', 'accepted', 'picked_up', 'completed'];
+        const stepIndex = flow.indexOf(stepKey);
+        const currentIndex = flow.indexOf(returnStatus);
+        if (currentIndex === -1) return 'pending';
+        if (stepIndex < currentIndex) return 'completed';
+        if (stepIndex === currentIndex) {
+            // If it's the final step (returned to store), mark as completed instead of active
+            return (stepIndex === flow.length - 1) ? 'completed' : 'active';
+        }
+        return 'pending';
+    }
+
+    function renderStep(state, icon, title) {
+        const circleIcon = state === 'completed' ? icons.check : (state === 'rejected' ? icons.x : icon);
+        return `<div class="timeline-step ${state}">
+            <div class="step-circle">${circleIcon}</div>
+            <div class="step-label">${title}</div>
+        </div>`;
+    }
+
+    function renderOrderTimeline(orderStatus) {
+        const el = document.getElementById('order-timeline');
+        if (!el) return;
+        let html = '';
+        html += renderStep(getOrderStepState('completed', orderStatus), icons.cart, 'Order Placed');
+        html += renderStep(getOrderStepState('processing', orderStatus), icons.gear, 'Processing');
+        html += renderStep(getOrderStepState('shipped', orderStatus), icons.truck, 'In Transit');
+        html += renderStep(getOrderStepState('delivered', orderStatus), icons.home, 'Delivered');
+        if (orderStatus === 'cancelled') {
+            html += renderStep('rejected', icons.x, 'Cancelled');
+        }
+        if (orderStatus === 'refunded') {
+            html += renderStep('completed', icons.check, 'Refunded');
+        }
+        el.innerHTML = html;
+    }
+
+    function renderReturnTimeline(returnStatus) {
+        const container = document.getElementById('return-timeline-container');
+        const el = document.getElementById('return-timeline');
+        if (!container || !el) return;
+        if (!returnStatus) { container.style.display = 'none'; return; }
+        container.style.display = 'block';
+        let html = '';
+        html += renderStep(getReturnStepState('pending', returnStatus), icons.returnIcon, 'Requested');
+        if (returnStatus === 'rejected') {
+            html += renderStep('rejected', icons.x, 'Rejected');
+        } else {
+            html += renderStep(getReturnStepState('accepted', returnStatus), icons.check, 'Accepted');
+            html += renderStep(getReturnStepState('picked_up', returnStatus), icons.pickup, 'Picked Up');
+            html += renderStep(getReturnStepState('completed', returnStatus), icons.store, 'Returned');
+        }
+        el.innerHTML = html;
+    }
+
     // Real-time status updates via SSE
     const evtSource = new EventSource("{{ route('sse.stream') }}");
     
@@ -727,6 +1076,12 @@
                             }
                         }
                     }
+                }
+
+                // Live update modal timeline if this order is currently open
+                if (currentModalOrderId === order.id) {
+                    renderOrderTimeline(order.status);
+                    renderReturnTimeline(order.return_status);
                 }
             });
         }
@@ -800,14 +1155,12 @@
     }
 
     function showOrderDetails(order) {
-        console.log("Showing details for order:", order);
-        
-        // Basic Info
+        currentModalOrderId = order.id;
+        currentModalOrderData = order;
+
         document.getElementById('modal-order-id').textContent = `Order #ORD-${order.id.toString().padStart(5, '0')}`;
         document.getElementById('modal-date').textContent = new Date(order.created_at).toLocaleDateString('en-US', { 
-            month: 'long', 
-            day: 'numeric', 
-            year: 'numeric' 
+            month: 'long', day: 'numeric', year: 'numeric' 
         });
         document.getElementById('modal-status').textContent = order.status.toUpperCase();
         document.getElementById('modal-total-items').textContent = `${order.total_items} Items`;
@@ -817,20 +1170,14 @@
         document.getElementById('modal-total-amount-info').textContent = formattedTotal;
         document.getElementById('modal-total-amount-footer').textContent = formattedTotal;
 
-        // Items List
         const itemsList = document.getElementById('modal-items-list');
         itemsList.innerHTML = '';
-        
         const items = Array.isArray(order.items_json) ? order.items_json : JSON.parse(order.items_json);
-        
         items.forEach(item => {
-            const itemRow = document.createElement('div');
-            itemRow.className = 'modal-item-row';
-            
-            // Handle image path correctly
             const imgPath = item.image ? (item.image.startsWith('http') ? item.image : `/${item.image}`) : '/placeholder-product.png';
-            
-            itemRow.innerHTML = `
+            const row = document.createElement('div');
+            row.className = 'modal-item-row';
+            row.innerHTML = `
                 <div class="item-main">
                     <img src="${imgPath}" class="item-img" onerror="this.src='https://via.placeholder.com/50x50?text=Product'">
                     <div class="item-details">
@@ -845,20 +1192,31 @@
                     <span class="item-total">${currencySymbol}${parseFloat(item.price * item.qty).toFixed(2)}</span>
                 </div>
             `;
-            itemsList.appendChild(itemRow);
+            itemsList.appendChild(row);
         });
 
-        // Show Modal
+        // Render tracking timelines
+        renderOrderTimeline(order.status);
+        
+        // Get return status from the order's returns relation
+        let returnStatus = null;
+        if (order.returns && order.returns.length > 0) {
+            const latestReturn = order.returns.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+            returnStatus = latestReturn.status;
+        }
+        renderReturnTimeline(returnStatus);
+
         document.getElementById('order-details-modal').style.display = 'flex';
         document.body.classList.add('modal-open');
     }
 
     function closeOrderModal() {
+        currentModalOrderId = null;
+        currentModalOrderData = null;
         document.getElementById('order-details-modal').style.display = 'none';
         document.body.classList.remove('modal-open');
     }
 
-    // Close on overlay click
     document.getElementById('order-details-modal').addEventListener('click', function(e) {
         if (e.target === this) closeOrderModal();
     });

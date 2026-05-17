@@ -1422,17 +1422,31 @@
             }
 
             // Global Fly Animation
-            window.flyToCart = (startElement, countToAdd, productId) => {
+            window.flyToCart = (startElement, countToAdd, productId, options = {}) => {
                 let cartBtn = document.querySelector('.nav-actions .profile-btn[title="Shopping Cart"]');
                 if (window.innerWidth <= 768) cartBtn = document.querySelector('#cart-trigger-mobile svg');
                 const badges = document.querySelectorAll('.cart-badge');
                 if (!cartBtn || !startElement) return;
 
                 if (productId) {
-                    const current = window.cartItems[productId] || { qty: 0, t: Date.now() };
-                    window.cartItems[productId] = {
+                    // Create a unique key if variants exist, otherwise just use productId
+                    const variantKey = (options.color || options.size) ? `${productId}_${options.color || ''}_${options.size || ''}` : productId;
+
+                    const current = window.cartItems[variantKey] || {
+                        productId: productId,
+                        qty: 0,
+                        t: Date.now(),
+                        color: options.color || null,
+                        size: options.size || null
+                    };
+
+                    // If it's the old format (just an object with qty and t), convert to new format
+                    if (!current.productId) current.productId = productId;
+
+                    window.cartItems[variantKey] = {
+                        ...current,
                         qty: current.qty + countToAdd,
-                        t: Date.now() // Reset timer on update? Or keep original? Let's reset to give 24h from last add.
+                        t: Date.now()
                     };
                     if (cartKey) localStorage.setItem(cartKey, JSON.stringify(window.cartItems));
                 }
@@ -1476,7 +1490,7 @@
                     e.stopPropagation();
                     const card = btnAdd.closest('.product-card');
                     if (!card) return;
-                    
+
                     const productId = card.dataset.productId;
                     const stockLimit = parseInt(card.dataset.stock || 0);
 
@@ -1517,7 +1531,7 @@
                             btnAdd.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
                             btnAdd.style.background = '#28a745';
                             btnAdd.style.color = '#fff';
-                            
+
                             setTimeout(() => {
                                 btnAdd.disabled = false;
                                 btnAdd.classList.remove('is-success');
@@ -1543,7 +1557,7 @@
                 if (card) {
                     // Don't navigate if clicking buttons or qty controls
                     if (e.target.closest('.btn-add, .qty-selector, .qty-btn, .btn-confirm-add, .product-actions button')) return;
-                    
+
                     const pid = card.dataset.productId;
                     if (pid) {
                         window.location.href = `{{ url('/product') }}/${pid}`;
