@@ -26,6 +26,53 @@
         .stats-grid { grid-template-columns: 1fr; }
         .stat-card { padding: 15px; }
     }
+
+    .chart-container {
+        background: var(--partner-white);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: var(--shadow);
+        margin-bottom: 40px;
+    }
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+    .chart-title {
+        font-size: 20px;
+        color: var(--partner-dark);
+        margin: 0;
+    }
+    .chart-filters {
+        display: flex;
+        gap: 10px;
+        background: var(--partner-bg);
+        padding: 4px;
+        border-radius: 8px;
+    }
+    .filter-btn {
+        background: transparent;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #666;
+        cursor: pointer;
+        transition: var(--transition);
+        font-family: inherit;
+    }
+    .filter-btn.active, .filter-btn:hover {
+        background: var(--partner-white);
+        color: var(--partner-primary);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    @media (max-width: 768px) {
+        .chart-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+        .chart-container { padding: 20px; }
+    }
 </style>
 @endsection
 
@@ -78,4 +125,164 @@
             </div>
         </div>
     </div>
+
+    <!-- Income Tracking Chart -->
+    <div class="chart-container">
+        <div class="chart-header">
+            <h2 class="chart-title">Income Analytics</h2>
+            <div class="chart-filters">
+                <button class="filter-btn {{ $timeRange == '1D' ? 'active' : '' }}" onclick="updateChart('1D')">1D</button>
+                <button class="filter-btn {{ $timeRange == '5D' ? 'active' : '' }}" onclick="updateChart('5D')">5D</button>
+                <button class="filter-btn {{ $timeRange == '1M' ? 'active' : '' }}" onclick="updateChart('1M')">1M</button>
+                <button class="filter-btn {{ $timeRange == '1Y' ? 'active' : '' }}" onclick="updateChart('1Y')">1Y</button>
+            </div>
+        </div>
+        <div style="position: relative; height: 350px; width: 100%;">
+            <canvas id="incomeChart"></canvas>
+        </div>
+    </div>
+@endsection
+
+@section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    let incomeChart;
+
+    const chartConfig = {
+        type: 'line',
+        data: {
+            labels: @json($chartData['labels']),
+            datasets: [{
+                label: 'Income ({{ currency_symbol() }})',
+                data: @json($chartData['income']),
+                borderColor: '#4CAF50',
+                backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#4CAF50',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                yAxisID: 'y'
+            }, {
+                label: 'Deliveries Count',
+                data: @json($chartData['count']),
+                borderColor: '#2196F3',
+                backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                borderWidth: 2,
+                tension: 0.4,
+                borderDash: [5, 5],
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#2196F3',
+                pointBorderWidth: 2,
+                pointRadius: 3,
+                pointHoverRadius: 5,
+                yAxisID: 'y1'
+            }, {
+                label: 'Returns Count',
+                data: @json($chartData['returns']),
+                borderColor: '#F44336',
+                backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                borderWidth: 2,
+                tension: 0.4,
+                borderDash: [3, 3],
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#F44336',
+                pointBorderWidth: 2,
+                pointRadius: 3,
+                pointHoverRadius: 5,
+                yAxisID: 'y1'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20,
+                        font: { family: "'Poppins', sans-serif", size: 12 }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(26, 26, 26, 0.9)',
+                    titleFont: { family: "'Poppins', sans-serif", size: 13 },
+                    bodyFont: { family: "'Poppins', sans-serif", size: 12 },
+                    padding: 12,
+                    cornerRadius: 8,
+                    displayColors: true
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false, drawBorder: false },
+                    ticks: {
+                        font: { family: "'Poppins', sans-serif", size: 11 },
+                        color: '#888'
+                    }
+                },
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false },
+                    ticks: {
+                        font: { family: "'Poppins', sans-serif", size: 11 },
+                        color: '#888',
+                        callback: function(value) { return '{{ currency_symbol() }}' + value; }
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    beginAtZero: true,
+                    grid: { drawOnChartArea: false },
+                    ticks: {
+                        font: { family: "'Poppins', sans-serif", size: 11 },
+                        color: '#888',
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('incomeChart').getContext('2d');
+        incomeChart = new Chart(ctx, chartConfig);
+    });
+
+    function updateChart(range) {
+        // Update active button
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        // Fetch new data
+        fetch(`{{ route('delivery.dashboard') }}?range=${range}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            incomeChart.data.labels = data.labels;
+            incomeChart.data.datasets[0].data = data.income;
+            incomeChart.data.datasets[1].data = data.count;
+            incomeChart.data.datasets[2].data = data.returns;
+            incomeChart.update();
+        })
+        .catch(error => console.error('Error updating chart:', error));
+    }
+</script>
 @endsection

@@ -535,13 +535,14 @@
 
             productIds.forEach(id => {
                 const item = items[id];
-                const realProductId = typeof item === 'object' && item.productId ? item.productId : id;
+                const parts = String(id).split('_');
+                const realProductId = typeof item === 'object' && item.productId ? item.productId : parts[0];
                 const product = productsData.find(p => p.id == realProductId);
                 if (!product) return;
 
                 const qty = typeof item === 'object' ? item.qty : item;
-                const color = typeof item === 'object' && item.color ? item.color : null;
-                const size = typeof item === 'object' && item.size ? item.size : null;
+                const color = typeof item === 'object' && item.color ? item.color : (parts[1] || null);
+                const size = typeof item === 'object' && item.size ? item.size : (parts[2] || null);
 
                 const itemTotal = product.final_price * qty;
                 total += itemTotal;
@@ -612,7 +613,11 @@
                         const result = await response.json();
                         if (result.success) {
                             const current = window.cartItems[id] || { qty: 0, t: Date.now() };
-                            window.cartItems[id] = { qty: current.qty + 1, t: Date.now() };
+                            window.cartItems[id] = {
+                                ...current,
+                                qty: (current.qty || 0) + 1,
+                                t: Date.now()
+                            };
                             localStorage.setItem(`cart_user_{{ Auth::id() }}`, JSON.stringify(window.cartItems));
                             // Update global badges
                             const totalItems = Object.values(window.cartItems).reduce((a, b) => a + (b.qty || 0), 0);

@@ -255,21 +255,22 @@
 
             {{-- Color Variants --}}
             @php
-                $colorVariants = $product->variants->where('variant_type', 'color');
-                $sizeVariants = $product->variants->where('variant_type', 'size');
+                $colorVariants = $product->variants->where('variant_type', 'color')->values();
+                $sizeVariants = $product->variants->where('variant_type', 'size')->values();
+                $firstInStockColor = $colorVariants->where('stock_quantity', '>', 0)->first() ?? $colorVariants->first();
             @endphp
             @if($colorVariants->count() > 0)
             <div class="pd-variants">
-                <div class="pd-variant-label">Color: <span id="selectedColorName">{{ $colorVariants->first()->value }}</span></div>
+                <div class="pd-variant-label">Color: <span id="selectedColorName">{{ $firstInStockColor->value ?? 'Select' }}</span></div>
                 <div class="pd-color-swatches">
                     @foreach($colorVariants as $i => $color)
-                    <div class="pd-color-swatch {{ $i === 0 ? 'active' : '' }}"
-                         style="background: {{ $color->hex_code ?? '#ccc' }}"
-                         title="{{ $color->value }}"
+                    <div class="pd-color-swatch {{ ($firstInStockColor && $firstInStockColor->id === $color->id) ? 'active' : '' }} {{ $color->stock_quantity <= 0 ? 'out-of-stock' : '' }}"
+                         style="background: {{ $color->hex_code ?? '#ccc' }}; {{ $color->stock_quantity <= 0 ? 'opacity: 0.4; cursor: not-allowed;' : '' }}"
+                         title="{{ $color->value }} {{ $color->stock_quantity <= 0 ? '(Out of Stock)' : '' }}"
                          data-color-name="{{ $color->value }}"
                          data-color-image="{{ $color->image_url ? asset($color->image_url) : '' }}"
                          data-color-stock="{{ $color->stock_quantity }}"
-                         onclick="selectColor(this)"></div>
+                         onclick="{{ $color->stock_quantity <= 0 ? '' : 'selectColor(this)' }}"></div>
                     @endforeach
                 </div>
             </div>
@@ -472,6 +473,17 @@ let selectedColor = null;
 let selectedSize = null;
 const basePrice = {{ $product->final_price }};
 
+let selectedColorLimit = Infinity;
+let selectedSizeLimit = Infinity;
+
+function getCurrentLimit() {
+    let limit = stockLimit; // global fallback
+    if (selectedColorLimit !== Infinity || selectedSizeLimit !== Infinity) {
+        limit = Math.min(selectedColorLimit, selectedSizeLimit);
+    }
+    return limit;
+}
+
 function selectColor(el) {
     document.querySelectorAll('.pd-color-swatch').forEach(s => s.classList.remove('active'));
     el.classList.add('active');
@@ -484,6 +496,10 @@ function selectColor(el) {
     if (colorImg) {
         document.getElementById('mainImg').src = colorImg;
     }
+
+    let limit = parseInt(el.dataset.colorStock);
+    selectedColorLimit = isNaN(limit) ? Infinity : limit;
+    updateQtyAfterVariantChange();
 }
 
 function selectSize(el) {
@@ -500,11 +516,36 @@ function selectSize(el) {
     if (priceEl) {
         priceEl.textContent = '{{ currency_symbol() }}' + newPrice.toFixed(2);
     }
+
+    let limit = parseInt(el.dataset.sizeStock);
+    selectedSizeLimit = isNaN(limit) ? Infinity : limit;
+    updateQtyAfterVariantChange();
 }
+
+function updateQtyAfterVariantChange() {
+    const limit = getCurrentLimit();
+    const el = document.getElementById('pdQty');
+    let v = parseInt(el.textContent);
+    if (v > limit) {
+        el.textContent = Math.max(1, limit);
+    }
+}
+
 function changeQty(d){
+    const limit = getCurrentLimit();
     const el = document.getElementById('pdQty');
     let v = parseInt(el.textContent) + d;
-    if(v < 1) v = 1; if(v > stockLimit) v = stockLimit;
+    
+    if(v < 1) v = 1; 
+    
+    if(v > limit) {
+        v = limit;
+        if (selectedColorLimit !== Infinity || selectedSizeLimit !== Infinity) {
+            showToast(`Only ${limit} available in this selection`, true);
+        } else {
+            showToast(`Only ${limit} available in stock`, true);
+        }
+    }
     el.textContent = v;
 }
 function showToast(msg, err){
@@ -517,7 +558,12 @@ async function addToCartDetail(){
     if(!isAuth){window.location.href="{{ route('sign-in') }}";return;}
 
     // Check if color is selected
+    const hasColors = document.querySelectorAll('.pd-color-swatch').length > 0;
     const activeColor = document.querySelector('.pd-color-swatch.active');
+    if (hasColors && !activeColor) {
+        showToast('Please select a color', true);
+        return;
+    }
     const colorVal = activeColor ? activeColor.dataset.colorName : null;
 
     // Check if size is selected
@@ -570,5 +616,19 @@ async function deleteReview(id){
     const d = await r.json(); if(d.success){document.getElementById('review-'+id)?.remove();showToast('Deleted');}
     }catch(e){showToast('Error',true);}
 }
+
+// Initialize limits on page load based on pre-selected variants
+document.addEventListener('DOMContentLoaded', () => {
+    const activeColorSwatch = document.querySelector('.pd-color-swatch.active');
+    if (activeColorSwatch) {
+        selectedColorLimit = parseInt(activeColorSwatch.dataset.colorStock) || Infinity;
+        selectedColor = activeColorSwatch.dataset.colorName;
+    }
+    const activeSizeBtn = document.querySelector('.pd-size-btn.active');
+    if (activeSizeBtn) {
+        selectedSizeLimit = parseInt(activeSizeBtn.dataset.sizeStock) || Infinity;
+        selectedSize = activeSizeBtn.dataset.sizeName;
+    }
+});
 </script>
 @endsection

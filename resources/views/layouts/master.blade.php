@@ -1402,7 +1402,7 @@
                             const timestamp = typeof entry === 'object' ? entry.t : now;
 
                             if (now - timestamp < expiry) {
-                                window.cartItems[id] = { qty: qty, t: timestamp };
+                                window.cartItems[id] = typeof entry === 'object' ? { ...entry } : { qty: entry, t: now };
                             }
                         });
 

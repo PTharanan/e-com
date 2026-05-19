@@ -874,11 +874,7 @@
                                 <option value="not">Not Available</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Stock Quantity</label>
-                            <input type="number" name="stock_quantity" id="p_quantity" class="form-input" placeholder="0"
-                                min="0" required oninput="updateStatusFromQty(this.value)">
-                        </div>
+                        <input type="hidden" name="stock_quantity" id="p_quantity" value="1">
                     </div>
                     <div class="form-group">
                         <label class="form-label" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
@@ -1482,6 +1478,22 @@
             formData.set('_method', document.getElementById('form_method').value);
             formData.set('_token', '{{ csrf_token() }}');
             formData.set('is_new', form.is_new.checked ? 1 : 0);
+
+            // Calculate stock from variants
+            let totalStock = 0;
+            let hasVariants = false;
+            document.querySelectorAll('input[name="color_stocks[]"]').forEach(input => {
+                totalStock += parseInt(input.value) || 0;
+                hasVariants = true;
+            });
+            document.querySelectorAll('input[name="size_stocks[]"]').forEach(input => {
+                totalStock += parseInt(input.value) || 0;
+                hasVariants = true;
+            });
+            if (hasVariants) {
+                formData.set('stock_quantity', totalStock);
+                formData.set('stock_status', totalStock > 0 ? 'available' : 'not');
+            }
 
             // Collect main images
             let combinedImages = [];

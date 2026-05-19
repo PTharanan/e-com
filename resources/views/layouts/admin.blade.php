@@ -817,7 +817,7 @@
         <div class="admin-topbar">
             <div class="topbar-left">
                 <div class="welcome-text">
-                    <h1 style="font-size: clamp(14px, 2vw, 18px); font-weight: 700; color: #1a1a1a; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Welcome back, {{ Auth::user()->name }}! 👋</h1>
+                    <h1 style="font-size: clamp(14px, 2vw, 18px); font-weight: 700; color: #1a1a1a; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Welcome back, {{ Auth::user()->name }}!</h1>
                     <p class="topbar-subtitle" style="font-size: 11px; color: #666; margin: 0;">Here's what's happening with your store today.</p>
                 </div>
             </div>
