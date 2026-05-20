@@ -30,7 +30,7 @@ class DeliveryController extends Controller
         ])->onlyInput('email');
     }
 
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         if (Auth::user()->role !== 'delivery_boy') {
             return redirect('/');
@@ -49,7 +49,84 @@ class DeliveryController extends Controller
             ->take(3)
             ->get();
 
-        return view('delivery.dashboard', compact('stats', 'recentReturns'));
+        // Chart Data Calculation
+        $timeRange = $request->query('range', '1M');
+        $startDate = match($timeRange) {
+            '1D' => now()->startOfDay(),
+            '5D' => now()->subDays(4)->startOfDay(),
+            '1M' => now()->subDays(29)->startOfDay(),
+            '1Y' => now()->subMonths(11)->startOfMonth(),
+            default => now()->subDays(29)->startOfDay(),
+        };
+
+        $format = ($timeRange === '1Y') ? 'Y-m' : (($timeRange === '1D') ? 'H:00' : 'Y-m-d');
+        
+        $deliveries = Order::where('delivery_boy_id', Auth::id())
+            ->where('status', 'delivered')
+            ->where('delivered_at', '>=', $startDate)
+            ->get();
+
+        $returns = OrderReturn::where('delivery_boy_id', Auth::id())
+            ->where('status', 'completed')
+            ->where('updated_at', '>=', $startDate)
+            ->get();
+
+        $app = DeliveryApplication::where('delivery_boy_id', Auth::id())->where('status', 'approved')->first();
+        $fee = $app ? $app->delivery_fee : 0;
+
+        $chartLabels = [];
+        $chartIncome = [];
+        $chartCount = [];
+        $chartReturnCount = [];
+
+        // Pre-fill labels
+        $current = clone $startDate;
+        $now = now();
+        
+        while ($current <= $now) {
+            $key = $current->format($format);
+            $chartLabels[] = $key;
+            $chartIncome[$key] = 0;
+            $chartCount[$key] = 0;
+            $chartReturnCount[$key] = 0;
+            
+            if ($timeRange === '1Y') {
+                $current->addMonth();
+            } else if ($timeRange === '1D') {
+                $current->addHour();
+            } else {
+                $current->addDay();
+            }
+        }
+
+        foreach ($deliveries as $order) {
+            $date = $order->delivered_at->format($format);
+            if (isset($chartIncome[$date])) {
+                $chartIncome[$date] += $fee;
+                $chartCount[$date] += 1;
+            }
+        }
+
+        foreach ($returns as $ret) {
+            $date = $ret->updated_at->format($format);
+            if (isset($chartReturnCount[$date])) {
+                $chartReturnCount[$date] += 1;
+            }
+        }
+
+        $chartData = [
+            'labels' => array_values($chartLabels),
+            'income' => array_values($chartIncome),
+            'count' => array_values($chartCount),
+            'returns' => array_values($chartReturnCount),
+            'fee' => $fee
+        ];
+
+        if ($request->ajax()) {
+            return response()->json($chartData);
+        }
+
+        return view('delivery.dashboard', compact('stats', 'recentReturns', 'chartData', 'timeRange'));
     }
 
     public function work()

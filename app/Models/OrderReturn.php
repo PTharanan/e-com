@@ -9,7 +9,12 @@ class OrderReturn extends Model
     protected $fillable = [
         'order_id',
         'user_id',
+        'delivery_boy_id',
+        'assignment_type',
+        'pickup_image',
+        'store_image',
         'reason',
+        'rejection_reason',
         'status',
     ];
 
@@ -21,5 +26,15 @@ class OrderReturn extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function deliveryBoy()
+    {
+        return $this->belongsTo(User::class, 'delivery_boy_id');
+    }
+
+    public function getStoreOwnerAttribute()
+    {
+        return $this->order->admin;
     }
 }

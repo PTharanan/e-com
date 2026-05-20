@@ -191,6 +191,44 @@
                         <div class="desc-text">Cleanup of your read notifications.</div>
                     </td>
                 </tr>
+                {{-- Product Returns --}}
+                <tr>
+                    <td><span class="status-badge" style="background: #FEF3C7; color: #D97706;">Product Returns</span></td>
+                    <td>
+                        <div class="input-group">
+                            <input type="number" name="auto_delete_returns_value" class="input-val" value="{{ $settings['auto_delete_returns_value'] ?? 12 }}">
+                            <select name="auto_delete_returns_unit" class="unit-select">
+                                <option value="minutes" {{ ($settings['auto_delete_returns_unit'] ?? 'months') == 'minutes' ? 'selected' : '' }}>Minutes</option>
+                                <option value="hours" {{ ($settings['auto_delete_returns_unit'] ?? 'months') == 'hours' ? 'selected' : '' }}>Hours</option>
+                                <option value="days" {{ ($settings['auto_delete_returns_unit'] ?? 'months') == 'days' ? 'selected' : '' }}>Days</option>
+                                <option value="months" {{ ($settings['auto_delete_returns_unit'] ?? 'months') == 'months' ? 'selected' : '' }}>Months</option>
+                                <option value="years" {{ ($settings['auto_delete_returns_unit'] ?? 'months') == 'years' ? 'selected' : '' }}>Years</option>
+                            </select>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="desc-text">Cleanup of your completed or rejected return requests, along with customer proof images.</div>
+                    </td>
+                </tr>
+                {{-- Expired Sessions --}}
+                <tr>
+                    <td><span class="status-badge" style="background: #E0F2FE; color: #0284C7;">Expired Sessions</span></td>
+                    <td>
+                        <div class="input-group">
+                            <input type="number" name="auto_delete_sessions_value" class="input-val" value="{{ $settings['auto_delete_sessions_value'] ?? 24 }}">
+                            <select name="auto_delete_sessions_unit" class="unit-select">
+                                <option value="minutes" {{ ($settings['auto_delete_sessions_unit'] ?? 'hours') == 'minutes' ? 'selected' : '' }}>Minutes</option>
+                                <option value="hours" {{ ($settings['auto_delete_sessions_unit'] ?? 'hours') == 'hours' ? 'selected' : '' }}>Hours</option>
+                                <option value="days" {{ ($settings['auto_delete_sessions_unit'] ?? 'hours') == 'days' ? 'selected' : '' }}>Days</option>
+                                <option value="months" {{ ($settings['auto_delete_sessions_unit'] ?? 'hours') == 'months' ? 'selected' : '' }}>Months</option>
+                                <option value="years" {{ ($settings['auto_delete_sessions_unit'] ?? 'hours') == 'years' ? 'selected' : '' }}>Years</option>
+                            </select>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="desc-text">Cleanup of old database user session tokens that have exceeded inactivity thresholds.</div>
+                    </td>
+                </tr>
             </tbody>
         </table>
         <div class="card-footer">

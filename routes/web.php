@@ -23,9 +23,15 @@ Route::get('/cart', function () {
     return view('cart', compact('products'));
 })->name('cart');
 
-Route::post('/checkout', [\App\Http\Controllers\StripeController::class, 'checkout'])->name('checkout');
-Route::get('/checkout/success', [\App\Http\Controllers\StripeController::class, 'success'])->name('checkout.success');
-Route::get('/checkout/cancel', [\App\Http\Controllers\StripeController::class, 'cancel'])->name('checkout.cancel');
+Route::middleware('auth')->group(function () {
+    Route::post('/checkout', [\App\Http\Controllers\StripeController::class, 'checkout'])->name('checkout');
+    Route::get('/checkout/success', [\App\Http\Controllers\StripeController::class, 'success'])->name('checkout.success');
+    Route::get('/checkout/cancel', [\App\Http\Controllers\StripeController::class, 'cancel'])->name('checkout.cancel');
+
+    Route::post('/paypal/checkout', [\App\Http\Controllers\PayPalController::class, 'checkout'])->name('paypal.checkout');
+    Route::get('/paypal/success', [\App\Http\Controllers\PayPalController::class, 'success'])->name('paypal.success');
+    Route::get('/paypal/cancel', [\App\Http\Controllers\PayPalController::class, 'cancel'])->name('paypal.cancel');
+});
 
 Route::get('/categories', [\App\Http\Controllers\CategoryController::class, 'publicIndex'])->name('categories');
 

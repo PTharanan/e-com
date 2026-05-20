@@ -42,6 +42,16 @@ class Order extends Model
         return $this->hasOne(OrderDelivery::class)->latestOfMany();
     }
 
+    public function admin()
+    {
+        return $this->belongsTo(User::class, 'admin_id');
+    }
+
+    public function returns()
+    {
+        return $this->hasMany(OrderReturn::class);
+    }
+
     public function processDeliveryPayment()
     {
         if ($this->status !== 'delivered' && $this->delivery_boy_id) {

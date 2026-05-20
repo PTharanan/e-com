@@ -153,12 +153,51 @@ class ProductController extends Controller
 
     public function deductStock(Request $request)
     {
-        $product = Product::findOrFail($request->product_id);
+        $productIdInput = $request->product_id;
+        $parts = explode('_', $productIdInput);
+        $productId = $parts[0];
+
+        $product = Product::findOrFail($productId);
         $qty = intval($request->quantity);
+
+        $color = isset($parts[1]) && $parts[1] !== '' ? $parts[1] : $request->input('color');
+        $size = isset($parts[2]) && $parts[2] !== '' ? $parts[2] : $request->input('size');
+
+        $colorVariant = null;
+        if ($color) {
+            $colorVariant = $product->variants()
+                ->where('variant_type', 'color')
+                ->where('value', $color)
+                ->first();
+            if ($colorVariant && $colorVariant->stock_quantity < $qty) {
+                return response()->json(['success' => false, 'message' => "Not enough stock for color: {$color}"]);
+            }
+        }
+
+        $sizeVariant = null;
+        if ($size) {
+            $sizeVariant = $product->variants()
+                ->where('variant_type', 'size')
+                ->where('value', $size)
+                ->first();
+            if ($sizeVariant && $sizeVariant->stock_quantity < $qty) {
+                return response()->json(['success' => false, 'message' => "Not enough stock for size: {$size}"]);
+            }
+        }
 
         if ($product->stock_quantity >= $qty) {
             $product->stock_quantity -= $qty;
             $product->save();
+
+            if ($colorVariant) {
+                $colorVariant->stock_quantity -= $qty;
+                $colorVariant->save();
+            }
+            if ($sizeVariant) {
+                $sizeVariant->stock_quantity -= $qty;
+                $sizeVariant->save();
+            }
+
             return response()->json(['success' => true, 'new_stock' => $product->stock_quantity]);
         }
 
@@ -167,11 +206,40 @@ class ProductController extends Controller
 
     public function returnStock(Request $request)
     {
-        $product = Product::findOrFail($request->product_id);
+        $productIdInput = $request->product_id;
+        $parts = explode('_', $productIdInput);
+        $productId = $parts[0];
+
+        $product = Product::findOrFail($productId);
         $qty = intval($request->quantity);
+
+        $color = isset($parts[1]) && $parts[1] !== '' ? $parts[1] : $request->input('color');
+        $size = isset($parts[2]) && $parts[2] !== '' ? $parts[2] : $request->input('size');
 
         $product->stock_quantity += $qty;
         $product->save();
+
+        if ($color) {
+            $colorVariant = $product->variants()
+                ->where('variant_type', 'color')
+                ->where('value', $color)
+                ->first();
+            if ($colorVariant) {
+                $colorVariant->stock_quantity += $qty;
+                $colorVariant->save();
+            }
+        }
+
+        if ($size) {
+            $sizeVariant = $product->variants()
+                ->where('variant_type', 'size')
+                ->where('value', $size)
+                ->first();
+            if ($sizeVariant) {
+                $sizeVariant->stock_quantity += $qty;
+                $sizeVariant->save();
+            }
+        }
 
         return response()->json(['success' => true, 'new_stock' => $product->stock_quantity]);
     }

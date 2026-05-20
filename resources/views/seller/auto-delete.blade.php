@@ -194,6 +194,25 @@
                         <div class="desc-text">In-app notifications that have already been read.</div>
                     </td>
                 </tr>
+                {{-- Product Returns --}}
+                <tr>
+                    <td><span class="status-badge" style="background: #FEF3C7; color: #D97706;">Product Returns</span></td>
+                    <td>
+                        <div class="input-group">
+                            <input type="number" name="auto_delete_returns_value" class="input-val" value="{{ $settings['auto_delete_returns_value'] ?? 12 }}">
+                            <select name="auto_delete_returns_unit" class="unit-select">
+                                <option value="minutes" {{ ($settings['auto_delete_returns_unit'] ?? 'months') == 'minutes' ? 'selected' : '' }}>Minutes</option>
+                                <option value="hours" {{ ($settings['auto_delete_returns_unit'] ?? 'months') == 'hours' ? 'selected' : '' }}>Hours</option>
+                                <option value="days" {{ ($settings['auto_delete_returns_unit'] ?? 'months') == 'days' ? 'selected' : '' }}>Days</option>
+                                <option value="months" {{ ($settings['auto_delete_returns_unit'] ?? 'months') == 'months' ? 'selected' : '' }}>Months</option>
+                                <option value="years" {{ ($settings['auto_delete_returns_unit'] ?? 'months') == 'years' ? 'selected' : '' }}>Years</option>
+                            </select>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="desc-text">Cleanup of your completed or rejected return requests, along with customer proof images.</div>
+                    </td>
+                </tr>
             </tbody>
         </table>
         <div class="card-footer">

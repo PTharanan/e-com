@@ -37,6 +37,21 @@ class Product extends Model
         return $this->hasMany(ProductReview::class);
     }
 
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class)->orderBy('sort_order');
+    }
+
+    public function colors()
+    {
+        return $this->variants()->where('variant_type', 'color');
+    }
+
+    public function sizes()
+    {
+        return $this->variants()->where('variant_type', 'size');
+    }
+
     public function getAverageRatingAttribute()
     {
         return round($this->reviews()->avg('rating') ?? 0, 1);
