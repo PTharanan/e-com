@@ -31,6 +31,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/paypal/checkout', [\App\Http\Controllers\PayPalController::class, 'checkout'])->name('paypal.checkout');
     Route::get('/paypal/success', [\App\Http\Controllers\PayPalController::class, 'success'])->name('paypal.success');
     Route::get('/paypal/cancel', [\App\Http\Controllers\PayPalController::class, 'cancel'])->name('paypal.cancel');
+    Route::get('/payment/success', function () {
+        return view('checkout-success');
+    })->name('payment.success');
 });
 
 Route::get('/categories', [\App\Http\Controllers\CategoryController::class, 'publicIndex'])->name('categories');

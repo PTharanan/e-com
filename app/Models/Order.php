@@ -11,6 +11,7 @@ class Order extends Model
         'admin_id',
         'user_id',
         'payment_intent_id',
+        'payment_method',
         'total_price',
         'total_items',
         'items_json',

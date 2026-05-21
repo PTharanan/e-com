@@ -53,22 +53,7 @@ class DashboardController extends Controller
         // Restore stock
         if (is_array($order->items_json)) {
             foreach ($order->items_json as $item) {
-                $product = null;
-                
-                // Try finding by ID if available (new orders)
-                if (isset($item['id'])) {
-                    $product = Product::find($item['id']);
-                }
-                
-                // Fallback to finding by name (old orders)
-                if (!$product && isset($item['name'])) {
-                    $product = Product::where('name', $item['name'])->first();
-                }
-
-                if ($product) {
-                    $product->stock_quantity += $item['qty'];
-                    $product->save();
-                }
+                $this->restoreOrderItemStock($item);
             }
         }
 
@@ -86,6 +71,55 @@ class DashboardController extends Controller
         }
 
         return back()->with('success', 'Order cancelled successfully. Please wait for admin to process your refund.');
+    }
+
+    private function restoreOrderItemStock(array $item): void
+    {
+        $product = null;
+
+        if (isset($item['id'])) {
+            $product = Product::find($item['id']);
+        }
+
+        if (!$product && isset($item['name'])) {
+            $product = Product::where('name', $item['name'])->first();
+        }
+
+        if (!$product) {
+            return;
+        }
+
+        $qty = (int) ($item['qty'] ?? 0);
+        if ($qty <= 0) {
+            return;
+        }
+
+        $product->stock_quantity += $qty;
+        $product->save();
+
+        if (!empty($item['color'])) {
+            $colorVariant = $product->variants()
+                ->where('variant_type', 'color')
+                ->where('value', $item['color'])
+                ->first();
+
+            if ($colorVariant) {
+                $colorVariant->stock_quantity += $qty;
+                $colorVariant->save();
+            }
+        }
+
+        if (!empty($item['size'])) {
+            $sizeVariant = $product->variants()
+                ->where('variant_type', 'size')
+                ->where('value', $item['size'])
+                ->first();
+
+            if ($sizeVariant) {
+                $sizeVariant->stock_quantity += $qty;
+                $sizeVariant->save();
+            }
+        }
     }
 
     public function returnOrder(Request $request, $id)
