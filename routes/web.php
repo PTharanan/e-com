@@ -7,9 +7,9 @@ Route::get('/500', function () {
 });
 
 Route::get('/', function () {
-    $products = \App\Models\Product::with(['category', 'seller', 'admin'])->where('is_new', true)->latest()->take(4)->get();
+    $products = \App\Models\Product::with(['category', 'seller', 'admin'])->availableForBuyers()->where('is_new', true)->latest()->take(4)->get();
     if ($products->isEmpty()) {
-        $products = \App\Models\Product::with(['category', 'seller', 'admin'])->latest()->take(4)->get();
+        $products = \App\Models\Product::with(['category', 'seller', 'admin'])->availableForBuyers()->latest()->take(4)->get();
     }
     $banners = \App\Models\Banner::where('is_active', true)->orderBy('order')->get();
     return view('index', compact('products', 'banners'));
@@ -19,7 +19,8 @@ Route::get('/products', [\App\Http\Controllers\ProductController::class, 'public
 Route::post('/products/add-to-cart', [\App\Http\Controllers\ProductController::class, 'deductStock'])->name('products.add-to-cart');
 Route::post('/products/remove-from-cart', [\App\Http\Controllers\ProductController::class, 'returnStock'])->name('products.remove-from-cart');
 Route::get('/cart', function () {
-    $products = \App\Models\Product::with('category')->get();
+    $products = \App\Models\Product::with(['category', 'seller' => function ($q) {
+        $q->withTrashed(); }])->get();
     return view('cart', compact('products'));
 })->name('cart');
 
@@ -39,7 +40,7 @@ Route::middleware('auth')->group(function () {
 Route::get('/categories', [\App\Http\Controllers\CategoryController::class, 'publicIndex'])->name('categories');
 
 Route::get('/offers', function () {
-    $products = \App\Models\Product::with('category')->whereNotNull('discount_percentage')->where('discount_percentage', '>', 0)->latest()->get();
+    $products = \App\Models\Product::with('category')->availableForBuyers()->whereNotNull('discount_percentage')->where('discount_percentage', '>', 0)->latest()->get();
     return view('offers', compact('products'));
 })->name('offers');
 
@@ -170,7 +171,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Protected Admin Routes
     Route::middleware(['admin'])->group(function () {
         Route::get('/settings/sellers', [\App\Http\Controllers\AdminSellerController::class, 'index'])->name('sellers');
+        Route::delete('/settings/sellers/{id}', [\App\Http\Controllers\AdminSellerController::class, 'destroySeller'])->name('sellers.destroy');
         Route::patch('/settings/sellers/{id}/toggle-block', [\App\Http\Controllers\AdminSellerController::class, 'toggleBlock'])->name('sellers.toggle-block');
+        Route::get('/settings/admin-accounts', [\App\Http\Controllers\AdminSellerController::class, 'adminIndex'])->name('accounts');
+        Route::post('/settings/admin-accounts', [\App\Http\Controllers\AdminSellerController::class, 'storeAdmin'])->name('accounts.store');
+        Route::patch('/settings/admin-accounts/{id}', [\App\Http\Controllers\AdminSellerController::class, 'updateAdmin'])->name('accounts.update');
+        Route::delete('/settings/admin-accounts/{id}', [\App\Http\Controllers\AdminSellerController::class, 'destroyAdmin'])->name('accounts.destroy');
+        Route::patch('/settings/admin-accounts/{id}/toggle-block', [\App\Http\Controllers\AdminSellerController::class, 'toggleAdminBlock'])->name('accounts.toggle-block');
         Route::get('/dashboard', [\App\Http\Controllers\AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/dashboard/analytics', [\App\Http\Controllers\AdminDashboardController::class, 'getAnalytics'])->name('dashboard.analytics');
 
@@ -200,11 +207,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/notifications/poll', [\App\Http\Controllers\NotificationController::class, 'poll'])->name('notifications.poll');
         Route::patch('/notifications/{id}/dismiss', [\App\Http\Controllers\NotificationController::class, 'dismiss'])->name('notifications.dismiss');
         // SSE route moved to general auth group below
-
-
-        Route::get('/settings', function () {
-            return view('admin.settings');
-        })->name('settings');
 
         Route::get('/settings/auto-delete', [\App\Http\Controllers\SiteSettingController::class, 'autoDeleteIndex'])->name('settings.auto-delete');
         Route::post('/settings/auto-delete', [\App\Http\Controllers\SiteSettingController::class, 'updateAutoDelete'])->name('settings.auto-delete.update');

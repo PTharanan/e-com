@@ -637,6 +637,8 @@
                 cartItemsList.innerHTML = '';
 
                 let total = 0;
+                window.hasUnavailableItems = false;
+                window.hasAvailableItems = false;
 
                 productIds.forEach(id => {
                     const item = items[id];
@@ -649,40 +651,51 @@
                     const color = typeof item === 'object' && item.color ? item.color : (parts[1] || null);
                     const size = typeof item === 'object' && item.size ? item.size : (parts[2] || null);
 
-                    const itemTotal = product.final_price * qty;
-                    total += itemTotal;
+                    const isAvailable = product.seller_id ? (product.seller && !product.seller.is_blocked && !product.seller.deleted_at) : true;
+
+                    let itemTotal = 0;
+                    if (isAvailable) {
+                        itemTotal = product.final_price * qty;
+                        total += itemTotal;
+                        window.hasAvailableItems = true;
+                    } else {
+                        window.hasUnavailableItems = true;
+                    }
 
                     const variantsHtml = (color || size) ? `<div style="font-size: 0.85rem; color: #64748B; margin-top: 5px;">
-                            ${color ? `<span style="margin-right: 10px;">Color: <strong style="color: #1E293B;">${color}</strong></span>` : ''}
-                            ${size ? `<span>Size: <strong style="color: #1E293B;">${size}</strong></span>` : ''}
-                        </div>` : '';
+                                ${color ? `<span style="margin-right: 10px;">Color: <strong style="color: #1E293B;">${color}</strong></span>` : ''}
+                                ${size ? `<span>Size: <strong style="color: #1E293B;">${size}</strong></span>` : ''}
+                            </div>` : '';
+
+                    const unavailableNotice = !isAvailable ? `<div style="color: #EF4444; font-size: 0.85rem; font-weight: 600; margin-top: 8px;">UNAVAILABLE (Seller Account Disabled)</div>` : '';
 
                     const itemHtml = `
-                            <div class="cart-item" data-id="${id}">
-                                <div class="item-image">
-                                    <img src="{{ asset('') }}${product.main_image_url}" alt="${product.name}">
-                                </div>
-                                <div class="item-details">
-                                    <span class="item-category">${product.category.name}</span>
-                                    <h3 style="margin-bottom: 2px;">${product.name}</h3>
-                                    ${variantsHtml}
-                                    <div class="item-price" style="margin-top: 8px;">
-                                        ${product.discount_percentage ? `
-                                            <span style="text-decoration: line-through; font-size: 0.8rem; color: #9CA3AF; margin-right: 8px;">${currencySymbol}${parseFloat(product.price).toFixed(2)}</span>
-                                            <span style="color: #10B981;">${currencySymbol}${parseFloat(product.final_price).toFixed(2)}</span>
-                                        ` : `${currencySymbol}${parseFloat(product.price).toFixed(2)}`}
+                                <div class="cart-item" data-id="${id}" ${!isAvailable ? 'style="opacity: 0.7; background: #FFF5F5;"' : ''}>
+                                    <div class="item-image" ${!isAvailable ? 'style="filter: grayscale(1);"' : ''}>
+                                        <img src="{{ asset('') }}${product.main_image_url}" alt="${product.name}">
+                                    </div>
+                                    <div class="item-details">
+                                        <span class="item-category">${product.category.name}</span>
+                                        <h3 style="margin-bottom: 2px;">${product.name}</h3>
+                                        ${variantsHtml}
+                                        ${unavailableNotice}
+                                        <div class="item-price" style="margin-top: 8px;">
+                                            ${product.discount_percentage ? `
+                                                <span style="text-decoration: line-through; font-size: 0.8rem; color: #9CA3AF; margin-right: 8px;">${currencySymbol}${parseFloat(product.price).toFixed(2)}</span>
+                                                <span style="color: #10B981;">${currencySymbol}${parseFloat(product.final_price).toFixed(2)}</span>
+                                            ` : `${currencySymbol}${parseFloat(product.price).toFixed(2)}`}
+                                        </div>
+                                    </div>
+                                    <div class="item-actions">
+                                        <div class="qty-control">
+                                            <button class="qty-btn dec" data-id="${id}">−</button>
+                                            <span class="qty-val">${qty}</span>
+                                            <button class="qty-btn inc" data-id="${id}" ${!isAvailable ? 'disabled title="Unavailable"' : ''}>+</button>
+                                        </div>
+                                        <div class="item-total" style="${!isAvailable ? 'text-decoration: line-through; color:#9CA3AF;' : ''}">${currencySymbol}${itemTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                                     </div>
                                 </div>
-                                <div class="item-actions">
-                                    <div class="qty-control">
-                                        <button class="qty-btn dec" data-id="${id}">−</button>
-                                        <span class="qty-val">${qty}</span>
-                                        <button class="qty-btn inc" data-id="${id}">+</button>
-                                    </div>
-                                    <div class="item-total">${currencySymbol}${itemTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
-                                </div>
-                            </div>
-                        `;
+                            `;
                     cartItemsList.insertAdjacentHTML('beforeend', itemHtml);
                 });
 
@@ -816,6 +829,17 @@
             btnCheckout.addEventListener('click', () => {
                 const items = window.cartItems || {};
                 if (Object.keys(items).length === 0) return;
+
+                if (window.hasUnavailableItems) {
+                    alert('Please remove unavailable items from your cart before proceeding to checkout.');
+                    return;
+                }
+
+                if (!window.hasAvailableItems) {
+                    alert('You have no available items to checkout.');
+                    return;
+                }
+
                 paymentMethodModal.style.display = 'flex';
                 document.body.classList.add('modal-open');
             });

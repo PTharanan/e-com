@@ -90,60 +90,169 @@
             color: #EF4444;
         }
 
+        .status-deleted {
+            background: #F3F4F6;
+            color: #6B7280;
+            opacity: 0.8;
+        }
+
         .actions-flex {
             display: flex;
             gap: 8px;
+            align-items: center;
         }
 
-        .btn-block {
-            padding: 6px 14px;
+        .action-icon-btn {
+            width: 32px;
+            height: 32px;
             border-radius: 8px;
-            border: 1px solid #EF4444;
-            background: white;
-            font-size: 13px;
-            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #64748B;
+            background: #F8FAFC;
+        }
+
+        .btn-edit:hover {
+            background: #DBEAFE;
+            color: #2563EB;
+        }
+
+        .btn-delete:hover {
+            background: #FEE2E2;
             color: #EF4444;
+        }
+
+        .btn-block-action {
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
             cursor: pointer;
             transition: 0.2s;
-        }
-
-        .btn-block:hover {
-            background: #EF4444;
-            color: white;
-        }
-
-        .btn-unblock {
-            padding: 6px 14px;
-            border-radius: 8px;
-            border: 1px solid #10B981;
-            background: white;
-            font-size: 13px;
-            font-weight: 600;
-            color: #10B981;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .btn-unblock:hover {
-            background: #10B981;
-            color: white;
-        }
-
-        .btn-view {
-            padding: 6px 14px;
-            border-radius: 8px;
             border: 1px solid #E2E8F0;
             background: white;
+            color: #64748B;
+        }
+
+        .btn-block-action:hover {
+            background: #F8FAFC;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-container {
+            background: white;
+            width: 100%;
+            max-width: 450px;
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            animation: modalSlideUp 0.3s ease;
+        }
+
+        @keyframes modalSlideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            margin-bottom: 25px;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1E293B;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
             font-size: 13px;
             font-weight: 600;
-            color: var(--admin-primary);
-            cursor: pointer;
+            color: #64748B;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: 1px solid #E2E8F0;
+            font-size: 14px;
+            outline: none;
             transition: 0.2s;
         }
 
-        .btn-view:hover {
+        .form-control:focus {
+            border-color: var(--admin-primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        .modal-footer {
+            margin-top: 30px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .btn-cancel {
+            padding: 10px 20px;
+            background: #F1F5F9;
+            color: #64748B;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-save {
+            padding: 10px 20px;
             background: var(--admin-primary);
             color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-destructive {
+            background: #EF4444;
+        }
+
+        .audit-info {
+            font-size: 10px;
+            color: #94A3B8;
+            margin-top: 4px;
         }
     </style>
 @endsection
@@ -151,8 +260,8 @@
 @section('content')
     <div class="page-header">
         <div class="page-title">
-            <h1>Seller Management</h1>
-            <p>View and manage sellers assigned to your store.</p>
+            <h1>All Sellers</h1>
+            <p>View and manage all registered sellers and their status.</p>
         </div>
     </div>
 
@@ -162,6 +271,7 @@
                 <tr>
                     <th>Seller</th>
                     <th>Email</th>
+                    <th>Approved By</th>
                     <th>Joined Date</th>
                     <th>Products</th>
                     <th>Status</th>
@@ -177,19 +287,38 @@
                                 <div class="seller-info">
                                     <div style="font-weight: 700; color: #1E293B;">{{ $seller->name }}</div>
                                     <div style="font-size: 11px; color: #64748B;">ID: #{{ $seller->id }}</div>
+                                    @if($seller->lastEditor)
+                                        <div class="audit-info">
+                                            Last edited by: {{ $seller->lastEditor->name }}
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </td>
                         <td>{{ $seller->email }}</td>
+                        <td>
+                            @if($seller->approver)
+                                <div style="font-weight: 600; color: var(--admin-primary);">{{ $seller->approver->name }}</div>
+                                <div style="font-size: 11px; color: #64748B;">Admin ID: #{{ $seller->approver->id }}</div>
+                            @else
+                                <span style="color: #A0AEC0; font-style: italic;">Direct Registry</span>
+                            @endif
+                        </td>
                         <td>{{ $seller->created_at->format('M d, Y') }}</td>
                         <td>
-                            @php
-                                $productCount = \App\Models\Product::where('seller_id', $seller->id)->count();
-                            @endphp
-                            <span style="font-weight: 600;">{{ $productCount }}</span> Products
+                            <span style="font-weight: 600;">{{ $seller->products_count }}</span> Products
                         </td>
                         <td>
-                            @if($seller->is_blocked)
+                            @if($seller->trashed())
+                                <span class="status-badge status-deleted" title="Reason: {{ $seller->deletion_reason }}">Account
+                                    Deleted</span>
+                                @if($seller->deletion_reason)
+                                    <div
+                                        style="font-size: 10px; color: #EF4444; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        Reason: {{ $seller->deletion_reason }}
+                                    </div>
+                                @endif
+                            @elseif($seller->is_blocked)
                                 <span class="status-badge status-blocked" id="status-{{ $seller->id }}">Blocked</span>
                             @else
                                 <span class="status-badge status-active" id="status-{{ $seller->id }}">Active</span>
@@ -197,71 +326,149 @@
                         </td>
                         <td>
                             <div class="actions-flex">
-                                <button class="btn-view"
-                                    onclick="window.location.href='/admin/products?seller_id={{ $seller->id }}'">
-                                    View Products
-                                </button>
-                                <button class="{{ $seller->is_blocked ? 'btn-unblock' : 'btn-block' }}"
-                                    id="block-btn-{{ $seller->id }}" onclick="toggleBlock({{ $seller->id }})">
-                                    {{ $seller->is_blocked ? 'Unblock' : 'Block' }}
-                                </button>
+                                @if(!$seller->trashed())
+
+                                    <button class="btn-block-action" id="block-btn-{{ $seller->id }}"
+                                        onclick="toggleBlock({{ $seller->id }})">
+                                        {{ $seller->is_blocked ? 'Unblock' : 'Block' }}
+                                    </button>
+
+                                    <button class="action-icon-btn btn-delete" title="Delete Seller"
+                                        onclick="openDeleteModal({{ $seller->id }})">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2">
+                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                            <path
+                                                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                            </path>
+                                        </svg>
+                                    </button>
+                                @else
+                                    <span style="font-size: 11px; color: #94A3B8; font-style: italic;">No Actions</span>
+                                @endif
                             </div>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" style="text-align: center; padding: 50px; color: #64748B;">
-                            No sellers assigned to your store yet.
+                        <td colspan="7" style="text-align: center; padding: 50px; color: #64748B;">
+                            No sellers found in the system.
                         </td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
+
+
+
+    <!-- Delete Reason Modal -->
+    <div class="modal-overlay" id="deleteReasonModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 style="color: #EF4444;">Delete Seller Account</h2>
+                <p style="font-size: 13px; color: #64748B; margin-top: 5px;">This will permanently delete his products and
+                    images.</p>
+            </div>
+            <form id="deleteSellerForm">
+                @csrf
+                @method('DELETE')
+                <input type="hidden" name="id" id="delete_seller_id">
+                <div class="form-group">
+                    <label>Reason for Deletion</label>
+                    <textarea name="reason" class="form-control"
+                        placeholder="Please provide a reason for deleting this seller..."
+                        style="height: 100px; resize: none;" required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeModal('deleteReasonModal')">Cancel</button>
+                    <button type="submit" class="btn-save btn-destructive">Confirm and Delete All Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection
 
 @section('scripts')
     <script>
-        async function toggleBlock(sellerId) {
-            if (!confirm('Are you sure you want to change this seller\'s status?')) return;
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
 
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function openDeleteModal(id) {
+            document.getElementById('delete_seller_id').value = id;
+            openModal('deleteReasonModal');
+        }
+
+        // Delete Seller Handler
+        document.getElementById('deleteSellerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const id = formData.get('id');
+            const btn = e.target.querySelector('.btn-save');
+
+            if (!confirm('DANGER: This will delete ALL products and media files for this seller. Continue?')) return;
+
+            btn.disabled = true;
+            btn.innerText = 'Deleting & Cleaning Files...';
+
+            try {
+                const response = await fetch(`{{ url('admin/settings/sellers') }}/${id}`, {
+                    method: 'POST', // Using POST with _method=DELETE
+                    body: formData,
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                });
+                const result = await response.json();
+                if (result.success) {
+                    location.reload();
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error(error);
+                alert('An error occurred.');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Confirm and Delete All Data';
+            }
+        });
+
+        async function toggleBlock(sellerId) {
             const btn = document.getElementById(`block-btn-${sellerId}`);
             const statusBadge = document.getElementById(`status-${sellerId}`);
 
             btn.disabled = true;
-            const originalText = btn.innerText;
-            btn.innerText = 'Processing...';
-
             try {
-                const response = await fetch(`/admin/settings/sellers/${sellerId}/toggle-block`, {
-                    method: 'PATCH',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    }
+                const formData = new FormData();
+                formData.append('_method', 'PATCH');
+                formData.append('_token', '{{ csrf_token() }}');
+
+                const response = await fetch(`{{ url('admin/settings/sellers') }}/${sellerId}/toggle-block`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
                 });
                 const result = await response.json();
 
                 if (result.success) {
                     if (result.is_blocked) {
                         btn.innerText = 'Unblock';
-                        btn.className = 'btn-unblock';
                         statusBadge.innerText = 'Blocked';
                         statusBadge.className = 'status-badge status-blocked';
                     } else {
                         btn.innerText = 'Block';
-                        btn.className = 'btn-block';
                         statusBadge.innerText = 'Active';
                         statusBadge.className = 'status-badge status-active';
                     }
-                } else {
-                    alert('Operation failed.');
-                    btn.innerText = originalText;
                 }
             } catch (error) {
                 console.error(error);
-                alert('An error occurred.');
-                btn.innerText = originalText;
             } finally {
                 btn.disabled = false;
             }
