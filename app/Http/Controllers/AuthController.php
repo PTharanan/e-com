@@ -36,7 +36,7 @@ class AuthController extends Controller
         ]);
 
         $otp = rand(100000, 999999);
-        
+
         $pendingUser = [
             'name' => $request->name,
             'email' => $request->email,
@@ -109,7 +109,7 @@ class AuthController extends Controller
         $otp = rand(100000, 999999);
         $pendingUser['otp'] = $otp;
         $pendingUser['otp_expires_at'] = now()->addSeconds(60)->timestamp;
-        
+
         session(['pending_user' => $pendingUser]);
 
         Mail::to($pendingUser['email'])->send(new OtpMail($otp, $pendingUser['name']));
@@ -133,7 +133,7 @@ class AuthController extends Controller
         }
 
         $otp = rand(100000, 999999);
-        
+
         $resetData = [
             'email' => $user->email,
             'otp' => $otp,
@@ -235,6 +235,13 @@ class AuthController extends Controller
         $remember = $request->has('remember');
 
         if (auth()->attempt($credentials, $remember)) {
+            if (auth()->user()->is_blocked) {
+                auth()->logout();
+                return back()->withErrors([
+                    'email' => 'Your account has been suspended.',
+                ])->onlyInput('email');
+            }
+
             $request->session()->regenerate();
             return redirect()->intended('/');
         }
@@ -254,6 +261,13 @@ class AuthController extends Controller
         $remember = $request->has('remember');
 
         if (auth()->attempt($credentials, $remember)) {
+            if (auth()->user()->is_blocked) {
+                auth()->logout();
+                return back()->withErrors([
+                    'email' => 'Your account has been blocked. Please contact support.',
+                ])->onlyInput('email');
+            }
+
             if (auth()->user()->role === 'admin') {
                 $request->session()->regenerate();
                 return redirect()->route('admin.dashboard');
@@ -281,6 +295,13 @@ class AuthController extends Controller
         $remember = $request->has('remember');
 
         if (auth()->attempt($credentials, $remember)) {
+            if (auth()->user()->is_blocked) {
+                auth()->logout();
+                return back()->withErrors([
+                    'email' => 'Your seller account has been blocked. Please check your email or contact the administrator.',
+                ])->onlyInput('email');
+            }
+
             if (auth()->user()->role === 'seller') {
                 $request->session()->regenerate();
                 return redirect()->route('seller.dashboard');
@@ -329,22 +350,24 @@ class AuthController extends Controller
         ]);
 
         $existingPending = session('pending_admin');
-        
+
         // Reuse OTP if it exists, is for the same email, and hasn't expired yet
-        if ($existingPending && 
-            $existingPending['email'] === $request->email && 
-            now()->timestamp < $existingPending['otp_expires_at']) {
-            
+        if (
+            $existingPending &&
+            $existingPending['email'] === $request->email &&
+            now()->timestamp < $existingPending['otp_expires_at']
+        ) {
+
             $otp = $existingPending['otp'];
             $pendingUser = $existingPending;
-            
+
             \Illuminate\Support\Facades\Log::info("Admin OTP Reused", [
                 'email' => $request->email,
                 'otp' => $otp
             ]);
         } else {
             $otp = rand(100000, 999999);
-            
+
             $pendingUser = [
                 'name' => $request->name,
                 'email' => $request->email,
@@ -383,8 +406,8 @@ class AuthController extends Controller
             return response()->json(['success' => false, 'message' => 'Session expired. Please sign up again.']);
         }
 
-        $sessionOtp = trim((string)$pendingUser['otp']);
-        $requestOtp = trim((string)$request->otp);
+        $sessionOtp = trim((string) $pendingUser['otp']);
+        $requestOtp = trim((string) $request->otp);
 
         \Illuminate\Support\Facades\Log::info("Admin OTP Verification", [
             'session_otp' => $sessionOtp,
@@ -422,7 +445,7 @@ class AuthController extends Controller
         auth()->login($user);
 
         return response()->json([
-            'success' => true, 
+            'success' => true,
             'message' => 'Admin registration successful!',
             'redirect' => route('admin.dashboard')
         ]);
@@ -439,7 +462,7 @@ class AuthController extends Controller
         $otp = rand(100000, 999999);
         $pendingUser['otp'] = $otp;
         $pendingUser['otp_expires_at'] = now()->addSeconds(60)->timestamp;
-        
+
         session(['pending_admin' => $pendingUser]);
         session()->save();
 
@@ -464,16 +487,18 @@ class AuthController extends Controller
         $existingPending = session('pending_delivery');
         $shouldSendEmail = true;
 
-        if ($existingPending && 
-            $existingPending['email'] === $request->email && 
-            now()->timestamp < $existingPending['otp_expires_at']) {
-            
+        if (
+            $existingPending &&
+            $existingPending['email'] === $request->email &&
+            now()->timestamp < $existingPending['otp_expires_at']
+        ) {
+
             // Reuse existing OTP and DO NOT send a new email
             $otp = $existingPending['otp'];
             $pendingUser = $existingPending;
             $pendingUser['name'] = $request->name;
             $pendingUser['password'] = Hash::make($request->password);
-            
+
             $shouldSendEmail = false;
         } else {
             $otp = rand(100000, 999999);
@@ -528,7 +553,7 @@ class AuthController extends Controller
         session()->forget('pending_delivery');
 
         return response()->json([
-            'success' => true, 
+            'success' => true,
             'message' => 'Delivery partner registration successful!',
             'redirect' => route('delivery.login')
         ]);
@@ -545,7 +570,7 @@ class AuthController extends Controller
         $otp = rand(100000, 999999);
         $pendingUser['otp'] = $otp;
         $pendingUser['otp_expires_at'] = now()->addSeconds(60)->timestamp;
-        
+
         session(['pending_delivery' => $pendingUser]);
         session()->save();
 
@@ -566,15 +591,17 @@ class AuthController extends Controller
         $existingPending = session('pending_seller');
         $shouldSendEmail = true;
 
-        if ($existingPending && 
-            $existingPending['email'] === $request->email && 
-            now()->timestamp < $existingPending['otp_expires_at']) {
-            
+        if (
+            $existingPending &&
+            $existingPending['email'] === $request->email &&
+            now()->timestamp < $existingPending['otp_expires_at']
+        ) {
+
             $otp = $existingPending['otp'];
             $pendingUser = $existingPending;
             $pendingUser['name'] = $request->name;
             $pendingUser['password'] = Hash::make($request->password);
-            
+
             $shouldSendEmail = false;
         } else {
             $otp = rand(100000, 999999);
@@ -639,7 +666,7 @@ class AuthController extends Controller
         session()->forget('pending_seller');
 
         return response()->json([
-            'success' => true, 
+            'success' => true,
             'message' => 'Seller registration successful!',
             'redirect' => route('seller.login')
         ]);
@@ -656,7 +683,7 @@ class AuthController extends Controller
         $otp = rand(100000, 999999);
         $pendingUser['otp'] = $otp;
         $pendingUser['otp_expires_at'] = now()->addSeconds(60)->timestamp;
-        
+
         session(['pending_seller' => $pendingUser]);
         session()->save();
 

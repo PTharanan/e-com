@@ -90,6 +90,22 @@ class Product extends Model
         return $this->belongsTo(User::class, 'seller_id');
     }
 
+    /**
+     * Scope to exclude products from blocked or deleted sellers.
+     * Use this on all buyer-facing queries.
+     */
+    public function scopeAvailableForBuyers($query)
+    {
+        return $query->where(function ($q) {
+            // Products with no seller (admin products) are always shown
+            $q->whereNull('seller_id')
+                // Products from active (non-blocked, non-deleted) sellers
+                ->orWhereHas('seller', function ($sellerQuery) {
+                    $sellerQuery->where('is_blocked', false);
+                });
+        });
+    }
+
     protected static function booted()
     {
         static::saving(function ($product) {
@@ -105,7 +121,7 @@ class Product extends Model
             if ($product->stock_quantity == 0 && $product->getOriginal('stock_quantity') > 0) {
                 // Determine the recipient (Seller if it exists, otherwise Admin)
                 $recipient = $product->seller ?? $product->admin;
-                
+
                 if ($recipient) {
                     $recipient->notify(new \App\Notifications\ProductOutOfStockNotification($product));
                 }

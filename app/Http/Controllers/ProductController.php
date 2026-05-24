@@ -41,7 +41,8 @@ class ProductController extends Controller
         if ($user->role === 'seller') {
             $query->where('seller_id', $user->id);
         } else {
-            $query->where('admin_id', $adminId);
+            // Unify all admin products (the main E-shop store)
+            $query->whereNull('seller_id');
         }
 
         // Search logic
@@ -95,7 +96,7 @@ class ProductController extends Controller
 
     public function publicIndex(Request $request)
     {
-        $query = Product::with(['category', 'seller', 'admin']);
+        $query = Product::with(['category', 'seller', 'admin'])->availableForBuyers();
 
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
@@ -127,10 +128,11 @@ class ProductController extends Controller
 
     public function show($id)
     {
-        $product = Product::with(['category', 'seller', 'admin', 'reviews.user', 'variants'])->findOrFail($id);
+        $product = Product::with(['category', 'seller', 'admin', 'reviews.user', 'variants'])->availableForBuyers()->findOrFail($id);
 
         // Get related products from same category (excluding current)
         $relatedProducts = Product::with(['category', 'seller', 'admin'])
+            ->availableForBuyers()
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->take(4)
@@ -443,7 +445,7 @@ class ProductController extends Controller
         // Delete old variants first, but keep physical images if they are still being used
         $oldVariants = $product->variants;
         $keptImages = $request->input('color_existing_images', []);
-        
+
         foreach ($oldVariants as $oldVariant) {
             if ($oldVariant->image_url && !in_array($oldVariant->image_url, $keptImages)) {
                 if (File::exists(public_path($oldVariant->image_url))) {
@@ -462,7 +464,8 @@ class ProductController extends Controller
             $colorExistingImages = $request->input('color_existing_images', []);
 
             foreach ($colorValues as $i => $value) {
-                if (empty($value)) continue;
+                if (empty($value))
+                    continue;
 
                 $imageUrl = null;
                 // Check for new uploaded image
@@ -491,7 +494,8 @@ class ProductController extends Controller
             $sizePrices = $request->input('size_prices', []);
 
             foreach ($sizeValues as $i => $value) {
-                if (empty($value)) continue;
+                if (empty($value))
+                    continue;
 
                 ProductVariant::create([
                     'product_id' => $product->id,

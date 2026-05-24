@@ -16,13 +16,16 @@ class NotificationController extends Controller
 
         $user = Auth::user();
 
+        $adminId = $user->role === 'admin' ? $user->id : $user->admin_id;
+
         // 1. Order Notifications (Paid/Completed)
         $newOrders = Order::with('user')
+            ->where('admin_id', $adminId)
             ->where('status', 'completed')
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
-        $newOrdersCount = Order::where('status', 'completed')->count();
+        $newOrdersCount = Order::where('admin_id', $adminId)->where('status', 'completed')->count();
 
         $mappedOrders = $newOrders->map(function ($o) {
             return [
@@ -66,7 +69,7 @@ class NotificationController extends Controller
                 'time' => $n->created_at->diffForHumans(),
             ];
         });
-        
+
         // 4. Return Notifications
         $returnNotifications = $user->unreadNotifications()
             ->where('type', 'like', '%OrderReturnNotification')
@@ -75,7 +78,7 @@ class NotificationController extends Controller
         $returnNotifCount = $user->unreadNotifications()
             ->where('type', 'like', '%OrderReturnNotification')
             ->count();
-            
+
         $mappedReturns = $returnNotifications->map(function ($n) {
             return [
                 'id' => $n->id,
@@ -92,7 +95,7 @@ class NotificationController extends Controller
                 ->where('status', 'processing') // assigned but not yet picked up
                 ->orderBy('updated_at', 'desc')
                 ->get();
-            
+
             $newWorkCount = $newWork->count();
 
             $mappedWork = $newWork->map(function ($w) {
@@ -138,8 +141,8 @@ class NotificationController extends Controller
         }
 
         $notification = Auth::user()->notifications()->findOrFail($id);
-        $notification->markAsRead();
-        
+        $notification->delete();
+
         return response()->json(['success' => true]);
     }
 }

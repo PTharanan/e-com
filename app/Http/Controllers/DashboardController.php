@@ -21,7 +21,7 @@ class DashboardController extends Controller
 
         $totalCashSpent = $orders->sum('total_price');
         $totalItemsBought = $orders->sum('total_items');
-        
+
         // Count unique products by checking all items_json across orders
         $uniqueProductNames = [];
         foreach ($orders as $order) {
@@ -60,9 +60,9 @@ class DashboardController extends Controller
         // Send email notification to user
         try {
             Mail::to(Auth::user()->email)->send(new OrderStatusMail($order, 'cancelled'));
-            
-            // Notify Admin/Seller (Store Owner)
-            $admin = \App\Models\User::where('role', 'admin')->first();
+
+            // Notify the specific Admin/Seller (Store Owner) who owns this order
+            $admin = \App\Models\User::find($order->admin_id);
             if ($admin) {
                 $admin->notify(new \App\Notifications\OrderCancelledNotification($order));
             }
@@ -174,7 +174,7 @@ class DashboardController extends Controller
             $storeDeliveryBoys = \App\Models\DeliveryApplication::where('store_owner_id', $order->admin_id)
                 ->where('status', 'approved')
                 ->pluck('delivery_boy_id');
-            
+
             foreach ($storeDeliveryBoys as $dbId) {
                 if ($dbId != $order->delivery_boy_id) { // Avoid double notification
                     $dbUser = \App\Models\User::find($dbId);
@@ -201,7 +201,7 @@ class DashboardController extends Controller
                     }
                 }
                 $sellerIds = array_unique($sellerIds);
-                
+
                 foreach ($sellerIds as $sId) {
                     $seller = \App\Models\User::find($sId);
                     if ($seller && $sId != $order->admin_id) { // Avoid double notification if admin is also seller

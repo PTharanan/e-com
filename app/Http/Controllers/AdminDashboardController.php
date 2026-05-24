@@ -14,31 +14,29 @@ class AdminDashboardController extends Controller
     public function index()
     {
         $adminId = auth()->id();
-        
+
         // Basic Stats
-        $totalOrders = Order::where('admin_id', $adminId)->where('status', '!=', 'cancelled')->count();
+        $totalOrders = Order::where('status', '!=', 'cancelled')->count();
         $totalUsers = User::where('role', 'client')->count();
-        $totalRevenue = Order::where('admin_id', $adminId)
-            ->whereIn('status', ['completed', 'processing', 'shipped', 'delivered'])
+        $totalRevenue = Order::whereIn('status', ['completed', 'processing', 'shipped', 'delivered'])
             ->sum('total_price');
-        $totalProducts = Product::where('admin_id', $adminId)->count();
-        $totalRefunds = Order::where('admin_id', $adminId)->where('status', 'refunded')->count();
+        $totalProducts = Product::whereNull('seller_id')->count();
+        $totalRefunds = Order::where('status', 'refunded')->count();
 
         // Default: 5D view (matching active button)
         $analytics = $this->fetchAnalyticsData($adminId, '5D');
 
         // Product Sales Data for Pie Chart (Total Quantity Sold)
-        $orders = Order::where('admin_id', $adminId)
-            ->whereIn('status', ['completed', 'processing', 'shipped', 'delivered'])
+        $orders = Order::whereIn('status', ['completed', 'processing', 'shipped', 'delivered'])
             ->get();
 
-        $productSales = []; 
+        $productSales = [];
         foreach ($orders as $order) {
             $items = is_string($order->items_json) ? json_decode($order->items_json, true) : $order->items_json;
             if (is_array($items)) {
                 foreach ($items as $item) {
                     $name = $item['name'] ?? 'Unknown';
-                    $qty = (int)($item['qty'] ?? 0);
+                    $qty = (int) ($item['qty'] ?? 0);
                     if (!isset($productSales[$name])) {
                         $productSales[$name] = 0;
                     }
@@ -56,8 +54,15 @@ class AdminDashboardController extends Controller
         $revenueData = $analytics['data'];
 
         return view('admin.dashboard', compact(
-            'totalOrders', 'totalUsers', 'totalRevenue', 'totalProducts', 'totalRefunds',
-            'days', 'revenueData', 'productLabels', 'productCounts'
+            'totalOrders',
+            'totalUsers',
+            'totalRevenue',
+            'totalProducts',
+            'totalRefunds',
+            'days',
+            'revenueData',
+            'productLabels',
+            'productCounts'
         ));
     }
 
@@ -77,33 +82,30 @@ class AdminDashboardController extends Controller
             for ($i = 23; $i >= 0; $i--) {
                 $time = Carbon::now()->subHours($i);
                 $labels[] = $time->format('H:00');
-                $rev = Order::where('admin_id', $adminId)
-                    ->whereIn('status', ['completed', 'processing', 'shipped', 'delivered'])
+                $rev = Order::whereIn('status', ['completed', 'processing', 'shipped', 'delivered'])
                     ->whereBetween('created_at', [$time->copy()->startOfHour(), $time->copy()->endOfHour()])
                     ->sum('total_price');
-                $data[] = (float)$rev;
+                $data[] = (float) $rev;
             }
         } elseif ($range === '5D' || $range === '1M') {
             $count = ($range === '5D') ? 5 : 30;
             for ($i = $count - 1; $i >= 0; $i--) {
                 $date = Carbon::now()->subDays($i);
                 $labels[] = $date->format('D j M');
-                $rev = Order::where('admin_id', $adminId)
-                    ->whereIn('status', ['completed', 'processing', 'shipped', 'delivered'])
+                $rev = Order::whereIn('status', ['completed', 'processing', 'shipped', 'delivered'])
                     ->whereDate('created_at', $date->toDateString())
                     ->sum('total_price');
-                $data[] = (float)$rev;
+                $data[] = (float) $rev;
             }
         } elseif ($range === '1Y') {
             for ($i = 11; $i >= 0; $i--) {
                 $date = Carbon::now()->subMonths($i);
                 $labels[] = $date->format('M Y');
-                $rev = Order::where('admin_id', $adminId)
-                    ->whereIn('status', ['completed', 'processing', 'shipped', 'delivered'])
+                $rev = Order::whereIn('status', ['completed', 'processing', 'shipped', 'delivered'])
                     ->whereMonth('created_at', $date->month)
                     ->whereYear('created_at', $date->year)
                     ->sum('total_price');
-                $data[] = (float)$rev;
+                $data[] = (float) $rev;
             }
         }
 

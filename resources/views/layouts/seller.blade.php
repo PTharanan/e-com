@@ -19,7 +19,7 @@
 
     <style>
         :root {
-           --admin-primary: #F25C3B;
+            --admin-primary: #F25C3B;
             --admin-primary-hover: #E04A2A;
             --admin-bg: rgb(255, 247, 230);
             --admin-dark: #000000;
@@ -804,350 +804,355 @@
         <div class="admin-topbar">
             <div class="topbar-left">
                 <div class="welcome-text">
-                    <h1 style="font-size: clamp(14px, 2vw, 18px); font-weight: 700; color: #1a1a1a; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Welcome back, {{ Auth::user()->name }}!</h1>
-                    <p class="topbar-subtitle" style="font-size: 11px; color: #666; margin: 0;">Here's what's happening with your store today.</p>
+                    <h1
+                        style="font-size: clamp(14px, 2vw, 18px); font-weight: 700; color: #1a1a1a; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        Welcome back, {{ Auth::user()->name }}!</h1>
+                    <p class="topbar-subtitle" style="font-size: 11px; color: #666; margin: 0;">Here's what's happening
+                        with your store today.</p>
                 </div>
             </div>
             <div class="topbar-right" style="display: flex; align-items: center; gap: 20px;">
-                <div class="admin-badge" style="background: var(--admin-primary); color: white; padding: 6px 15px; border-radius: 50px; font-weight: 600; font-size: 12px; white-space: nowrap;">
+                <div class="admin-badge"
+                    style="background: var(--admin-primary); color: white; padding: 6px 15px; border-radius: 50px; font-weight: 600; font-size: 12px; white-space: nowrap;">
                     Seller
                 </div>
                 <div class="notif-section">
-                @php
-                    $cancelledCount = 0;
-                    $cancelledOrders = collect();
-                    $newOrdersCount = 0;
-                    $newOrders = collect();
-                    $deliveryNotifCount = 0;
-                    $deliveryNotifications = collect();
+                    @php
+                        $cancelledCount = 0;
+                        $cancelledOrders = collect();
+                        $newOrdersCount = 0;
+                        $newOrders = collect();
+                        $deliveryNotifCount = 0;
+                        $deliveryNotifications = collect();
 
-                    if (Auth::check()) {
-                        $sellerId = Auth::id();
-                        $user = Auth::user();
+                        if (Auth::check()) {
+                            $sellerId = Auth::id();
+                            $user = Auth::user();
 
-                        $sellerOrdersQuery = \App\Models\Order::with('user')
-                            ->whereJsonContains('items_json', ['seller_id' => (int) $sellerId]);
+                            $sellerOrdersQuery = \App\Models\Order::with('user')
+                                ->whereJsonContains('items_json', ['seller_id' => (int) $sellerId]);
 
-                        if ($user->admin_id) {
-                            $sellerOrdersQuery->where('admin_id', $user->admin_id);
+                            if ($user->admin_id) {
+                                $sellerOrdersQuery->where('admin_id', $user->admin_id);
+                            }
+
+                            // Fetch cancelled orders
+                            $cancelledOrders = (clone $sellerOrdersQuery)->where('status', 'cancelled')->orderBy('updated_at', 'desc')->take(5)->get();
+                            $cancelledCount = (clone $sellerOrdersQuery)->where('status', 'cancelled')->count();
+
+                            // Fetch recent paid orders
+                            $newOrders = (clone $sellerOrdersQuery)->where('status', 'completed')->orderBy('created_at', 'desc')->take(5)->get();
+                            $newOrdersCount = (clone $sellerOrdersQuery)->where('status', 'completed')->count();
+
+                            // Fetch unread delivery applications
+                            $deliveryNotifications = $user->unreadNotifications()->where('type', 'like', '%DeliveryApplicationNotification')->take(5)->get();
+                            $deliveryNotifCount = $user->unreadNotifications()->where('type', 'like', '%DeliveryApplicationNotification')->count();
+
+                            // Fetch unread stock notifications
+                            $stockNotifications = $user->unreadNotifications()->where('type', 'like', '%ProductOutOfStockNotification')->take(5)->get();
+                            $stockNotifCount = $user->unreadNotifications()->where('type', 'like', '%ProductOutOfStockNotification')->count();
+
+                            // Fetch unread return notifications
+                            $returnNotifications = $user->unreadNotifications()->where('type', 'like', '%OrderReturnNotification')->take(5)->get();
+                            $returnNotifCount = $user->unreadNotifications()->where('type', 'like', '%OrderReturnNotification')->count();
                         }
-
-                        // Fetch cancelled orders
-                        $cancelledOrders = (clone $sellerOrdersQuery)->where('status', 'cancelled')->orderBy('updated_at', 'desc')->take(5)->get();
-                        $cancelledCount = (clone $sellerOrdersQuery)->where('status', 'cancelled')->count();
-
-                        // Fetch recent paid orders
-                        $newOrders = (clone $sellerOrdersQuery)->where('status', 'completed')->orderBy('created_at', 'desc')->take(5)->get();
-                        $newOrdersCount = (clone $sellerOrdersQuery)->where('status', 'completed')->count();
-
-                        // Fetch unread delivery applications
-                        $deliveryNotifications = $user->unreadNotifications()->where('type', 'like', '%DeliveryApplicationNotification')->take(5)->get();
-                        $deliveryNotifCount = $user->unreadNotifications()->where('type', 'like', '%DeliveryApplicationNotification')->count();
-
-                        // Fetch unread stock notifications
-                        $stockNotifications = $user->unreadNotifications()->where('type', 'like', '%ProductOutOfStockNotification')->take(5)->get();
-                        $stockNotifCount = $user->unreadNotifications()->where('type', 'like', '%ProductOutOfStockNotification')->count();
-                        
-                        // Fetch unread return notifications
-                        $returnNotifications = $user->unreadNotifications()->where('type', 'like', '%OrderReturnNotification')->take(5)->get();
-                        $returnNotifCount = $user->unreadNotifications()->where('type', 'like', '%OrderReturnNotification')->count();
-                    }
-                @endphp
-                <div style="display: flex; gap: 15px;">
-                    {{-- Cancellation Notification --}}
-                    <div class="notification-dropdown">
-                        <button class="bell-btn" id="cancelNotifToggle" title="Cancelled Orders">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF4444"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="15" y1="9" x2="9" y2="15"></line>
-                                <line x1="9" y1="9" x2="15" y2="15"></line>
-                            </svg>
-                            <span class="bell-badge" id="cancelBadge"
-                                style="background: #EF4444; {{ $cancelledCount > 0 ? '' : 'display: none;' }}">{{ $cancelledCount }}</span>
-                        </button>
-                        <div class="bell-menu" id="cancelNotifMenu">
-                            <div class="bell-menu-header">
-                                <h4 style="color: #EF4444;">Cancelled Orders</h4>
-                                <span id="cancelHeaderCount"
-                                    style="background: rgba(239, 68, 68, 0.1); color: #EF4444;">{{ $cancelledCount }}
-                                    New</span>
-                            </div>
-                            <div class="bell-menu-body" id="cancelNotifList">
-                                @forelse($cancelledOrders as $order)
-                                    <a href="{{ route('seller.orders') }}" class="notification-item">
-                                        <div class="notif-icon" style="background: #FEE2E2; color: #EF4444;">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                                stroke-linejoin="round">
-                                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                                            </svg>
-                                        </div>
-                                        <div class="notif-content">
-                                            <p>Order <strong>#{{ $order->id }}</strong> cancelled by
-                                                {{ $order->user->name ?? 'Guest' }}.
-                                            </p>
-                                            <span>{{ $order->updated_at->diffForHumans() }}</span>
-                                        </div>
-                                    </a>
-                                @empty
-                                    <div class="no-notif">No new cancellations.</div>
-                                @endforelse
-                                @if($cancelledCount > 0)
-                                    <a href="{{ route('seller.orders') }}" class="view-all-link"
-                                        style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #EF4444; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View
-                                        All Cancellations</a>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Delivery Partner Notification --}}
-                    <div class="notification-dropdown">
-                        <button class="bell-btn" id="deliveryNotifToggle" title="Delivery Applications">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="1" y="3" width="15" height="13"></rect>
-                                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
-                                <circle cx="5.5" cy="18.5" r="2.5"></circle>
-                                <circle cx="18.5" cy="18.5" r="2.5"></circle>
-                            </svg>
-                            @if($deliveryNotifCount > 0)
-                                <span class="bell-badge" id="deliveryBadge"
-                                    style="background: var(--admin-primary);">{{ $deliveryNotifCount }}</span>
-                            @else
-                                <span class="bell-badge" id="deliveryBadge"
-                                    style="background: var(--admin-primary); display: none;">0</span>
-                            @endif
-                        </button>
-                        <div class="bell-menu" id="deliveryNotifMenu">
-                            <div class="bell-menu-header">
-                                <h4>Partner Applications</h4>
-                                <span id="deliveryHeaderCount"
-                                    style="background: rgba(242, 92, 59, 0.1); color: var(--admin-primary);">{{ $deliveryNotifCount }}
-                                    New</span>
-                            </div>
-                            <div class="bell-menu-body" id="deliveryNotifList">
-                                @forelse($deliveryNotifications as $notif)
-                                    <div class="notification-item" id="notif-{{ $notif->id }}">
-                                        <div class="notif-icon-wrapper"
-                                            onmousedown="startNotifDismiss(event, '{{ $notif->id }}')"
-                                            onmouseup="stopNotifDismiss()" onmouseleave="stopNotifDismiss()"
-                                            ontouchstart="startNotifDismiss(event, '{{ $notif->id }}')"
-                                            ontouchend="stopNotifDismiss()">
-                                            <svg class="progress-ring">
-                                                <circle class="progress-ring__circle" r="18" cx="20" cy="20" />
-                                            </svg>
-                                            <div class="notif-icon" style="background: #FDEEE4; color: #F25C3B;">
-                                                <svg class="icon-arrow" width="18" height="18" viewBox="0 0 24 24"
-                                                    fill="none" stroke="currentColor" stroke-width="2.5"
-                                                    stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M5 12h14"></path>
-                                                    <path d="m12 5 7 7-7 7"></path>
-                                                </svg>
-                                                <svg class="icon-close" width="18" height="18" viewBox="0 0 24 24"
-                                                    fill="none" stroke="currentColor" stroke-width="2.5"
-                                                    stroke-linecap="round" stroke-linejoin="round">
+                    @endphp
+                    <div style="display: flex; gap: 15px;">
+                        {{-- Cancellation Notification --}}
+                        <div class="notification-dropdown">
+                            <button class="bell-btn" id="cancelNotifToggle" title="Cancelled Orders">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF4444"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                                </svg>
+                                <span class="bell-badge" id="cancelBadge"
+                                    style="background: #EF4444; {{ $cancelledCount > 0 ? '' : 'display: none;' }}">{{ $cancelledCount }}</span>
+                            </button>
+                            <div class="bell-menu" id="cancelNotifMenu">
+                                <div class="bell-menu-header">
+                                    <h4 style="color: #EF4444;">Cancelled Orders</h4>
+                                    <span id="cancelHeaderCount"
+                                        style="background: rgba(239, 68, 68, 0.1); color: #EF4444;">{{ $cancelledCount }}
+                                        New</span>
+                                </div>
+                                <div class="bell-menu-body" id="cancelNotifList">
+                                    @forelse($cancelledOrders as $order)
+                                        <a href="{{ route('seller.orders') }}" class="notification-item">
+                                            <div class="notif-icon" style="background: #FEE2E2; color: #EF4444;">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                    stroke-linejoin="round">
                                                     <line x1="18" y1="6" x2="6" y2="18"></line>
                                                     <line x1="6" y1="6" x2="18" y2="18"></line>
                                                 </svg>
                                             </div>
-                                        </div>
-                                        <a href="{{ route('seller.delivery') }}" class="notif-content"
-                                            style="text-decoration: none; flex: 1;">
-                                            <p><strong>{{ $notif->data['delivery_boy_name'] }}</strong> applied as a
-                                                partner.</p>
-                                            <span>{{ $notif->created_at->diffForHumans() }}</span>
+                                            <div class="notif-content">
+                                                <p>Order <strong>#{{ $order->id }}</strong> cancelled by
+                                                    {{ $order->user->name ?? 'Guest' }}.
+                                                </p>
+                                                <span>{{ $order->updated_at->diffForHumans() }}</span>
+                                            </div>
                                         </a>
-                                    </div>
-                                @empty
-                                    <div class="no-notif">No new applications.</div>
-                                @endforelse
+                                    @empty
+                                        <div class="no-notif">No new cancellations.</div>
+                                    @endforelse
+                                    @if($cancelledCount > 0)
+                                        <a href="{{ route('seller.orders') }}" class="view-all-link"
+                                            style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #EF4444; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View
+                                            All Cancellations</a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Delivery Partner Notification --}}
+                        <div class="notification-dropdown">
+                            <button class="bell-btn" id="deliveryNotifToggle" title="Delivery Applications">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="1" y="3" width="15" height="13"></rect>
+                                    <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                                    <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                                    <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                                </svg>
                                 @if($deliveryNotifCount > 0)
-                                    <a href="{{ route('seller.delivery') }}" class="view-all-link"
-                                        style="display: block; text-align: center; padding: 10px; font-size: 12px; color: var(--admin-primary); text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View
-                                        All Applications</a>
+                                    <span class="bell-badge" id="deliveryBadge"
+                                        style="background: var(--admin-primary);">{{ $deliveryNotifCount }}</span>
+                                @else
+                                    <span class="bell-badge" id="deliveryBadge"
+                                        style="background: var(--admin-primary); display: none;">0</span>
                                 @endif
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Out of Stock Notification --}}
-                    <div class="notification-dropdown">
-                        <button class="bell-btn" id="stockNotifToggle" title="Out of Stock Products">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F59E0B"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path
-                                    d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
-                                </path>
-                                <line x1="12" y1="9" x2="12" y2="13"></line>
-                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                            </svg>
-                            <span class="bell-badge" id="stockBadge"
-                                style="background: #F59E0B; {{ $stockNotifCount > 0 ? '' : 'display: none;' }}">{{ $stockNotifCount }}</span>
-                        </button>
-                        <div class="bell-menu" id="stockNotifMenu">
-                            <div class="bell-menu-header">
-                                <h4 style="color: #F59E0B;">Out of Stock</h4>
-                                <span id="stockHeaderCount"
-                                    style="background: rgba(245, 158, 11, 0.1); color: #F59E0B;">{{ $stockNotifCount }}
-                                    New</span>
-                            </div>
-                            <div class="bell-menu-body" id="stockNotifList">
-                                @forelse($stockNotifications as $notif)
-                                    <div class="notification-item" id="notif-{{ $notif->id }}">
-                                        <div class="notif-icon-wrapper"
-                                            onmousedown="startNotifDismiss(event, '{{ $notif->id }}')"
-                                            onmouseup="stopNotifDismiss()" onmouseleave="stopNotifDismiss()"
-                                            ontouchstart="startNotifDismiss(event, '{{ $notif->id }}')"
-                                            ontouchend="stopNotifDismiss()">
-                                            <svg class="progress-ring">
-                                                <circle class="progress-ring__circle" r="18" cx="20" cy="20" />
-                                            </svg>
-                                            <div class="notif-icon" style="background: #FFFBEB; color: #F59E0B;">
-                                                <svg class="icon-arrow" width="18" height="18" viewBox="0 0 24 24"
-                                                    fill="none" stroke="currentColor" stroke-width="2.5"
-                                                    stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M5 12h14"></path>
-                                                    <path d="m12 5 7 7-7 7"></path>
+                            </button>
+                            <div class="bell-menu" id="deliveryNotifMenu">
+                                <div class="bell-menu-header">
+                                    <h4>Partner Applications</h4>
+                                    <span id="deliveryHeaderCount"
+                                        style="background: rgba(242, 92, 59, 0.1); color: var(--admin-primary);">{{ $deliveryNotifCount }}
+                                        New</span>
+                                </div>
+                                <div class="bell-menu-body" id="deliveryNotifList">
+                                    @forelse($deliveryNotifications as $notif)
+                                        <div class="notification-item" id="notif-{{ $notif->id }}">
+                                            <div class="notif-icon-wrapper"
+                                                onmousedown="startNotifDismiss(event, '{{ $notif->id }}')"
+                                                onmouseup="stopNotifDismiss()" onmouseleave="stopNotifDismiss()"
+                                                ontouchstart="startNotifDismiss(event, '{{ $notif->id }}')"
+                                                ontouchend="stopNotifDismiss()">
+                                                <svg class="progress-ring">
+                                                    <circle class="progress-ring__circle" r="18" cx="20" cy="20" />
                                                 </svg>
-                                                <svg class="icon-close" width="18" height="18" viewBox="0 0 24 24"
-                                                    fill="none" stroke="currentColor" stroke-width="2.5"
-                                                    stroke-linecap="round" stroke-linejoin="round">
-                                                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                                                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                                                </svg>
+                                                <div class="notif-icon" style="background: #FDEEE4; color: #F25C3B;">
+                                                    <svg class="icon-arrow" width="18" height="18" viewBox="0 0 24 24"
+                                                        fill="none" stroke="currentColor" stroke-width="2.5"
+                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M5 12h14"></path>
+                                                        <path d="m12 5 7 7-7 7"></path>
+                                                    </svg>
+                                                    <svg class="icon-close" width="18" height="18" viewBox="0 0 24 24"
+                                                        fill="none" stroke="currentColor" stroke-width="2.5"
+                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                    </svg>
+                                                </div>
                                             </div>
+                                            <a href="{{ route('seller.delivery') }}" class="notif-content"
+                                                style="text-decoration: none; flex: 1;">
+                                                <p><strong>{{ $notif->data['delivery_boy_name'] }}</strong> applied as a
+                                                    partner.</p>
+                                                <span>{{ $notif->created_at->diffForHumans() }}</span>
+                                            </a>
                                         </div>
-                                        <a href="{{ route('seller.products') }}" class="notif-content"
-                                            style="text-decoration: none; flex: 1;">
-                                            <p><strong>{{ $notif->data['product_name'] }}</strong> is out of stock.</p>
-                                            <span>{{ $notif->created_at->diffForHumans() }}</span>
-                                        </a>
-                                    </div>
-                                @empty
-                                    <div class="no-notif">No out of stock alerts.</div>
-                                @endforelse
-                                @if($stockNotifCount > 0)
-                                    <a href="{{ route('seller.products') }}" class="view-all-link"
-                                        style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #F59E0B; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View
-                                        All Products</a>
-                                @endif
+                                    @empty
+                                        <div class="no-notif">No new applications.</div>
+                                    @endforelse
+                                    @if($deliveryNotifCount > 0)
+                                        <a href="{{ route('seller.delivery') }}" class="view-all-link"
+                                            style="display: block; text-align: center; padding: 10px; font-size: 12px; color: var(--admin-primary); text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View
+                                            All Applications</a>
+                                    @endif
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    {{-- Return Notification --}}
-                    <div class="notification-dropdown">
-                        <button class="bell-btn" id="returnNotifToggle" title="Return Requests">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6366F1"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M9 14L4 9l5-5"></path>
-                                <path d="M4 9h11a4 4 0 0 1 0 8h-1"></path>
-                            </svg>
-                            <span class="bell-badge" id="returnBadge"
-                                style="background: #6366F1; {{ $returnNotifCount > 0 ? '' : 'display: none;' }}">{{ $returnNotifCount }}</span>
-                        </button>
-                        <div class="bell-menu" id="returnNotifMenu">
-                            <div class="bell-menu-header">
-                                <h4 style="color: #6366F1;">Return Requests</h4>
-                                <span id="returnHeaderCount"
-                                    style="background: rgba(99, 102, 241, 0.1); color: #6366F1;">{{ $returnNotifCount }}
-                                    New</span>
-                            </div>
-                            <div class="bell-menu-body" id="returnNotifList">
-                                @forelse($returnNotifications as $notif)
-                                    <div class="notification-item" id="notif-{{ $notif->id }}">
-                                        <div class="notif-icon-wrapper"
-                                            onmousedown="startNotifDismiss(event, '{{ $notif->id }}')"
-                                            onmouseup="stopNotifDismiss()" onmouseleave="stopNotifDismiss()"
-                                            ontouchstart="startNotifDismiss(event, '{{ $notif->id }}')"
-                                            ontouchend="stopNotifDismiss()">
-                                            <svg class="progress-ring">
-                                                <circle class="progress-ring__circle" r="18" cx="20" cy="20" />
-                                            </svg>
-                                            <div class="notif-icon" style="background: #EEF2FF; color: #6366F1;">
-                                                <svg class="icon-arrow" width="18" height="18" viewBox="0 0 24 24"
-                                                    fill="none" stroke="currentColor" stroke-width="2.5"
-                                                    stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M5 12h14"></path>
-                                                    <path d="m12 5 7 7-7 7"></path>
+                        {{-- Out of Stock Notification --}}
+                        <div class="notification-dropdown">
+                            <button class="bell-btn" id="stockNotifToggle" title="Out of Stock Products">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F59E0B"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                                    </path>
+                                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                </svg>
+                                <span class="bell-badge" id="stockBadge"
+                                    style="background: #F59E0B; {{ $stockNotifCount > 0 ? '' : 'display: none;' }}">{{ $stockNotifCount }}</span>
+                            </button>
+                            <div class="bell-menu" id="stockNotifMenu">
+                                <div class="bell-menu-header">
+                                    <h4 style="color: #F59E0B;">Out of Stock</h4>
+                                    <span id="stockHeaderCount"
+                                        style="background: rgba(245, 158, 11, 0.1); color: #F59E0B;">{{ $stockNotifCount }}
+                                        New</span>
+                                </div>
+                                <div class="bell-menu-body" id="stockNotifList">
+                                    @forelse($stockNotifications as $notif)
+                                        <div class="notification-item" id="notif-{{ $notif->id }}">
+                                            <div class="notif-icon-wrapper"
+                                                onmousedown="startNotifDismiss(event, '{{ $notif->id }}')"
+                                                onmouseup="stopNotifDismiss()" onmouseleave="stopNotifDismiss()"
+                                                ontouchstart="startNotifDismiss(event, '{{ $notif->id }}')"
+                                                ontouchend="stopNotifDismiss()">
+                                                <svg class="progress-ring">
+                                                    <circle class="progress-ring__circle" r="18" cx="20" cy="20" />
                                                 </svg>
-                                                <svg class="icon-close" width="18" height="18" viewBox="0 0 24 24"
-                                                    fill="none" stroke="currentColor" stroke-width="2.5"
-                                                    stroke-linecap="round" stroke-linejoin="round">
-                                                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                                                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                                                </svg>
+                                                <div class="notif-icon" style="background: #FFFBEB; color: #F59E0B;">
+                                                    <svg class="icon-arrow" width="18" height="18" viewBox="0 0 24 24"
+                                                        fill="none" stroke="currentColor" stroke-width="2.5"
+                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M5 12h14"></path>
+                                                        <path d="m12 5 7 7-7 7"></path>
+                                                    </svg>
+                                                    <svg class="icon-close" width="18" height="18" viewBox="0 0 24 24"
+                                                        fill="none" stroke="currentColor" stroke-width="2.5"
+                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                    </svg>
+                                                </div>
                                             </div>
+                                            <a href="{{ route('seller.products') }}" class="notif-content"
+                                                style="text-decoration: none; flex: 1;">
+                                                <p><strong>{{ $notif->data['product_name'] }}</strong> is out of stock.</p>
+                                                <span>{{ $notif->created_at->diffForHumans() }}</span>
+                                            </a>
                                         </div>
-                                        <a href="{{ route('seller.returns') }}" class="notif-content"
-                                            style="text-decoration: none; flex: 1;">
-                                            <p><strong>#{{ $notif->data['order_id'] }}</strong>: Return request from <strong>{{ $notif->data['customer_name'] }}</strong>.</p>
-                                            <span>{{ $notif->created_at->diffForHumans() }}</span>
-                                        </a>
-                                    </div>
-                                @empty
-                                    <div class="no-notif">No new return requests.</div>
-                                @endforelse
-                                @if($returnNotifCount > 0)
-                                    <a href="{{ route('seller.returns') }}" class="view-all-link"
-                                        style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #6366F1; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View
-                                        All Returns</a>
-                                @endif
+                                    @empty
+                                        <div class="no-notif">No out of stock alerts.</div>
+                                    @endforelse
+                                    @if($stockNotifCount > 0)
+                                        <a href="{{ route('seller.products') }}" class="view-all-link"
+                                            style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #F59E0B; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View
+                                            All Products</a>
+                                    @endif
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    {{-- Order Notification (Bell) --}}
-                    <div class="notification-dropdown">
-                        <button class="bell-btn" id="bellToggle" title="Payment Notifications">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                            </svg>
-                            @if($newOrdersCount > 0)
-                                <span class="bell-badge" id="orderBadge">{{ $newOrdersCount }}</span>
-                            @else
-                                <span class="bell-badge" id="orderBadge" style="display: none;">0</span>
-                            @endif
-                        </button>
-                        <div class="bell-menu" id="bellMenu">
-                            <div class="bell-menu-header">
-                                <h4>Payments</h4>
-                                <span id="orderHeaderCount">{{ $newOrdersCount }} Successful</span>
+                        {{-- Return Notification --}}
+                        <div class="notification-dropdown">
+                            <button class="bell-btn" id="returnNotifToggle" title="Return Requests">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6366F1"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 14L4 9l5-5"></path>
+                                    <path d="M4 9h11a4 4 0 0 1 0 8h-1"></path>
+                                </svg>
+                                <span class="bell-badge" id="returnBadge"
+                                    style="background: #6366F1; {{ $returnNotifCount > 0 ? '' : 'display: none;' }}">{{ $returnNotifCount }}</span>
+                            </button>
+                            <div class="bell-menu" id="returnNotifMenu">
+                                <div class="bell-menu-header">
+                                    <h4 style="color: #6366F1;">Return Requests</h4>
+                                    <span id="returnHeaderCount"
+                                        style="background: rgba(99, 102, 241, 0.1); color: #6366F1;">{{ $returnNotifCount }}
+                                        New</span>
+                                </div>
+                                <div class="bell-menu-body" id="returnNotifList">
+                                    @forelse($returnNotifications as $notif)
+                                        <div class="notification-item" id="notif-{{ $notif->id }}">
+                                            <div class="notif-icon-wrapper"
+                                                onmousedown="startNotifDismiss(event, '{{ $notif->id }}')"
+                                                onmouseup="stopNotifDismiss()" onmouseleave="stopNotifDismiss()"
+                                                ontouchstart="startNotifDismiss(event, '{{ $notif->id }}')"
+                                                ontouchend="stopNotifDismiss()">
+                                                <svg class="progress-ring">
+                                                    <circle class="progress-ring__circle" r="18" cx="20" cy="20" />
+                                                </svg>
+                                                <div class="notif-icon" style="background: #EEF2FF; color: #6366F1;">
+                                                    <svg class="icon-arrow" width="18" height="18" viewBox="0 0 24 24"
+                                                        fill="none" stroke="currentColor" stroke-width="2.5"
+                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M5 12h14"></path>
+                                                        <path d="m12 5 7 7-7 7"></path>
+                                                    </svg>
+                                                    <svg class="icon-close" width="18" height="18" viewBox="0 0 24 24"
+                                                        fill="none" stroke="currentColor" stroke-width="2.5"
+                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            <a href="{{ route('seller.returns') }}" class="notif-content"
+                                                style="text-decoration: none; flex: 1;">
+                                                <p><strong>#{{ $notif->data['order_id'] }}</strong>: Return request from
+                                                    <strong>{{ $notif->data['customer_name'] }}</strong>.</p>
+                                                <span>{{ $notif->created_at->diffForHumans() }}</span>
+                                            </a>
+                                        </div>
+                                    @empty
+                                        <div class="no-notif">No new return requests.</div>
+                                    @endforelse
+                                    @if($returnNotifCount > 0)
+                                        <a href="{{ route('seller.returns') }}" class="view-all-link"
+                                            style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #6366F1; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View
+                                            All Returns</a>
+                                    @endif
+                                </div>
                             </div>
-                            <div class="bell-menu-body" id="orderNotifList">
-                                @forelse($newOrders as $order)
-                                    <a href="{{ route('seller.orders') }}" class="notification-item">
-                                        <div class="notif-icon">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                                stroke-linejoin="round">
-                                                <polyline points="20 6 9 17 4 12"></polyline>
-                                            </svg>
-                                        </div>
-                                        <div class="notif-content">
-                                            <p>Order <strong>#{{ $order->id }}</strong> paid by
-                                                {{ $order->user->name ?? 'Guest' }}.
-                                            </p>
-                                            <span>{{ $order->created_at->diffForHumans() }}</span>
-                                        </div>
-                                    </a>
-                                @empty
-                                    <div class="no-notif">No new payments.</div>
-                                @endforelse
+                        </div>
+
+                        {{-- Order Notification (Bell) --}}
+                        <div class="notification-dropdown">
+                            <button class="bell-btn" id="bellToggle" title="Payment Notifications">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                </svg>
                                 @if($newOrdersCount > 0)
-                                    <a href="{{ route('seller.orders') }}" class="view-all-link"
-                                        style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #4CAF50; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View
-                                        All Orders</a>
+                                    <span class="bell-badge" id="orderBadge">{{ $newOrdersCount }}</span>
+                                @else
+                                    <span class="bell-badge" id="orderBadge" style="display: none;">0</span>
                                 @endif
+                            </button>
+                            <div class="bell-menu" id="bellMenu">
+                                <div class="bell-menu-header">
+                                    <h4>Payments</h4>
+                                    <span id="orderHeaderCount">{{ $newOrdersCount }} Successful</span>
+                                </div>
+                                <div class="bell-menu-body" id="orderNotifList">
+                                    @forelse($newOrders as $order)
+                                        <a href="{{ route('seller.orders') }}" class="notification-item">
+                                            <div class="notif-icon">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                    stroke-linejoin="round">
+                                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                                </svg>
+                                            </div>
+                                            <div class="notif-content">
+                                                <p>Order <strong>#{{ $order->id }}</strong> paid by
+                                                    {{ $order->user->name ?? 'Guest' }}.
+                                                </p>
+                                                <span>{{ $order->created_at->diffForHumans() }}</span>
+                                            </div>
+                                        </a>
+                                    @empty
+                                        <div class="no-notif">No new payments.</div>
+                                    @endforelse
+                                    @if($newOrdersCount > 0)
+                                        <a href="{{ route('seller.orders') }}" class="view-all-link"
+                                            style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #4CAF50; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View
+                                            All Orders</a>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 </div>
             </div>
         </div>
@@ -1317,7 +1322,7 @@
                     });
                 }
                 window.dispatchEvent(new Event('resize'));
-                
+
                 // Stop after transition (300ms + buffer)
                 if (Date.now() - startTime > 400) {
                     clearInterval(resizeTimer);

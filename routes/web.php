@@ -19,8 +19,12 @@ Route::get('/products', [\App\Http\Controllers\ProductController::class, 'public
 Route::post('/products/add-to-cart', [\App\Http\Controllers\ProductController::class, 'deductStock'])->name('products.add-to-cart');
 Route::post('/products/remove-from-cart', [\App\Http\Controllers\ProductController::class, 'returnStock'])->name('products.remove-from-cart');
 Route::get('/cart', function () {
-    $products = \App\Models\Product::with(['category', 'seller' => function ($q) {
-        $q->withTrashed(); }])->get();
+    $products = \App\Models\Product::with([
+        'category',
+        'seller' => function ($q) {
+            $q->withTrashed();
+        }
+    ])->get();
     return view('cart', compact('products'));
 })->name('cart');
 

@@ -11,10 +11,9 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, \Illuminate\Database\Eloquent\SoftDeletes;
 
     /**
-     * The attributes that are mass assignable.
      *
      * @var list<string>
      */
@@ -31,6 +30,8 @@ class User extends Authenticatable
         'address',
         'admin_id',
         'is_blocked',
+        'last_edited_by',
+        'deletion_reason',
     ];
 
     public function info()
@@ -81,6 +82,11 @@ class User extends Authenticatable
         return $this->hasMany(User::class, 'admin_id');
     }
 
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'admin_id');
+    }
+
     public function sellerAssignments()
     {
         return $this->hasMany(SellerAssignment::class, 'seller_id');
@@ -89,5 +95,15 @@ class User extends Authenticatable
     public function storeAssignments()
     {
         return $this->hasMany(SellerAssignment::class, 'admin_id');
+    }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'seller_id');
+    }
+
+    public function lastEditor()
+    {
+        return $this->belongsTo(User::class, 'last_edited_by');
     }
 }

@@ -73,6 +73,11 @@ class OrderController extends Controller
     {
         $order = Order::with('user')->findOrFail($id);
 
+        $adminId = auth()->user()->role === 'admin' ? auth()->id() : auth()->user()->admin_id;
+        if ($order->admin_id != $adminId) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
         $request->validate([
             'status' => 'required|string|in:completed,shipped,delivered,cancelled,processing'
         ]);
@@ -166,6 +171,11 @@ class OrderController extends Controller
     {
         $order = Order::findOrFail($id);
 
+        $adminId = auth()->user()->role === 'admin' ? auth()->id() : auth()->user()->admin_id;
+        if ($order->admin_id != $adminId) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
         $request->validate([
             'delivery_boy_id' => 'required|exists:users,id'
         ]);
@@ -199,6 +209,11 @@ class OrderController extends Controller
     public function refundOrder(Request $request, $id)
     {
         $order = Order::findOrFail($id);
+
+        $adminId = auth()->user()->role === 'admin' ? auth()->id() : auth()->user()->admin_id;
+        if ($order->admin_id != $adminId) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
 
         if ($order->status !== 'cancelled') {
             return response()->json(['success' => false, 'message' => 'Only cancelled orders can be refunded.']);
