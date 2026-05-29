@@ -801,6 +801,16 @@
                     <span>Delivery Partners</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ route('admin.reviews') }}" title="Reviews"
+                    class="nav-link {{ request()->routeIs('admin.reviews') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <span>Reviews</span>
+                </a>
+            </li>
             <li class="nav-item" id="settings-nav-item" style="position: relative;">
                 <a href="javascript:void(0)" title="Settings"
                     class="nav-link {{ request()->routeIs('admin.categories') || request()->routeIs('admin.currency') || request()->routeIs('admin.sellers') || request()->routeIs('admin.accounts') || request()->routeIs('admin.banners') || request()->routeIs('admin.settings.auto-delete') ? 'active' : '' }}"
@@ -906,6 +916,21 @@
                         // Fetch unread return notifications
                         $returnNotifications = Auth::user()->unreadNotifications()->where('type', 'like', '%OrderReturnNotification')->take(5)->get();
                         $returnNotifCount = Auth::user()->unreadNotifications()->where('type', 'like', '%OrderReturnNotification')->count();
+
+                        // Fetch unread review notifications (both new reviews and replies)
+                        $reviewNotifications = Auth::user()->unreadNotifications()
+                            ->where(function($query) {
+                                $query->where('type', 'like', '%NewProductReviewNotification')
+                                      ->orWhere('type', 'like', '%ReviewReplyNotification');
+                            })
+                            ->take(5)
+                            ->get();
+                        $reviewNotifCount = Auth::user()->unreadNotifications()
+                            ->where(function($query) {
+                                $query->where('type', 'like', '%NewProductReviewNotification')
+                                      ->orWhere('type', 'like', '%ReviewReplyNotification');
+                            })
+                            ->count();
                     @endphp
                     <div style="display: flex; gap: 15px;">
                         {{-- Cancellation Notification --}}
@@ -1152,6 +1177,76 @@
                                         <a href="{{ route('admin.returns') }}" class="view-all-link"
                                             style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #6366F1; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View
                                             All Returns</a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Reviews & Replies Notification --}}
+                        <div class="notification-dropdown">
+                            <button class="bell-btn" id="reviewReplyNotifToggle" title="Reviews & Replies">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                                @if($reviewNotifCount > 0)
+                                    <span class="bell-badge" id="reviewReplyBadge"
+                                        style="background: #8B5CF6;">{{ $reviewNotifCount }}</span>
+                                @else
+                                    <span class="bell-badge" id="reviewReplyBadge"
+                                        style="background: #8B5CF6; display: none;">0</span>
+                                @endif
+                            </button>
+                            <div class="bell-menu" id="reviewReplyNotifMenu">
+                                <div class="bell-menu-header">
+                                    <h4 style="color: #8B5CF6;">Reviews & Replies</h4>
+                                    <span id="reviewReplyHeaderCount"
+                                        style="background: rgba(139, 92, 246, 0.1); color: #8B5CF6;">{{ $reviewNotifCount }}
+                                        New</span>
+                                </div>
+                                <div class="bell-menu-body" id="reviewReplyNotifList">
+                                    @forelse($reviewNotifications as $notif)
+                                        <div class="notification-item" id="notif-{{ $notif->id }}">
+                                            <div class="notif-icon-wrapper"
+                                                onmousedown="startNotifDismiss(event, '{{ $notif->id }}')"
+                                                onmouseup="stopNotifDismiss()" onmouseleave="stopNotifDismiss()"
+                                                ontouchstart="startNotifDismiss(event, '{{ $notif->id }}')"
+                                                ontouchend="stopNotifDismiss()">
+                                                <svg class="progress-ring">
+                                                    <circle class="progress-ring__circle" r="18" cx="20" cy="20" />
+                                                </svg>
+                                                <div class="notif-icon" style="background: #EDE9FE; color: #8B5CF6;">
+                                                    <svg class="icon-arrow" width="18" height="18" viewBox="0 0 24 24"
+                                                        fill="none" stroke="currentColor" stroke-width="2.5"
+                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M5 12h14"></path>
+                                                        <path d="m12 5 7 7-7 7"></path>
+                                                    </svg>
+                                                    <svg class="icon-close" width="18" height="18" viewBox="0 0 24 24"
+                                                        fill="none" stroke="currentColor" stroke-width="2.5"
+                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            <a href="{{ route('admin.reviews') }}" class="notif-content"
+                                                style="text-decoration: none; flex: 1;">
+                                                @if(strpos($notif->type, 'NewProductReviewNotification') !== false)
+                                                    <p><strong>{{ $notif->data['reviewer_name'] ?? 'Customer' }}</strong> reviewed <strong>{{ $notif->data['product_name'] ?? 'product' }}</strong> - {{ $notif->data['rating'] ?? '5' }}⭐</p>
+                                                @else
+                                                    <p>New reply to review for <strong>{{ $notif->data['product_name'] ?? 'product' }}</strong>.</p>
+                                                @endif
+                                                <span>{{ $notif->created_at->diffForHumans() }}</span>
+                                            </a>
+                                        </div>
+                                    @empty
+                                        <div class="no-notif">No new reviews or replies.</div>
+                                    @endforelse
+                                    @if($reviewNotifCount > 0)
+                                        <a href="{{ route('admin.reviews') }}" class="view-all-link"
+                                            style="display: block; text-align: center; padding: 10px; font-size: 12px; color: #8B5CF6; text-decoration: none; font-weight: 600; border-top: 1px solid #f1f1f1;">View
+                                            All Reviews</a>
                                     @endif
                                 </div>
                             </div>
@@ -1503,6 +1598,8 @@
         const stockMenu = document.getElementById('stockNotifMenu');
         const returnToggle = document.getElementById('returnNotifToggle');
         const returnMenu = document.getElementById('returnNotifMenu');
+        const reviewToggle = document.getElementById('reviewReplyNotifToggle');
+        const reviewMenu = document.getElementById('reviewReplyNotifMenu');
 
         const closeAllMenus = () => {
             if (bellMenu) bellMenu.classList.remove('active');
@@ -1510,6 +1607,7 @@
             if (cancelMenu) cancelMenu.classList.remove('active');
             if (stockMenu) stockMenu.classList.remove('active');
             if (returnMenu) returnMenu.classList.remove('active');
+            if (reviewMenu) reviewMenu.classList.remove('active');
         };
 
         const setupToggle = (toggle, menu) => {
@@ -1528,13 +1626,15 @@
         setupToggle(cancelToggle, cancelMenu);
         setupToggle(stockToggle, stockMenu);
         setupToggle(returnToggle, returnMenu);
+        setupToggle(reviewToggle, reviewMenu);
 
         document.addEventListener('click', (e) => {
             if (bellToggle && !bellToggle.contains(e.target) && bellMenu && !bellMenu.contains(e.target) &&
                 deliveryToggle && !deliveryToggle.contains(e.target) && deliveryMenu && !deliveryMenu.contains(e.target) &&
                 cancelToggle && !cancelToggle.contains(e.target) && cancelMenu && !cancelMenu.contains(e.target) &&
                 stockToggle && !stockToggle.contains(e.target) && stockMenu && !stockMenu.contains(e.target) &&
-                returnToggle && !returnToggle.contains(e.target) && returnMenu && !returnMenu.contains(e.target)) {
+                returnToggle && !returnToggle.contains(e.target) && returnMenu && !returnMenu.contains(e.target) &&
+                reviewToggle && !reviewToggle.contains(e.target) && reviewMenu && !reviewMenu.contains(e.target)) {
                 closeAllMenus();
             }
         });

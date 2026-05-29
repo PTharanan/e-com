@@ -851,8 +851,8 @@
                                 <th>Action</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            @foreach($orders->sortByDesc('created_at') as $order)
+                        <tbody id="orders-tbody">
+                            @foreach($orders as $order)
                                 <tr id="order-row-{{ $order->id }}">
                                     <td data-label="Order ID" style="font-weight: 600;">
                                         #ORD-{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}</td>
@@ -963,6 +963,16 @@
                     </div>
                 @endif
             </div>
+            
+            <!-- See More Button -->
+            @if($orders->hasMorePages())
+                <div style="text-align: center; margin-top: 24px;">
+                    <button type="button" id="load-more-btn" class="btn-view-details" 
+                        style="background: #4F46E5; color: white; padding: 10px 24px; border: none;">
+                        See More Orders
+                    </button>
+                </div>
+            @endif
         </div>
     </div>
 
@@ -1348,6 +1358,51 @@
             document.getElementById('order-details-modal').addEventListener('click', function (e) {
                 if (e.target === this) closeOrderModal();
             });
+
+            // Load More Orders functionality
+            let nextPage = 2;
+            const loadMoreBtn = document.getElementById('load-more-btn');
+            
+            if (loadMoreBtn) {
+                loadMoreBtn.addEventListener('click', async function() {
+                    loadMoreBtn.disabled = true;
+                    loadMoreBtn.textContent = 'Loading...';
+                    
+                    try {
+                        const response = await fetch(`{{ route('dashboard') }}?page=${nextPage}`);
+                        const html = await response.text();
+                        
+                        // Parse the HTML to extract table rows
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const newRows = doc.querySelectorAll('#orders-tbody tr');
+                        
+                        if (newRows.length > 0) {
+                            const tbody = document.getElementById('orders-tbody');
+                            newRows.forEach(row => {
+                                tbody.appendChild(row.cloneNode(true));
+                            });
+                            
+                            nextPage++;
+                            
+                            // Check if there are more pages
+                            const hasMorePages = html.includes('id="load-more-btn"');
+                            if (!hasMorePages) {
+                                loadMoreBtn.style.display = 'none';
+                            } else {
+                                loadMoreBtn.disabled = false;
+                                loadMoreBtn.textContent = 'See More Orders';
+                            }
+                        } else {
+                            loadMoreBtn.style.display = 'none';
+                        }
+                    } catch (error) {
+                        console.error('Failed to load more orders:', error);
+                        loadMoreBtn.disabled = false;
+                        loadMoreBtn.textContent = 'See More Orders';
+                    }
+                });
+            }
         </script>
     @endsection
 @endsection

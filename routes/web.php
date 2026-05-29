@@ -55,6 +55,8 @@ Route::get('/product/{id}', [\App\Http\Controllers\ProductController::class, 'sh
 Route::middleware('auth')->group(function () {
     Route::post('/product/{id}/review', [\App\Http\Controllers\ReviewController::class, 'store'])->name('product.review.store');
     Route::delete('/review/{id}', [\App\Http\Controllers\ReviewController::class, 'destroy'])->name('product.review.delete');
+    Route::post('/review/{id}/reply', [\App\Http\Controllers\ReviewController::class, 'storeReply'])->name('review.reply.store');
+    Route::get('/product/{productId}/reviews', [\App\Http\Controllers\ReviewController::class, 'getProductReviews'])->name('product.reviews.get');
 });
 
 use App\Http\Controllers\AuthController;
@@ -190,6 +192,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/products/{id}', [\App\Http\Controllers\ProductController::class, 'update'])->name('products.update');
         Route::patch('/products/{id}/quick', [\App\Http\Controllers\ProductController::class, 'quickUpdate'])->name('products.quick-update');
         Route::delete('/products/{id}', [\App\Http\Controllers\ProductController::class, 'destroy'])->name('products.delete');
+
+        Route::get('/reviews', function () {
+            return view('admin.reviews-enhanced');
+        })->name('reviews');
+
+        Route::get('/api/reviews/all', [\App\Http\Controllers\ReviewController::class, 'getAllReviewsForAdmin'])->name('reviews.all');
 
         Route::get('/orders', [\App\Http\Controllers\OrderController::class, 'index'])->name('orders');
         Route::patch('/orders/{id}/status', [\App\Http\Controllers\OrderController::class, 'updateStatus'])->name('orders.status');
