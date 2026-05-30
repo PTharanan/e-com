@@ -6,7 +6,7 @@ use App\Models\ProductReview;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class NewProductReviewNotification extends Notification
+class ReviewReplyNotification extends Notification
 {
     /**
      * Create a new notification instance.
@@ -32,14 +32,13 @@ class NewProductReviewNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('New Review on Your Product')
+            ->subject('Seller Reply to Your Product Review')
             ->greeting("Hello {$notifiable->name}!")
-            ->line("{$this->review->user->name} left a review on your product: **{$this->review->product->name}**")
-            ->line("**Rating:** {$this->review->rating}/5 Stars")
-            ->line("**Review:**")
-            ->line($this->review->comment ?? 'No comment')
-            ->action('View Product', route('product.show', $this->review->product->id))
-            ->line('Thank you for your business!');
+            ->line("The seller has replied to your review for the product: **{$this->review->product->name}**")
+            ->line('**Their Reply:**')
+            ->line($this->review->reply)
+            ->action('View Full Review', route('product.show', $this->review->product->id))
+            ->line('Thank you for your feedback!');
     }
 
     /**
@@ -50,13 +49,12 @@ class NewProductReviewNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'type' => 'new_review',
+            'type' => 'review_reply',
             'review_id' => $this->review->id,
             'product_id' => $this->review->product->id,
             'product_name' => $this->review->product->name,
-            'reviewer_name' => $this->review->user->name,
-            'rating' => $this->review->rating,
-            'comment' => $this->review->comment,
+            'reply_text' => $this->review->reply,
+            'replied_by' => $this->review->repliedByUser->name ?? 'Seller',
         ];
     }
 }

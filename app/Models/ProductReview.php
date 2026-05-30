@@ -15,10 +15,14 @@ class ProductReview extends Model
         'rating',
         'title',
         'comment',
+        'reply',
+        'replied_by',
+        'replied_at',
     ];
 
     protected $casts = [
         'rating' => 'integer',
+        'replied_at' => 'datetime',
     ];
 
     public function product()
@@ -29,5 +33,10 @@ class ProductReview extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function repliedByUser()
+    {
+        return $this->belongsTo(User::class, 'replied_by');
     }
 }

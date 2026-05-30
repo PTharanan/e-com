@@ -17,14 +17,18 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $orders = Order::with(['delivery', 'returns'])->where('user_id', $user->id)->get();
-
-        $totalCashSpent = $orders->sum('total_price');
-        $totalItemsBought = $orders->sum('total_items');
+        
+        // Base query for all user's orders (used for totals)
+        $allOrdersQuery = Order::with(['delivery', 'returns'])->where('user_id', $user->id);
+        
+        // Get all orders for calculating totals
+        $allOrders = $allOrdersQuery->get();
+        $totalCashSpent = $allOrders->sum('total_price');
+        $totalItemsBought = $allOrders->sum('total_items');
 
         // Count unique products by checking all items_json across orders
         $uniqueProductNames = [];
-        foreach ($orders as $order) {
+        foreach ($allOrders as $order) {
             if (is_array($order->items_json)) {
                 foreach ($order->items_json as $item) {
                     if (isset($item['name'])) {
@@ -34,6 +38,9 @@ class DashboardController extends Controller
             }
         }
         $totalProductsCount = count(array_unique($uniqueProductNames));
+
+        // Paginate orders: show 10 per page, ordered by most recent first
+        $orders = $allOrdersQuery->orderBy('created_at', 'desc')->paginate(10);
 
         return view('dashboard', compact('totalCashSpent', 'totalItemsBought', 'totalProductsCount', 'orders'));
     }
