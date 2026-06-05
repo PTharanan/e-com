@@ -460,7 +460,7 @@
         }
 
         try {
-            const response = await fetch(`/review/${reviewId}/reply`, {
+            const response = await fetch(`{{ url('/review') }}/${reviewId}/reply`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

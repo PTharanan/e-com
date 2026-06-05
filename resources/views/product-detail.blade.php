@@ -373,6 +373,19 @@
             </div>
             @if($review->title)<div class="rv-title-text">{{ $review->title }}</div>@endif
             @if($review->comment)<div class="rv-comment">{{ $review->comment }}</div>@endif
+            @if($review->reply)
+            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; margin-top: 12px;">
+                <div style="font-weight: 600; color: #16a34a; margin-bottom: 8px; font-size: 13px;">
+                    ✓ Seller Reply
+                </div>
+                <div style="color: #475569; font-size: 14px; line-height: 1.6; margin-bottom: 6px;">
+                    {{ $review->reply }}
+                </div>
+                <div style="font-size: 12px; color: #64748b;">
+                    Replied by {{ $review->repliedByUser?->name ?? 'Seller' }} • {{ $review->replied_at ? \Carbon\Carbon::parse($review->replied_at)->diffForHumans() : '' }}
+                </div>
+            </div>
+            @endif
         </div>
         @endforeach
     </div>
