@@ -128,7 +128,7 @@ class ProductController extends Controller
 
     public function show($id)
     {
-        $product = Product::with(['category', 'seller', 'admin', 'reviews.user', 'variants'])->availableForBuyers()->findOrFail($id);
+        $product = Product::with(['category', 'seller', 'admin', 'reviews.user', 'reviews.repliedByUser', 'variants'])->availableForBuyers()->findOrFail($id);
 
         // Get related products from same category (excluding current)
         $relatedProducts = Product::with(['category', 'seller', 'admin'])
