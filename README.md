@@ -18,7 +18,7 @@ A full-featured, production-ready **multi-vendor e-commerce platform** built wit
   </a>
 </p>
 
-> **🔗 Live Demo:** [http://e-com.fwh.is/](http://e-com.fwh.is/)
+> **🔗 Live Demo:** [E-Shop](http://e-com.fwh.is/)
 
 ---
 
